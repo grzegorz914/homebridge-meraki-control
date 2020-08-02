@@ -42,9 +42,9 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 ```json
         {
             "platform": "meraki",
-            "organizations": [
+            "devices": [
                 {
-                    "name": "iDom",
+                    "name": "Meraki MR52",
                     "host": "https://api.meraki.com",
                     "apiKey": "01032453453421923",
                     "organizationId": "L_0123456789",
