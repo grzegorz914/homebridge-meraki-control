@@ -195,6 +195,7 @@ class merakiDevice {
 
       if (this.wlanControl >= 1) {
         this.wlan0Name = response.data[0].name;
+        this.wlan0State = (result[0].enabled == true);
         this.merakiService0 = new Service.Switch(this.wlan0Name, 'merakiService0');
 
         this.merakiService0.getCharacteristic(Characteristic.On)
@@ -205,6 +206,7 @@ class merakiDevice {
 
       if (this.wlanControl >= 2) {
         this.wlan1Name = response.data[1].name;
+        this.wlan1State = (result[1].enabled == true);
         this.merakiService1 = new Service.Switch(this.wlan1Name, 'merakiService1');
 
         this.merakiService1.getCharacteristic(Characteristic.On)
@@ -215,6 +217,7 @@ class merakiDevice {
 
       if (this.wlanControl >= 3) {
         this.wlan2Name = response.data[2].name;
+        this.wlan2State = (result[2].enabled == true);
         this.merakiService2 = new Service.Switch(this.wlan2Name, 'merakiService2');
 
         this.merakiService2.getCharacteristic(Characteristic.On)
@@ -225,6 +228,7 @@ class merakiDevice {
 
       if (this.wlanControl >= 4) {
         this.wlan3Name = response.data[3].name;
+        this.wlan3State = (result[3].enabled == true);
         this.merakiService3 = new Service.Switch(this.wlan3Name, 'merakiService3');
 
         this.merakiService3.getCharacteristic(Characteristic.On)
@@ -235,6 +239,7 @@ class merakiDevice {
 
       if (this.wlanControl >= 5) {
         this.wlan4Name = response.data[4].name;
+        this.wlan4State = (result[4].enabled == true);
         this.merakiService4 = new Service.Switch(this.wlan4Name, 'merakiService4');
 
         this.merakiService4.getCharacteristic(Characteristic.On)
