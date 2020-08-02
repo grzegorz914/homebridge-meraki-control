@@ -1,0 +1,43 @@
+{
+    "name": "homebridge-meraki-control",
+    "version": "0.0.1",
+    "description": "Homebridge plugin (https://github.com/homebridge/homebridge) to control Meraki devices.",
+    "license": "MIT",
+    "author": "grzegorz914",
+    "homepage": "https://github.com/grzegorz914/homebridge-meraki-control#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/grzegorz914/homebridge-meraki-control.git"
+    },
+    "bugs": {
+        "url": "https://github.com/grzegorz914/homebridge-meraki-control/issues"
+    },
+    "main": "index.js",
+    "files": [
+        "index.js",
+        "config.schema.json",
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        "LICENSE"
+    ],
+    "engines": {
+        "node": ">=12.0.0",
+        "homebridge": ">=1.1.0"
+    },
+    "dependencies": {
+        "axios": "^0.19.2"
+    },
+    "keywords": [
+        "homebridge",
+        "homebridge-plugin",
+        "homebridge-meraki-control",
+        "meraki",
+        "cisco"
+    ],
+    "contributors": [],
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    }
+}
