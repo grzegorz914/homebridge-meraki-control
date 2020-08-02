@@ -187,7 +187,7 @@ class merakiDevice {
       .setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
       .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 
-    if (me.wlanControl >= 1) {
+    if (this.wlanControl >= 1) {
       this.merakiService0 = new Service.Switch(me.wlan0Name, 'merakiService');
 
       this.merakiService0.getCharacteristic(Characteristic.On)
@@ -196,7 +196,7 @@ class merakiDevice {
       this.accessory.addService(this.merakiService0);
     }
 
-    if (me.wlanControl >= 2) {
+    if (this.wlanControl >= 2) {
       this.merakiService1 = new Service.Switch(me.wlan1Name, 'merakiService');
 
       this.merakiService1.getCharacteristic(Characteristic.On)
@@ -205,7 +205,7 @@ class merakiDevice {
       this.accessory.addService(this.merakiService1);
     }
 
-    if (me.wlanControl >= 3) {
+    if (this.wlanControl >= 3) {
       this.merakiService1 = new Service.Switch(me.wlan1Name, 'merakiService');
 
       this.merakiService2.getCharacteristic(Characteristic.On)
@@ -214,7 +214,7 @@ class merakiDevice {
       this.accessory.addService(this.merakiService2);
     }
 
-    if (me.wlanControl >= 3) {
+    if (this.wlanControl >= 3) {
       this.merakiService3 = new Service.Switch(me.wlan1Name, 'merakiService');
 
       this.merakiService3.getCharacteristic(Characteristic.On)
@@ -237,7 +237,6 @@ class merakiDevice {
 
   setWlan0State(state, callback) {
     var me = this;
-    let state = state ? true : false;
     axios.put(me.wlanUrl + '/0', { data: { 'enabled': state }, headers: { 'X-Cisco-Meraki-API-Key': this.apiKey, 'Content-Type': 'application/json' } });
     me.log.info('Wlan: %s %s, state: %s', me.host, me.name, state ? 'ON' : 'OFF');
     callback(null, state);

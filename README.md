@@ -47,8 +47,8 @@ Homebridge plugin to control Meraki devices using RESTFull API.
                     "name": "Meraki MR52",
                     "host": "https://api.meraki.com",
                     "apiKey": "01032453453421923",
-                    "organizationId": "L_0123456789",
-                    "networkId": "1234567",
+                    "organizationId": "123456789",
+                    "networkId": "L_0123456789",
                     "wlanControl": 0,
                     "refreshInterval": 10
                 }
