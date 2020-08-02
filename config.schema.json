@@ -48,8 +48,8 @@
               "title": "WLAN control",
               "type": "integer",
               "default": 0,
-              "maximum": 10,
-              "description": "Here select numbers of availeble SSIDS in Your network.",
+              "maximum": 4,
+              "description": "Here select numbers of configured SSIDs in Your network.",
               "oneOf": [
                 {
                   "title": "None",

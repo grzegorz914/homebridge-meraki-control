@@ -32,8 +32,8 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 3. In `apiKey` set the X-Cisco-Meraki-API-Key.
 4. In `organizationId` set Your organizationId.
 5. In `networkId` set Your networkId.
-6. In `wlanControl` set numbers of SSIDs to the control ON/OFF.
-7. In `refreshInterval` You can set the data refresh time in seconds.
+6. In `wlanControl` set numbers of configured SSIDs in Your network.
+7. In `refreshInterval` set the data refresh time in seconds.
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/master/graphics/ustawienia.png" height="150"></a>
