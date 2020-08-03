@@ -16,7 +16,7 @@
     "accessories": [],
     "platforms": [
         {
-            "platform": "meraki",
+            "platform": "Meraki",
             "devices": [
                 {
                     "name": "Meraki MR52",
