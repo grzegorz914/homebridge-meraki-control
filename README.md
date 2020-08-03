@@ -33,6 +33,7 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 3. In `apiKey` set the X-Cisco-Meraki-API-Key.
 4. In `organizationId` set Your organizationId.
 5. In `networkId` set Your networkId.
+5. In `deviceSerial` set device serial.
 6. In `wlanControl` set numbers of configured SSIDs in Your network.
 7. In `refreshInterval` set the data refresh time in seconds.
 
@@ -50,6 +51,7 @@ Homebridge plugin to control Meraki devices using RESTFull API.
                     "apiKey": "01032453453421923",
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",
+                    "deviceSerial": "Q234-ABCD-5678",
                     "wlanControl": 0,
                     "refreshInterval": 10
                 }

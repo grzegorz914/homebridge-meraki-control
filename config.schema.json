@@ -44,6 +44,12 @@
               "default": "L_0123456789",
               "required": true
             },
+            "deviceSerial": {
+              "title": "Serial",
+              "type": "string",
+              "default": "Q234-ABCD-5678",
+              "required": true
+            },
             "wlanControl": {
               "title": "WLAN control",
               "type": "integer",
@@ -53,39 +59,27 @@
               "oneOf": [
                 {
                   "title": "None",
-                  "enum": [
-                    0
-                  ]
+                  "enum": [0]
                 },
                 {
                   "title": "1 WLAN",
-                  "enum": [
-                    1
-                  ]
+                  "enum": [1]
                 },
                 {
                   "title": "2 WLAN",
-                  "enum": [
-                    2
-                  ]
+                  "enum": [2]
                 },
                 {
                   "title": "3 WLAN",
-                  "enum": [
-                    3
-                  ]
+                  "enum": [3]
                 },
                 {
                   "title": "4 WLAN",
-                  "enum": [
-                    4
-                  ]
+                  "enum": [4]
                 },
                 {
                   "title": "5 WLAN",
-                  "enum": [
-                    5
-                  ]
+                  "enum": [5]
                 }
               ],
               "required": true
