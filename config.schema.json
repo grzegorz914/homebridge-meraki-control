@@ -20,14 +20,14 @@
               "required": true
             },
             "host": {
-              "title": "Meraki API path",
+              "title": "API path",
               "type": "string",
               "default": "https://n123.meraki.com",
               "required": true,
               "format": "hostname"
             },
             "apiKey": {
-              "title": "Meraki API key",
+              "title": "API key",
               "type": "string",
               "default": "01032453453421923",
               "required": true
@@ -58,31 +58,31 @@
                   ]
                 },
                 {
-                  "title": "WLAN 1",
+                  "title": "1 WLAN",
                   "enum": [
                     1
                   ]
                 },
                 {
-                  "title": "WLAN 2",
+                  "title": "2 WLAN",
                   "enum": [
                     2
                   ]
                 },
                 {
-                  "title": "WLAN 3",
+                  "title": "3 WLAN",
                   "enum": [
                     3
                   ]
                 },
                 {
-                  "title": "WLAN 4",
+                  "title": "4 WLAN",
                   "enum": [
                     4
                   ]
                 },
                 {
-                  "title": "WLAN 5",
+                  "title": "5 WLAN",
                   "enum": [
                     5
                   ]
