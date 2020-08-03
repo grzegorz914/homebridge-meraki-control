@@ -14,7 +14,8 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 </span>
 
 ## Info
-1. ON/OFF WLAN networks
+1. This plugin control ON/OFF configured WLAN networks in Your organisation(MR devices).
+2. More comming soon...
 
 ## Package
 1. [Homebridge](https://github.com/homebridge/homebridge)
@@ -40,7 +41,7 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 
 ```json
         {
-            "platform": "meraki",
+            "platform": "Meraki",
             "devices": [
                 {
                     "name": "Meraki MR52",
