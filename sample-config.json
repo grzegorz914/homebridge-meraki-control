@@ -20,7 +20,7 @@
             "devices": [
                 {
                     "name": "Meraki MR52",
-                    "host": "https://api.meraki.com",
+                    "host": "https://n123.meraki.com",
                     "apiKey": "01032453453421923",
                     "organizationId": "L_0123456789",
                     "networkId": "1234567",

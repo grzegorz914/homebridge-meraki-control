@@ -15,7 +15,7 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 </span>
 
 ## Info
-1.
+1. ON/OFF WLAN networks
 
 ## Package
 1. [Homebridge](https://github.com/homebridge/homebridge)
@@ -28,7 +28,7 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 
 ## Configuration
 1. Use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) to configure the plugin (strongly recomended), or update your configuration file manually. See `sample-config.json` in this repository for a sample or add the bottom example to Your config.json file.
-2. In `host` set the host or leave empy (will use default path `https://api.meraki.com`).
+2. In `host` set the baseUrl like `https://n123.meraki.com`, do not use `https://api.meraki.com.`
 3. In `apiKey` set the X-Cisco-Meraki-API-Key.
 4. In `organizationId` set Your organizationId.
 5. In `networkId` set Your networkId.
@@ -45,7 +45,7 @@ Homebridge plugin to control Meraki devices using RESTFull API.
             "devices": [
                 {
                     "name": "Meraki MR52",
-                    "host": "https://api.meraki.com",
+                    "host": "https://n123.meraki.com",
                     "apiKey": "01032453453421923",
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",
