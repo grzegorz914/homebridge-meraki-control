@@ -79,6 +79,7 @@ class merakiDevice {
     this.firmwareRevision = config.firmwareRevision || 'FW0000006';
 
     //setup variables
+    this.connectionStatus = false;
     this.wlanLength = 0;
     this.wlan0State = false;
     this.wlan1State = false;
@@ -118,18 +119,18 @@ class merakiDevice {
 
     //Check device state
     setInterval(function () {
-      this.getDeviceState();
+      if (this.connectionStatus) {
+        this.getDeviceState();
+      }
     }.bind(this), this.refreshInterval * 1000);
 
-    //Delay to wait for device info before publish
-    setTimeout(this.prepareMerakiService.bind(this), 1000);
+    this.prepareMerakiService();
   }
 
   getDeviceState() {
     var me = this;
     me.meraki.get(me.mrUrl).then(response => {
       me.log.debug('Device %s, get device status data: %s', me.name, response.data);
-      me.log.info('Device: %s, state: Online.', me.name);
       let result = response.data;
 
       let wlanLength = result.length;
@@ -254,8 +255,16 @@ class merakiDevice {
           .on('set', this.setWlan4State.bind(this));
         this.accessory.addService(this.merakiService4);
       }
+
+      if (!this.connectionStatus) {
+        this.log.info('Device: %s, state: Online.', this.name);
+      }
+
+      this.connectionStatus = true;
     }).catch(error => {
       this.log.debug('Device: %s, read SSIDs error: %s', this.name, error);
+      this.log.info('Device: %s, state: Offline.', this.name);
+      this.connectionStatus = false;
     });
 
     this.log.debug('Device: %s, publishExternalAccessories.', accessoryName);
