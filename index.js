@@ -258,9 +258,8 @@ class merakiDevice {
 
       if (!this.connectionStatus) {
         this.log.info('Device: %s, state: Online.', this.name);
+        this.connectionStatus = true;
       }
-
-      this.connectionStatus = true;
     }).catch(error => {
       this.log.debug('Device: %s, read SSIDs error: %s', this.name, error);
       this.log.info('Device: %s, state: Offline.', this.name);
