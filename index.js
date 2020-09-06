@@ -210,7 +210,6 @@ class merakiDevice {
 
   getDeviceInfo() {
     var me = this;
-    me.log.debug('Device: %s %s, requesting config information.', me.host, me.name);
     me.log.info('Device: %s, state: Online.', me.name);
     let manufacturer = me.manufacturer;
     let modelName = me.modelName;
