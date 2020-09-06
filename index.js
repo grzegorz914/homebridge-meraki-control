@@ -142,8 +142,9 @@ class merakiDevice {
       .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 
     this.meraki.get(this.mrUrl).then(response => {
-      this.log.debug('Device %s, get device status data: %s', this.name, response.data);
+      this.log.info('Device: %s, state: Online.', this.name);
       let result = response.data;
+      this.log.debug('Device %s, get device status data: %s', this.name, result);
 
       if (this.wlanControl >= 1) {
         this.wlan0Name = result[0].name;
@@ -198,7 +199,7 @@ class merakiDevice {
       this.checkDeviceState = true;
 
     }).catch(error => {
-      this.log.debug('Device: %s, read SSIDs error: %s', this.name, error);
+      this.log.debug('Device: %s, state Offline, read SSIDs error: %s', this.name, error);
     });
 
     this.log.debug('Device: %s, publishExternalAccessories.', accessoryName);
@@ -208,9 +209,8 @@ class merakiDevice {
   updateDeviceState() {
     var me = this;
     me.meraki.get(me.mrUrl).then(response => {
-      me.log.info('Device: %s, state: Online.', me.name);
-      me.log.debug('Device %s, get device status data: %s', me.name, response.data);
       let result = response.data;
+      me.log.debug('Device %s, get device status data: %s', me.name, result);
 
       let wlanLength = result.length;
       me.log.debug('Device: %s, number of available SSIDs: %s', me.name, wlanLength);
