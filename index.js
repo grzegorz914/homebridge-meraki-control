@@ -68,15 +68,14 @@ class merakiDevice {
     this.apiKey = config.apiKey;
     this.organizationId = config.organizationId;
     this.networkId = config.networkId;
-    this.deviceSerial = config.deviceSerial;
     this.wlanControl = config.wlanControl || 0;
     this.refreshInterval = config.refreshInterval || 10;
 
     //get Device info
-    this.manufacturer = config.manufacturer || 'Meraki';
-    this.modelName = config.modelName || 'Meraki MR';
-    this.serialNumber = config.serialNumber || 'SN0000006';
-    this.firmwareRevision = config.firmwareRevision || 'FW0000006';
+    this.manufacturer = config.manufacturer || 'Cisco/Meraki';
+    this.modelName = config.modelName || 'Model Name';
+    this.serialNumber = config.serialNumber || 'Serial Number';
+    this.firmwareRevision = config.firmwareRevision || 'Firmware Revision';
 
     //setup variables
     this.checkDeviceInfo = false;
@@ -90,8 +89,8 @@ class merakiDevice {
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
     this.mxUrl = this.host + '/api/v1/networks/' + this.networkId + '/appliance/ports';
     this.mrUrl = this.host + '/api/v1/networks/' + this.networkId + '/wireless/ssids';
-    this.msUrl = this.host + '/api/v1/devices/' + this.deviceSerial + '/switch/ports';
-    this.mvUrl = this.host + '/api/v1/devices/' + this.deviceSerial + '/camera';
+    this.msUrl = this.host + '/api/v1/devices/' + this.serialNumber + '/switch/ports';
+    this.mvUrl = this.host + '/api/v1/devices/' + this.serialNumber + '/camera';
 
     this.meraki = axios.create({
       baseURL: this.host,
@@ -120,8 +119,8 @@ class merakiDevice {
 
     //Check device state
     setInterval(function () {
-      if (this.checkDeviceInfo) {
-        this.getDeviceInfo();
+      if (this.checkDeviceState) {
+        this.updateDeviceState();
       }
     }.bind(this), this.refreshInterval * 1000);
 
@@ -232,7 +231,7 @@ class merakiDevice {
         me.merakiService1.updateCharacteristic(Characteristic.On, wlan1State);
         me.log.debug('Device: %s, SSIDs name: %s', me.name, wlan1Name);
         me.log.debug('Device: %s, ' + wlan1Name + ' state: %s', me.name, wlan1State ? 'ON' : 'OFF');
-        me.wlan1Name = wlan1ame;
+        me.wlan1Name = wlan1Name;
         me.wlan1State = wlan1State;
       }
       if (me.wlanControl >= 3 && me.merakiService2) {
@@ -250,7 +249,7 @@ class merakiDevice {
         me.merakiService3.updateCharacteristic(Characteristic.On, wlan3State);
         me.log.debug('Device: %s, SSIDs name: %s', me.name, wlan3Name);
         me.log.debug('Device: %s, ' + wlan3Name + ' state: %s', me.name, wlan3State ? 'ON' : 'OFF');
-        me.wlan4Name = wlan4Name;
+        me.wlan4Name = wlan3Name;
         me.wlan3State = wlan3State;
       }
       if (me.wlanControl >= 5 && me.merakiService4) {

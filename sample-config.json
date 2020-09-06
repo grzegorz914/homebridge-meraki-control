@@ -24,9 +24,12 @@
                     "apiKey": "01032453453421923",
                     "organizationId": "L_0123456789",
                     "networkId": "1234567",
-                    "deviceSerial": "Q234-ABCD-5678",
                     "wlanControl": 0,
-                    "refreshInterval": 10
+                    "refreshInterval": 10,
+                    "manufacturer": "Manufacturer",
+                    "modelName": "Model",
+                    "serialNumber": "Serial Number",
+                    "firmwareRevision": "Firmware Revision"
                 }
             ]
         }

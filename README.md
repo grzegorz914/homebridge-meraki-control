@@ -51,9 +51,12 @@ Homebridge plugin to control Meraki devices using RESTFull API.
                     "apiKey": "01032453453421923",
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",
-                    "deviceSerial": "Q234-ABCD-5678",
                     "wlanControl": 0,
-                    "refreshInterval": 10
+                    "refreshInterval": 10,
+                    "manufacturer": "Manufacturer",
+                    "modelName": "Model",
+                    "serialNumber": "Serial Number",
+                    "firmwareRevision": "Firmware Revision"
                 }
             ]
         }

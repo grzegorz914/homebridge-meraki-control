@@ -44,12 +44,6 @@
               "default": "L_0123456789",
               "required": true
             },
-            "deviceSerial": {
-              "title": "Serial",
-              "type": "string",
-              "default": "Q234-ABCD-5678",
-              "required": true
-            },
             "wlanControl": {
               "title": "WLAN control",
               "type": "integer",
@@ -59,27 +53,39 @@
               "oneOf": [
                 {
                   "title": "None",
-                  "enum": [0]
+                  "enum": [
+                    0
+                  ]
                 },
                 {
                   "title": "1 WLAN",
-                  "enum": [1]
+                  "enum": [
+                    1
+                  ]
                 },
                 {
                   "title": "2 WLAN",
-                  "enum": [2]
+                  "enum": [
+                    2
+                  ]
                 },
                 {
                   "title": "3 WLAN",
-                  "enum": [3]
+                  "enum": [
+                    3
+                  ]
                 },
                 {
                   "title": "4 WLAN",
-                  "enum": [4]
+                  "enum": [
+                    4
+                  ]
                 },
                 {
                   "title": "5 WLAN",
-                  "enum": [5]
+                  "enum": [
+                    5
+                  ]
                 }
               ],
               "required": true
@@ -90,10 +96,85 @@
               "default": 10,
               "maximum": 3600,
               "required": true
+            },
+            "manufacturer": {
+              "name": "Manufacturer",
+              "type": "string",
+              "placeholder": "Cisco/Meraki",
+              "description": "Set the manufacturer name.",
+              "required": false
+            },
+            "modelName": {
+              "name": "Model",
+              "type": "string",
+              "placeholder": "Model",
+              "description": "Set the model name.",
+              "required": false
+            },
+            "serialNumber": {
+              "name": "Serial Number",
+              "type": "string",
+              "placeholder": "SerialNumber",
+              "description": "Set the serial number.",
+              "required": false
+            },
+            "firmwareRevision": {
+              "name": "Firmware Revision",
+              "type": "string",
+              "placeholder": "Firmware Revision",
+              "description": "Set the firmware revision.",
+              "required": false
             }
           }
         }
       }
     }
-  }
+  },
+  "layout": [
+    {
+      "type": "section",
+      "title": "Devices",
+      "expandable": true,
+      "expanded": true,
+      "items": [
+        {
+          "key": "devices",
+          "type": "array",
+          "orderable": false,
+          "buttonText": "Add device",
+          "items": [
+            "devices[].name",
+            "devices[].host",
+            "devices[].refreshInterval",
+            "devices[].wlanControl",
+            {
+              "key": "devices[]",
+              "type": "section",
+              "title": "Advanced Settings",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "devices[].apiKey",
+                "devices[].organizationId",
+                "devices[].networkId"
+              ]
+            },
+            {
+              "key": "devices[]",
+              "type": "section",
+              "title": "Branding",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "devices[].manufacturer",
+                "devices[].modelName",
+                "devices[].serialNumber",
+                "devices[].firmwareRevision"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
