@@ -119,6 +119,9 @@ class merakiDevice {
 
     //Check device state
     setInterval(function () {
+      if (this.checkDeviceInfo) {
+        this.getDeviceInfo();
+      }
       if (this.checkDeviceState) {
         this.updateDeviceState();
       }
@@ -142,7 +145,6 @@ class merakiDevice {
       .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 
     this.meraki.get(this.mrUrl).then(response => {
-      this.log.info('Device: %s, state: Online.', accessoryName);
       let result = response.data;
       this.log.debug('Device %s, get device status data: %s', accessoryName, result);
 
@@ -196,7 +198,7 @@ class merakiDevice {
         accessory.addService(this.merakiService4);
       }
 
-      this.checkDeviceState = true;
+      this.getDeviceInfo();
 
     }).catch(error => {
       this.log.debug('Device: %s, state Offline, read SSIDs error: %s', accessoryName, error);
@@ -204,6 +206,24 @@ class merakiDevice {
 
     this.log.debug('Device: %s, publishExternalAccessories.', accessoryName);
     this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+  }
+
+  getDeviceInfo() {
+    var me = this;
+    me.log.debug('Device: %s %s, requesting config information.', me.host, me.name);
+    me.log.info('Device: %s, state: Online.', me.name);
+    let manufacturer = me.manufacturer;
+    let modelName = me.modelName;
+    let serialNumber = me.serialNumber;
+    let firmwareRevision = me.firmwareRevision;
+    me.log('-------- %s --------', me.name);
+    me.log('Manufacturer: %s', manufacturer);
+    me.log('Model: %s', modelName);
+    me.log('Serialnr: %s', serialNumber);
+    me.log('Firmware: %s', firmwareRevision);
+    me.log('----------------------------------');
+    me.checkDeviceInfo = false;
+    me.checkDeviceState = true;
   }
 
   updateDeviceState() {
