@@ -132,19 +132,19 @@ class merakiDevice {
     this.log.debug('prepareMerakiService');
     const accessoryName = this.name;
     const accessoryUUID = UUID.generate(accessoryName);
-    this.accessory = new Accessory(accessoryName, accessoryUUID);
-    this.accessory.category = Categories.AIRPORT;
+    const accessoryCategory = Categories.AIRPORT;
+    const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
-    this.accessory.getService(Service.AccessoryInformation)
+    accessory.getService(Service.AccessoryInformation)
       .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
       .setCharacteristic(Characteristic.Model, this.modelName)
       .setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
       .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 
     this.meraki.get(this.mrUrl).then(response => {
-      this.log.info('Device: %s, state: Online.', this.name);
+      this.log.info('Device: %s, state: Online.', accessoryName);
       let result = response.data;
-      this.log.debug('Device %s, get device status data: %s', this.name, result);
+      this.log.debug('Device %s, get device status data: %s', accessoryName, result);
 
       if (this.wlanControl >= 1) {
         this.wlan0Name = result[0].name;
@@ -153,7 +153,7 @@ class merakiDevice {
         this.merakiService0.getCharacteristic(Characteristic.On)
           .on('get', this.getWlan0State.bind(this))
           .on('set', this.setWlan0State.bind(this));
-        this.accessory.addService(this.merakiService0);
+        accessory.addService(this.merakiService0);
       }
 
       if (this.wlanControl >= 2) {
@@ -163,7 +163,7 @@ class merakiDevice {
         this.merakiService1.getCharacteristic(Characteristic.On)
           .on('get', this.getWlan1State.bind(this))
           .on('set', this.setWlan1State.bind(this));
-        this.accessory.addService(this.merakiService1);
+        accessory.addService(this.merakiService1);
       }
 
       if (this.wlanControl >= 3) {
@@ -173,7 +173,7 @@ class merakiDevice {
         this.merakiService2.getCharacteristic(Characteristic.On)
           .on('get', this.getWlan2State.bind(this))
           .on('set', this.setWlan2State.bind(this));
-        this.accessory.addService(this.merakiService2);
+        accessory.addService(this.merakiService2);
       }
 
       if (this.wlanControl >= 4) {
@@ -183,7 +183,7 @@ class merakiDevice {
         this.merakiService3.getCharacteristic(Characteristic.On)
           .on('get', this.getWlan3State.bind(this))
           .on('set', this.setWlan3State.bind(this));
-        this.accessory.addService(this.merakiService3);
+        accessory.addService(this.merakiService3);
       }
 
       if (this.wlanControl >= 5) {
@@ -193,17 +193,17 @@ class merakiDevice {
         this.merakiService4.getCharacteristic(Characteristic.On)
           .on('get', this.getWlan4State.bind(this))
           .on('set', this.setWlan4State.bind(this));
-        this.accessory.addService(this.merakiService4);
+        accessory.addService(this.merakiService4);
       }
 
       this.checkDeviceState = true;
 
     }).catch(error => {
-      this.log.debug('Device: %s, state Offline, read SSIDs error: %s', this.name, error);
+      this.log.debug('Device: %s, state Offline, read SSIDs error: %s', accessoryName, error);
     });
 
     this.log.debug('Device: %s, publishExternalAccessories.', accessoryName);
-    this.api.publishExternalAccessories(PLUGIN_NAME, [this.accessory]);
+    this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
   }
 
   updateDeviceState() {
