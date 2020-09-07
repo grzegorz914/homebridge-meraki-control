@@ -211,15 +211,11 @@ class merakiDevice {
   getDeviceInfo() {
     var me = this;
     me.log.info('Device: %s, state: Online.', me.name);
-    let manufacturer = me.manufacturer;
-    let modelName = me.modelName;
-    let serialNumber = me.serialNumber;
-    let firmwareRevision = me.firmwareRevision;
     me.log('-------- %s --------', me.name);
-    me.log('Manufacturer: %s', manufacturer);
-    me.log('Model: %s', modelName);
-    me.log('Serialnr: %s', serialNumber);
-    me.log('Firmware: %s', firmwareRevision);
+    me.log('Manufacturer: %s', me.manufacturer);
+    me.log('Model: %s', me.modelName);
+    me.log('Serialnr: %s', me.serialNumber);
+    me.log('Firmware: %s', me.firmwareRevision);
     me.log('----------------------------------');
     me.checkDeviceInfo = false;
     me.checkDeviceState = true;
