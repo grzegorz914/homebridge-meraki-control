@@ -220,7 +220,7 @@ class merakiDevice {
       me.log('Firmware: %s', me.firmwareRevision);
       me.log('----------------------------------');
       me.checkDeviceInfo = false;
-      me.checkDeviceState = true;
+      me.updateDeviceState();
     } catch (error) {
       me.log.error('Device: %s, getDeviceInfo error: %s', me.name, error);
     }
@@ -279,6 +279,7 @@ class merakiDevice {
     } catch (error) {
       me.log.error('Device: %s, update status error: %s, state: Offline', me.name, error);
     }
+    me.checkDeviceState = true;
   }
 
   async getWlan0State(callback) {
