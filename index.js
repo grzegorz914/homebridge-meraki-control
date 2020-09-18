@@ -123,6 +123,7 @@ class merakiDevice {
       }
     }.bind(this), this.refreshInterval * 1000);
 
+    this.getDeviceInfo();
     this.prepareMerakiService();
   }
 
@@ -195,8 +196,7 @@ class merakiDevice {
         accessory.addService(this.merakiService4);
       }
 
-      this.getDeviceInfo();
-      this.updateDeviceState();
+      this.checkDeviceState = true;
 
     } catch (error) {
       this.log.debug('Device: %s, state Offline, read SSIDs error: %s', accessoryName, error);
@@ -216,6 +216,7 @@ class merakiDevice {
       me.log('Serialnr: %s', me.serialNumber);
       me.log('Firmware: %s', me.firmwareRevision);
       me.log('----------------------------------');
+      me.updateDeviceState();
     } catch (error) {
       me.log.error('Device: %s, getDeviceInfo error: %s', me.name, error);
     }
@@ -274,7 +275,6 @@ class merakiDevice {
     } catch (error) {
       me.log.error('Device: %s, update status error: %s, state: Offline', me.name, error);
     }
-    me.checkDeviceState = true;
   }
 
   async getWlan0State(callback) {
@@ -296,7 +296,6 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/0', data);
       me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan0Name, state ? 'ON' : 'OFF');
-      me.getWlan0State();
       callback(null, state);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan0Name, error);
@@ -322,7 +321,6 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/1', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan1Name, state ? 'ON' : 'OFF');
-      me.getWlan1State();
       callback(null, state);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan1Name, error);
@@ -348,7 +346,6 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/2', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan2Name, state ? 'ON' : 'OFF');
-      me.getWlan2State();
       callback(null, state);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan2Name, error);
@@ -374,7 +371,6 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/3', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan3Name, state ? 'ON' : 'OFF');
-      me.getWlan3State();
       callback(null, state);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan3Name, error);
@@ -400,7 +396,6 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/4', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan4Name, state ? 'ON' : 'OFF');
-      me.getWlan4State();
       callback(null, state);
     } catch (error) {
       me.log('Device:%s, SSIDs: %s set new state error: %s', me.name, me.wlan4Name, error);
