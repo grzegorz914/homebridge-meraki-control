@@ -80,10 +80,15 @@ class merakiDevice {
     this.checkDeviceState = false;
     this.wlanLength = 0;
     this.wlan0State = false;
+    this.wlan0Name = '';
     this.wlan1State = false;
+    this.wlan1Name = '';
     this.wlan2State = false;
-    this.wlan3State = false;
+    this.wlan2Name = '';
+    this.wlan3State = false
+    this.wlan3Name = '';
     this.wlan4State = false;
+    this.wlan4Name = '';
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
     this.mxUrl = this.host + '/api/v1/networks/' + this.networkId + '/appliance/ports';
     this.mrUrl = this.host + '/api/v1/networks/' + this.networkId + '/wireless/ssids';
@@ -121,7 +126,6 @@ class merakiDevice {
         this.updateDeviceState();
       }
     }.bind(this), this.refreshInterval * 1000);
-
     this.prepareAccessory();
   }
 
@@ -163,68 +167,64 @@ class merakiDevice {
   }
 
   //Prepare service 
-  async prepareMerakiService() {
+  prepareMerakiService() {
     this.log.debug('prepareMerakiService');
-    try {
-      const response = await this.meraki.get(this.mrUrl);
-      let result = response.data;
-      this.log.debug('Device %s, get device status data: %s', this.name, result);
+    if (this.wlanControl >= 1) {
+      this.merakiService0 = new Service.Switch(this.wlan0Name, 'merakiService0');
+      this.merakiService0.getCharacteristic(Characteristic.On)
+        .on('get', this.getWlan0State.bind(this))
+        .on('set', this.setWlan0State.bind(this));
+      this.merakiService0.getCharacteristic(Characteristic.Name)
+        .on('get', this.getWlan0Name.bind(this));
 
-      if (this.wlanControl >= 1) {
-        this.wlan0Name = result[0].name;
-        this.merakiService0 = new Service.Switch(this.wlan0Name, 'merakiService0');
+      this.accessory.addService(this.merakiService0);
+    }
 
-        this.merakiService0.getCharacteristic(Characteristic.On)
-          .on('get', this.getWlan0State.bind(this))
-          .on('set', this.setWlan0State.bind(this));
-        this.accessory.addService(this.merakiService0);
-      }
+    if (this.wlanControl >= 2) {
+      this.merakiService1 = new Service.Switch(this.wlan1Name, 'merakiService1');
+      this.merakiService1.getCharacteristic(Characteristic.On)
+        .on('get', this.getWlan1State.bind(this))
+        .on('set', this.setWlan1State.bind(this));
+      this.merakiService1.getCharacteristic(Characteristic.Name)
+        .on('get', this.getWlan1Name.bind(this));
 
-      if (this.wlanControl >= 2) {
-        this.wlan1Name = result[1].name;
-        this.merakiService1 = new Service.Switch(this.wlan1Name, 'merakiService1');
+      this.accessory.addService(this.merakiService1);
+    }
 
-        this.merakiService1.getCharacteristic(Characteristic.On)
-          .on('get', this.getWlan1State.bind(this))
-          .on('set', this.setWlan1State.bind(this));
-        this.accessory.addService(this.merakiService1);
-      }
+    if (this.wlanControl >= 3) {
+      this.merakiService2 = new Service.Switch(this.wlan2Name, 'merakiService2');
+      this.merakiService2.getCharacteristic(Characteristic.On)
+        .on('get', this.getWlan2State.bind(this))
+        .on('set', this.setWlan2State.bind(this));
+      this.merakiService2.getCharacteristic(Characteristic.Name)
+        .on('get', this.getWlan2Name.bind(this));
 
-      if (this.wlanControl >= 3) {
-        this.wlan2Name = result[2].name;
-        this.merakiService2 = new Service.Switch(this.wlan2Name, 'merakiService2');
+      this.accessory.addService(this.merakiService2);
+    }
 
-        this.merakiService2.getCharacteristic(Characteristic.On)
-          .on('get', this.getWlan2State.bind(this))
-          .on('set', this.setWlan2State.bind(this));
-        this.accessory.addService(this.merakiService2);
-      }
+    if (this.wlanControl >= 4) {
+      this.merakiService3 = new Service.Switch(this.wlan3Name, 'merakiService3');
+      this.merakiService3.getCharacteristic(Characteristic.On)
+        .on('get', this.getWlan3State.bind(this))
+        .on('set', this.setWlan3State.bind(this));
+      this.merakiService3.getCharacteristic(Characteristic.Name)
+        .on('get', this.getWlan3Name.bind(this));
 
-      if (this.wlanControl >= 4) {
-        this.wlan3Name = result[3].name;
-        this.merakiService3 = new Service.Switch(this.wlan3Name, 'merakiService3');
+      this.accessory.addService(this.merakiService3);
+    }
 
-        this.merakiService3.getCharacteristic(Characteristic.On)
-          .on('get', this.getWlan3State.bind(this))
-          .on('set', this.setWlan3State.bind(this));
-        this.accessory.addService(this.merakiService3);
-      }
+    if (this.wlanControl >= 5) {
+      this.merakiService4 = new Service.Switch(this.wlan4Name, 'merakiService4');
+      this.merakiService4.getCharacteristic(Characteristic.On)
+        .on('get', this.getWlan4State.bind(this))
+        .on('set', this.setWlan4State.bind(this));
+      this.merakiService4.getCharacteristic(Characteristic.Name)
+        .on('get', this.getWlan4Name.bind(this));
 
-      if (this.wlanControl >= 5) {
-        this.wlan4Name = result[4].name;
-        this.merakiService4 = new Service.Switch(this.wlan4Name, 'merakiService4');
+      this.accessory.addService(this.merakiService4);
+    }
 
-        this.merakiService4.getCharacteristic(Characteristic.On)
-          .on('get', this.getWlan4State.bind(this))
-          .on('set', this.setWlan4State.bind(this));
-        this.accessory.addService(this.merakiService4);
-      }
-
-      this.checkDeviceState = true;
-
-    } catch (error) {
-      this.log.debug('Device: %s, state Offline, read SSIDs error: %s', this.name, error);
-    };
+    this.checkDeviceState = true;
   }
 
   async getDeviceInfo() {
@@ -298,16 +298,18 @@ class merakiDevice {
     }
   }
 
-  async getWlan0State(callback) {
+  getWlan0State(callback) {
     var me = this;
-    try {
-      const response = await me.meraki.get(me.mrUrl);
-      let state = (response.data[0].enabled == true);
+      let state = me.wlan0State;
       me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan0Name, state ? 'ON' : 'OFF');
       callback(null, state);
-    } catch (error) {
-      me.log.debug('Device: %s, SSIDs: %s get state error: %s', me.name, me.wlan0Name, error);
-    };
+  }
+
+  getWlan0Name(callback) {
+    var me = this;
+      let wlan0Name = me.wlan0Name;
+      me.log.info('Device: %s, SSIDs: %s', me.name, wlan0Name);
+      callback(null, wlan0Name);
   }
 
   async setWlan0State(state, callback) {
@@ -317,22 +319,24 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/0', data);
       me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan0Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+      callback(null);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan0Name, error);
     };
   }
 
-  async getWlan1State(callback) {
+  getWlan1State(callback) {
     var me = this;
-    try {
-      const response = await me.meraki.get(me.mrUrl);
-      let state = (response.data[1].enabled == true);
+      let state = me.wlan0State;
       me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan1Name, state ? 'ON' : 'OFF');
       callback(null, state);
-    } catch (error) {
-      me.log.debug('Device: %s, SSIDs: %s get state error: %s', me.name, me.wlan1Name, error);
-    };
+  }
+
+  getWlan1Name(callback) {
+    var me = this;
+      let wlan1Name = me.wlan1Name;
+      me.log.info('Device: %s, SSIDs: %s', me.name, wlan1Name);
+      callback(null, wlan1Name);
   }
 
   async setWlan1State(state, callback) {
@@ -342,22 +346,24 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/1', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan1Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+      callback(null);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan1Name, error);
     };
   }
 
-  async getWlan2State(callback) {
+  getWlan2State(callback) {
     var me = this;
-    try {
-      const response = await me.meraki.get(me.mrUrl);
-      let state = (response.data[2].enabled == true);
+      let state = me.wlan2State;
       me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan2Name, state ? 'ON' : 'OFF');
       callback(null, state);
-    } catch (error) {
-      me.log.debug('Device: %s, SSIDs: %s get state error: %s', me.name, me.wlan2Name, error);
-    };
+  }
+
+  getWlan2Name(callback) {
+    var me = this;
+      let wlan2Name = me.wlan2Name;
+      me.log.info('Device: %s, SSIDs: %s', me.name, wlan2Name);
+      callback(null, wlan2Name);
   }
 
   async setWlan2State(state, callback) {
@@ -367,22 +373,24 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/2', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan2Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+      callback(null);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan2Name, error);
     };
   }
 
-  async getWlan3State(callback) {
+  getWlan3State(callback) {
     var me = this;
-    try {
-      const response = await me.meraki.get(me.mrUrl);
-      let state = (response.data[3].enabled == true);
+      let state = me.wlan3State;
       me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan3Name, state ? 'ON' : 'OFF');
       callback(null, state);
-    } catch (error) {
-      me.log.debug('Device: %s, SSIDs: %s get state error: %s', me.name, me.wlan3Name, error);
-    };
+  }
+
+  getWlan3Name(callback) {
+    var me = this;
+      let wlan3Name = me.wlan3Name;
+      me.log.info('Device: %s, SSIDs: %s', me.name, wlan3Name);
+      callback(null, wlan3Name);
   }
 
   async setWlan3State(state, callback) {
@@ -392,22 +400,24 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/3', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan3Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+      callback(null);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan3Name, error);
     };
   }
 
-  async getWlan4State(callback) {
+  getWlan4State(callback) {
     var me = this;
-    try {
-      const response = await me.meraki.get(me.mrUrl);
-      let state = (response.data[4].enabled == true);
+      let state = me.wlan4State;
       me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan4Name, state ? 'ON' : 'OFF');
       callback(null, state);
-    } catch (error) {
-      me.log.debug('Device: %s, SSIDs: %s get state error: %s', me.name, me.wlan4Name, error);
-    };
+  }
+
+  getWlan4Name(callback) {
+    var me = this;
+      let wlan4Name = me.wlan4Name;
+      me.log.info('Device: %s, SSIDs: %s', me.name, wlan4Name);
+      callback(null, wlan4Name);
   }
 
   async setWlan4State(state, callback) {
@@ -417,7 +427,7 @@ class merakiDevice {
     try {
       const response = await me.meraki.put(me.mrUrl + '/4', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan4Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+      callback(null);
     } catch (error) {
       me.log('Device:%s, SSIDs: %s set new state error: %s', me.name, me.wlan4Name, error);
     };
