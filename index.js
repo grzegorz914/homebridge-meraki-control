@@ -300,23 +300,23 @@ class merakiDevice {
 
   getWlan0State(callback) {
     var me = this;
-      let state = me.wlan0State;
-      me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan0Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+    let state = me.wlan0State;
+    me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan0Name, state ? 'ON' : 'OFF');
+    callback(null, state);
   }
 
   getWlan0Name(callback) {
     var me = this;
-      let wlan0Name = me.wlan0Name;
-      me.log.info('Device: %s, SSIDs: %s', me.name, wlan0Name);
-      callback(null, wlan0Name);
+    let wlan0Name = me.wlan0Name;
+    me.log.info('Device: %s, SSIDs: %s', me.name, wlan0Name);
+    callback(null, wlan0Name);
   }
 
   async setWlan0State(state, callback) {
     var me = this;
-    let newState = state ? true : false;
-    let data = { 'enabled': newState };
     try {
+      let newState = state ? true : false;
+      let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/0', data);
       me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan0Name, state ? 'ON' : 'OFF');
       callback(null);
@@ -327,23 +327,23 @@ class merakiDevice {
 
   getWlan1State(callback) {
     var me = this;
-      let state = me.wlan0State;
-      me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan1Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+    let state = me.wlan1State;
+    me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan1Name, state ? 'ON' : 'OFF');
+    callback(null, state);
   }
 
   getWlan1Name(callback) {
     var me = this;
-      let wlan1Name = me.wlan1Name;
-      me.log.info('Device: %s, SSIDs: %s', me.name, wlan1Name);
-      callback(null, wlan1Name);
+    let wlan1Name = me.wlan1Name;
+    me.log.info('Device: %s, SSIDs: %s', me.name, wlan1Name);
+    callback(null, wlan1Name);
   }
 
   async setWlan1State(state, callback) {
     var me = this;
-    let newState = state ? true : false;
-    let data = { 'enabled': newState };
     try {
+      let newState = state ? true : false;
+      let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/1', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan1Name, state ? 'ON' : 'OFF');
       callback(null);
@@ -354,23 +354,23 @@ class merakiDevice {
 
   getWlan2State(callback) {
     var me = this;
-      let state = me.wlan2State;
-      me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan2Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+    let state = me.wlan2State;
+    me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan2Name, state ? 'ON' : 'OFF');
+    callback(null, state);
   }
 
   getWlan2Name(callback) {
     var me = this;
-      let wlan2Name = me.wlan2Name;
-      me.log.info('Device: %s, SSIDs: %s', me.name, wlan2Name);
-      callback(null, wlan2Name);
+    let wlan2Name = me.wlan2Name;
+    me.log.info('Device: %s, SSIDs: %s', me.name, wlan2Name);
+    callback(null, wlan2Name);
   }
 
   async setWlan2State(state, callback) {
     var me = this;
-    let newState = state ? true : false;
-    let data = { 'enabled': newState };
     try {
+      let newState = state ? true : false;
+      let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/2', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan2Name, state ? 'ON' : 'OFF');
       callback(null);
@@ -381,23 +381,23 @@ class merakiDevice {
 
   getWlan3State(callback) {
     var me = this;
-      let state = me.wlan3State;
-      me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan3Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+    let state = me.wlan3State;
+    me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan3Name, state ? 'ON' : 'OFF');
+    callback(null, state);
   }
 
   getWlan3Name(callback) {
     var me = this;
-      let wlan3Name = me.wlan3Name;
-      me.log.info('Device: %s, SSIDs: %s', me.name, wlan3Name);
-      callback(null, wlan3Name);
+    let wlan3Name = me.wlan3Name;
+    me.log.info('Device: %s, SSIDs: %s', me.name, wlan3Name);
+    callback(null, wlan3Name);
   }
 
   async setWlan3State(state, callback) {
     var me = this;
-    let newState = state ? true : false;
-    let data = { 'enabled': newState };
     try {
+      let newState = state ? true : false;
+      let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/3', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan3Name, state ? 'ON' : 'OFF');
       callback(null);
@@ -408,23 +408,23 @@ class merakiDevice {
 
   getWlan4State(callback) {
     var me = this;
-      let state = me.wlan4State;
-      me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan4Name, state ? 'ON' : 'OFF');
-      callback(null, state);
+    let state = me.wlan4State;
+    me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan4Name, state ? 'ON' : 'OFF');
+    callback(null, state);
   }
 
   getWlan4Name(callback) {
     var me = this;
-      let wlan4Name = me.wlan4Name;
-      me.log.info('Device: %s, SSIDs: %s', me.name, wlan4Name);
-      callback(null, wlan4Name);
+    let wlan4Name = me.wlan4Name;
+    me.log.info('Device: %s, SSIDs: %s', me.name, wlan4Name);
+    callback(null, wlan4Name);
   }
 
   async setWlan4State(state, callback) {
     var me = this;
-    let newState = state ? true : false;
-    let data = { 'enabled': newState };
     try {
+      let newState = state ? true : false;
+      let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/4', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan4Name, state ? 'ON' : 'OFF');
       callback(null);
