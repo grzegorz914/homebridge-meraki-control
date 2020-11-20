@@ -14,13 +14,6 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 
 </span>
 
-## HomeKit pairing
-1. Each accessories needs to be manually paired. 
-2. Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' height='16.42px'> app on your device. 
-3. Tap the Home tab, then tap <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' height='16.42px'>. 
-4. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan*. 
-5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.
-
 ## Info
 1. This plugin control ON/OFF configured WLAN networks in Your organisation(MR devices).
 2. More comming soon...
