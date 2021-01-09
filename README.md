@@ -23,6 +23,9 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 2. Follow the step-by-step instructions on the [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) for how to install Homebridge Config UI X.
 3. Install homebridge-meraki-control using: `npm install -g homebridge-meraki-control` or search for `meraki` in Config UI X.
 
+## Know issues
+1. If use with Hoobs possible config incompatibilty.
+
 ## HomeKit pairing
 1. Each accessories needs to be manually paired. 
 2. Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' height='16.42px'> app on your device. 
