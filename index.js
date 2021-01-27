@@ -319,10 +319,10 @@ class merakiDevice {
       let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/0', data);
       me.log.info('Device: %s, SSIDs: %s state: %s', me.name, me.wlan0Name, state ? 'ON' : 'OFF');
-      callback(null);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan0Name, error);
     };
+    callback(null);
   }
 
   getWlan1State(callback) {
@@ -346,10 +346,10 @@ class merakiDevice {
       let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/1', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan1Name, state ? 'ON' : 'OFF');
-      callback(null);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan1Name, error);
     };
+    callback(null);
   }
 
   getWlan2State(callback) {
@@ -373,10 +373,10 @@ class merakiDevice {
       let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/2', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan2Name, state ? 'ON' : 'OFF');
-      callback(null);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan2Name, error);
     };
+    callback(null);
   }
 
   getWlan3State(callback) {
@@ -400,10 +400,10 @@ class merakiDevice {
       let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/3', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan3Name, state ? 'ON' : 'OFF');
-      callback(null);
     } catch (error) {
       me.log('Device: %s, SSIDs: %s set new state error: %s', me.name, me.wlan3Name, error);
     };
+    callback(null);
   }
 
   getWlan4State(callback) {
@@ -427,9 +427,9 @@ class merakiDevice {
       let data = { 'enabled': newState };
       const response = await me.meraki.put(me.mrUrl + '/4', data);
       me.log.info('Device: %s, SSIDs: %s set state: %s', me.name, me.wlan4Name, state ? 'ON' : 'OFF');
-      callback(null);
     } catch (error) {
       me.log('Device:%s, SSIDs: %s set new state error: %s', me.name, me.wlan4Name, error);
     };
+    callback(null);
   }
 }
