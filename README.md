@@ -44,7 +44,7 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 4. In `organizationId` set Your organizationId.
 5. In `networkId` set Your networkId.
 5. In `deviceSerial` set device serial.
-6. In `wlanControl` set numbers of configured SSIDs in Your network.
+6. In `wlanControl` set numbers of configured SSIDs in Your network. (removed in 0.5.0 and above)
 7. In `refreshInterval` set the data refresh time in seconds.
 8. `manufacturer`, `model`, `serialNumber`, `firmwareRevision` - optional branding data displayed in Home.app
 
@@ -62,7 +62,6 @@ Homebridge plugin to control Meraki devices using RESTFull API.
                     "apiKey": "01032453453421923",
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",
-                    "wlanControl": 0,
                     "refreshInterval": 10,
                     "manufacturer": "Manufacturer",
                     "modelName": "Model",

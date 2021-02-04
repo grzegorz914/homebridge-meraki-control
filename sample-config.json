@@ -24,7 +24,6 @@
                     "apiKey": "01032453453421923",
                     "organizationId": "L_0123456789",
                     "networkId": "1234567",
-                    "wlanControl": 0,
                     "refreshInterval": 10,
                     "manufacturer": "Manufacturer",
                     "modelName": "Model",
