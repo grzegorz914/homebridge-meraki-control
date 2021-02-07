@@ -80,8 +80,6 @@ class merakiDevice {
     this.checkDeviceState = false;
     this.merakiDataOK = false;
     this.wlanLength = 0;
-    this.wlanState = new Array();
-    this.wlanName = new Array();
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
     this.mxUrl = this.host + '/api/v1/networks/' + this.networkId + '/appliance/ports';
     this.mrUrl = this.host + '/api/v1/networks/' + this.networkId + '/wireless/ssids';
@@ -147,6 +145,9 @@ class merakiDevice {
   async updateDeviceState() {
     var me = this;
     try {
+      me.wlanState = new Array();
+      me.wlanName = new Array();
+
       const response = await me.meraki.get(me.mrUrl);
       me.log.debug('Device %s, get device status data: %s', me.name, response.data);
       let wlanLength = response.data.length;
