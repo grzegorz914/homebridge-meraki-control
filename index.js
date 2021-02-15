@@ -68,6 +68,7 @@ class merakiDevice {
     this.organizationId = config.organizationId;
     this.networkId = config.networkId;
     this.refreshInterval = config.refreshInterval || 10;
+    this.disableLogInfo = config.disableLogInfo;
 
     //get Device info
     this.manufacturer = config.manufacturer || 'Cisco/Meraki';
@@ -78,6 +79,7 @@ class merakiDevice {
     //setup variables
     this.checkDeviceInfo = false;
     this.checkDeviceState = false;
+    this.startPrepareAccessory = true;
     this.merakiDataOK = false;
     this.wlanLength = 0;
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
@@ -126,7 +128,7 @@ class merakiDevice {
   async getDeviceInfo() {
     var me = this;
     try {
-      me.log.info('Device: %s, state: Online.', me.name);
+      me.log('Device: %s, state: Online.', me.name);
       me.log('-------- %s --------', me.name);
       me.log('Manufacturer: %s', me.manufacturer);
       me.log('Model: %s', me.modelName);
@@ -145,32 +147,33 @@ class merakiDevice {
   async updateDeviceState() {
     var me = this;
     try {
-      me.wlanState = new Array();
       me.wlanName = new Array();
+      me.wlanState = new Array();
 
       const response = await me.meraki.get(me.mrUrl);
       me.log.debug('Device %s, get device status data: %s', me.name, response.data);
       let wlanLength = response.data.length;
-      me.log.debug('Device: %s, number of available SSIDs: %s', me.name, wlanLength);
-      me.wlanLength = wlanLength;
-
       for (let i = 0; i < wlanLength; i++) {
         if (response.status == 200) {
           let wlanName = response.data[i].name;
           let wlanState = response.data[i].enabled;
+          var state = (wlanState == true)
           if (me.merakiService) {
-            me.merakiService.updateCharacteristic(Characteristic.On, wlanState);
-            me.log.debug('Device: %s, SSIDs: %s state: %s', me.name, wlanName, wlanState ? 'ON' : 'OFF');
+            me.merakiService.updateCharacteristic(Characteristic.On, state);
+            me.log.debug('Device: %s, SSIDs: %s state: %s', me.name, wlanName, state ? 'ON' : 'OFF');
           }
           me.wlanName.push(wlanName);
-          me.wlanState.push(wlanState);
+          me.wlanState.push(state);
+          me.wlanLength = wlanLength;
           me.merakiDataOK = true;
         }
       }
-      if (!me.checkDeviceState) {
+      me.checkDeviceState = true;
+
+      //start prepare accessory
+      if (this.startPrepareAccessory) {
         me.prepareAccessory();
       }
-      me.checkDeviceState = true;
     } catch (error) {
       me.log.error('Device: %s, update status error: %s, state: Offline', me.name, error);
       me.checkDeviceState = false;
@@ -184,39 +187,26 @@ class merakiDevice {
     const accessoryName = this.name;
     const accessoryUUID = UUID.generate(accessoryName);
     const accessoryCategory = Categories.AIRPORT;
-    this.accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
+    const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
-    this.prepareInformationService();
-    this.prepareMerakiService();
-
-    this.log.debug('Device: %s %s, publishExternalAccessories.', this.host, accessoryName);
-    this.api.publishExternalAccessories(PLUGIN_NAME, [this.accessory]);
-  }
-
-  //Prepare information service
-  prepareInformationService() {
+    //Prepare information service
     this.log.debug('prepareInformationService');
-    this.getDeviceInfo();
+    const manufacturer = this.manufacturer;
+    const modelName = this.modelName;
+    const serialNumber = this.serialNumber;
+    const firmwareRevision = this.firmwareRevision;
 
-    let manufacturer = this.manufacturer;
-    let modelName = this.modelName;
-    let serialNumber = this.serialNumber;
-    let firmwareRevision = this.firmwareRevision;
-
-    this.accessory.removeService(this.accessory.getService(Service.AccessoryInformation));
+    accessory.removeService(accessory.getService(Service.AccessoryInformation));
     const informationService = new Service.AccessoryInformation();
     informationService
-      .setCharacteristic(Characteristic.Name, this.name)
+      .setCharacteristic(Characteristic.Name, accessoryName)
       .setCharacteristic(Characteristic.Manufacturer, manufacturer)
       .setCharacteristic(Characteristic.Model, modelName)
       .setCharacteristic(Characteristic.SerialNumber, serialNumber)
       .setCharacteristic(Characteristic.FirmwareRevision, firmwareRevision);
+    accessory.addService(informationService);
 
-    this.accessory.addService(informationService);
-  }
-
-  //Prepare service 
-  prepareMerakiService() {
+    //Prepare service 
     this.log.debug('prepareMerakiService');
     if (this.wlanLength > 0 && this.merakiDataOK) {
       for (let i = 0; i < this.wlanLength; i++) {
@@ -224,17 +214,25 @@ class merakiDevice {
         this.merakiService.getCharacteristic(Characteristic.On)
           .on('get', (callback) => {
             let value = this.wlanState[i];
-            this.log.info('Device: %s, SSIDs: %s state: %s', this.name, this.wlanName[i], value ? 'ON' : 'OFF');
+            if (!this.disableLogInfo) {
+              this.log('Device: %s, SSIDs: %s state: %s', accessoryName, this.wlanName[i], value ? 'ON' : 'OFF');
+            }
             callback(null, value);
           })
           .on('set', (value, callback) => {
             let data = { 'enabled': value };
-            const response = this.meraki.put(this.mrUrl + '/' + [i], data);
-            this.log.info('Device: %s, SSIDs: %s state: %s', this.name, this.wlanName[i], value ? 'ON' : 'OFF');
+            let response = this.meraki.put(this.mrUrl + '/' + [i], data);
+            if (!this.disableLogInfo) {
+              this.log('Device: %s, SSIDs: %s state: %s', accessoryName, this.wlanName[i], value ? 'ON' : 'OFF');
+            }
             callback(null);
           });
-        this.accessory.addService(this.merakiService);
+        accessory.addService(this.merakiService);
       }
     }
+
+    this.startPrepareAccessory = false;
+    this.log.debug('Device: %s %s, publishExternalAccessories.', this.host, accessoryName);
+    this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
   }
 }

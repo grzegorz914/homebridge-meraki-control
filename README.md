@@ -46,7 +46,8 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 5. In `deviceSerial` set device serial.
 6. In `wlanControl` set numbers of configured SSIDs in Your network. (removed in 0.5.0 and above)
 7. In `refreshInterval` set the data refresh time in seconds.
-8. `manufacturer`, `model`, `serialNumber`, `firmwareRevision` - optional branding data displayed in Home.app
+8. If `disableLogInfo` is enabled, disable log info, all values and state will not be displayed in Homebridge log console.
+9. `manufacturer`, `model`, `serialNumber`, `firmwareRevision` - optional branding data displayed in Home.app
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/master/graphics/ustawienia.png" height="150"></a>
@@ -63,6 +64,7 @@ Homebridge plugin to control Meraki devices using RESTFull API.
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",
                     "refreshInterval": 10,
+                    "disableLogInfo": false,
                     "manufacturer": "Manufacturer",
                     "modelName": "Model",
                     "serialNumber": "Serial Number",

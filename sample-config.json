@@ -25,6 +25,7 @@
                     "organizationId": "L_0123456789",
                     "networkId": "1234567",
                     "refreshInterval": 10,
+                    "disableLogInfo": false,
                     "manufacturer": "Manufacturer",
                     "modelName": "Model",
                     "serialNumber": "Serial Number",
