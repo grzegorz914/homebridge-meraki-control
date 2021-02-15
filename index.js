@@ -171,7 +171,7 @@ class merakiDevice {
       me.checkDeviceState = true;
 
       //start prepare accessory
-      if (this.startPrepareAccessory) {
+      if (me.startPrepareAccessory) {
         me.prepareAccessory();
       }
     } catch (error) {
