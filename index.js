@@ -67,7 +67,7 @@ class merakiDevice {
     this.apiKey = config.apiKey;
     this.organizationId = config.organizationId;
     this.networkId = config.networkId;
-    this.refreshInterval = config.refreshInterval || 10;
+    this.refreshInterval = config.refreshInterval || 5;
     this.disableLogInfo = config.disableLogInfo;
 
     //get Device info
