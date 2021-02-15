@@ -45,12 +45,13 @@
               "required": true
             },
             "refreshInterval": {
-              "title": "Refresh interval (sec)",
-              "type": "integer",
-              "default": 10,
-              "maximum": 3600,
-              "required": true
-            },
+							"title": "Refresh interval (sec)",
+							"type": "integer",
+							"default": 10,
+							"minimum": 0,
+							"maximum": 3600,
+							"required": true
+						},
             "disableLogInfo": {
               "title": "Disable log info",
               "type": "boolean",
