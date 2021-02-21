@@ -151,19 +151,21 @@ class merakiDevice {
 
       const response = await me.meraki.get(me.mrUrl);
       me.log.debug('Device %s, get device status data: %s', me.name, response.data);
-      let wlanLength = response.data.length;
-      for (let i = 0; i < wlanLength; i++) {
-        if (response.status == 200) {
+      if (response.status == 200) {
+        let wlanLength = response.data.length;
+        for (let i = 0; i < wlanLength; i++) {
           let wlanName = response.data[i].name;
           let wlanState = (response.data[i].enabled === true)
-          if (me.merakiService) {
-            me.merakiService.updateCharacteristic(Characteristic.On, wlanState);
-            me.log.debug('Device: %s, SSIDs: %s state: %s', me.name, wlanName, wlanState ? 'ON' : 'OFF');
+          if (wlanState !== undefined && wlanName !== undefined) {
+            if (me.merakiService) {
+              me.merakiService.updateCharacteristic(Characteristic.On, wlanState);
+              me.log.debug('Device: %s, SSIDs: %s state: %s', me.name, wlanName, wlanState ? 'ON' : 'OFF');
+            }
+            me.wlanName.push(wlanName);
+            me.wlanState.push(wlanState);
           }
-          me.wlanName.push(wlanName);
-          me.wlanState.push(wlanState);
-          me.wlanLength = wlanLength;
         }
+        me.wlanLength = wlanLength;
       }
       me.checkDeviceState = true;
 
@@ -211,6 +213,9 @@ class merakiDevice {
         this.merakiService.getCharacteristic(Characteristic.On)
           .on('get', (callback) => {
             let value = this.wlanState[i];
+            if (value === undefined) {
+              value = false
+            }
             if (!this.disableLogInfo) {
               this.log('Device: %s, SSIDs: %s state: %s', accessoryName, this.wlanName[i], value ? 'ON' : 'OFF');
             }
