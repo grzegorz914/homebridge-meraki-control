@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.6.0] - (23.02.2021)
 ## Changes
 - code rebuild, use Characteristic.onSet, Characteristic.onGet
-- require Homebridge 1.3.x or abowe
+- require Homebridge 1.3.x or above
 
 ## [0.5.9] - (15.02.2021)
 ## Changes
