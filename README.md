@@ -33,6 +33,9 @@ Homebridge plugin to control Meraki devices using RESTFull API.
 4. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan*. 
 5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.
 
+## Note
+1. Versin 0.6.0 and abowe need to be used with Homebridge min. v1.3.x.
+
 ## Info
 1. This plugin control ON/OFF configured WLAN networks in Your organisation(MR devices).
 2. More comming soon...

@@ -211,7 +211,7 @@ class merakiDevice {
       for (let i = 0; i < this.wlanLength; i++) {
         this.merakiService = new Service.Switch(this.wlanName[i], 'merakiService' + i);
         this.merakiService.getCharacteristic(Characteristic.On)
-          .on('get', (callback) => {
+          .onGet(async () => {
             let value = this.wlanState[i];
             if (value === undefined) {
               value = false
@@ -219,15 +219,14 @@ class merakiDevice {
             if (!this.disableLogInfo) {
               this.log('Device: %s, SSIDs: %s state: %s', accessoryName, this.wlanName[i], value ? 'ON' : 'OFF');
             }
-            callback(null, value);
+            return value
           })
-          .on('set', (value, callback) => {
+          .onSet(async (command) => {
             let data = { 'enabled': value };
             let response = this.meraki.put(this.mrUrl + '/' + [i], data);
             if (!this.disableLogInfo) {
               this.log('Device: %s, SSIDs: %s state: %s', accessoryName, this.wlanName[i], value ? 'ON' : 'OFF');
             }
-            callback(null);
           });
         accessory.addService(this.merakiService);
       }
