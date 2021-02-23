@@ -221,9 +221,9 @@ class merakiDevice {
             }
             return value
           })
-          .onSet(async (command) => {
-            let data = { 'enabled': value };
-            let response = this.meraki.put(this.mrUrl + '/' + [i], data);
+          .onSet(async (state) => {
+            let state = state ? true : false;
+            let response = this.meraki.put(this.mrUrl + '/' + [i], { 'enabled': state });
             if (!this.disableLogInfo) {
               this.log('Device: %s, SSIDs: %s state: %s', accessoryName, this.wlanName[i], value ? 'ON' : 'OFF');
             }
