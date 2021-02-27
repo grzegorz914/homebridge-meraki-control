@@ -80,6 +80,8 @@ class merakiDevice {
     this.checkDeviceInfo = false;
     this.checkDeviceState = false;
     this.startPrepareAccessory = true;
+    this.wlanName = '';
+    this.wlanState = false;
     this.wlanLength = 0;
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
     this.mxUrl = this.host + '/api/v1/networks/' + this.networkId + '/appliance/ports';
