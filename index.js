@@ -32,8 +32,8 @@ class merakiPlatform {
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching');
-      for (let i = 0, len = this.devices.length; i < len; i++) {
-        let deviceName = this.devices[i];
+      for (let i = 0; i < this.devices.length; i++) {
+        const deviceName = this.devices[i];
         if (!deviceName.name) {
           this.log.warn('Device Name Missing');
         } else {
@@ -100,16 +100,9 @@ class merakiDevice {
     if (this.prefDir.endsWith('/') === false) {
       this.prefDir = this.prefDir + '/';
     }
-
     //check if the directory exists, if not then create it
     if (fs.existsSync(this.prefDir) === false) {
-      fs.mkdir(this.prefDir, { recursive: false }, (error) => {
-        if (error) {
-          this.log.error('Device: %s , create directory: %s, error: %s', this.name, this.prefDir, error);
-        } else {
-          this.log.debug('Device: %s , create directory successful: %s', this.name, this.prefDir);
-        }
-      });
+      fsPromises.mkdir(this.prefDir);
     }
 
     //Check device state
@@ -125,58 +118,56 @@ class merakiDevice {
   }
 
   async getDeviceInfo() {
-    var me = this;
     try {
-      me.log('Device: %s, state: Online.', me.name);
-      me.log('-------- %s --------', me.name);
-      me.log('Manufacturer: %s', me.manufacturer);
-      me.log('Model: %s', me.modelName);
-      me.log('Serialnr: %s', me.serialNumber);
-      me.log('Firmware: %s', me.firmwareRevision);
-      me.log('----------------------------------');
+      this.log('Device: %s, state: Online.', this.name);
+      this.log('-------- %s --------', this.name);
+      this.log('Manufacturer: %s', this.manufacturer);
+      this.log('Model: %s', this.modelName);
+      this.log('Serialnr: %s', this.serialNumber);
+      this.log('Firmware: %s', this.firmwareRevision);
+      this.log('----------------------------------');
 
-      me.checkDeviceInfo = false;
-      me.updateDeviceState();
+      this.checkDeviceInfo = false;
+      this.updateDeviceState();
     } catch (error) {
-      me.log.error('Device: %s, getDeviceInfo error: %s', me.name, error);
-      me.checkDeviceInfo = true;
+      this.log.error('Device: %s, getDeviceInfo error: %s', this.name, error);
+      this.checkDeviceInfo = true;
     }
   }
 
   async updateDeviceState() {
-    var me = this;
     try {
-      me.wlanName = new Array();
-      me.wlanState = new Array();
+      this.wlanName = new Array();
+      this.wlanState = new Array();
 
-      const response = await me.meraki.get(me.mrUrl);
-      me.log.debug('Device %s, get device status data: %s', me.name, response.data);
+      const response = await this.meraki.get(this.mrUrl);
+      this.log.debug('Device %s, get device status data: %s', this.name, response.data);
       if (response.status == 200) {
-        let wlanLength = response.data.length;
+        const wlanLength = response.data.length;
         for (let i = 0; i < wlanLength; i++) {
-          let wlanName = response.data[i].name;
-          let wlanState = (response.data[i].enabled === true)
+          const wlanName = response.data[i].name;
+          const wlanState = (response.data[i].enabled === true)
           if (wlanState !== undefined && wlanName !== undefined) {
-            if (me.merakiService) {
-              me.merakiService.updateCharacteristic(Characteristic.On, wlanState);
-              me.log.debug('Device: %s, SSIDs: %s state: %s', me.name, wlanName, wlanState ? 'ON' : 'OFF');
+            if (this.merakiService) {
+              this.merakiService.updateCharacteristic(Characteristic.On, wlanState);
+              this.log.debug('Device: %s, SSIDs: %s state: %s', this.name, wlanName, wlanState ? 'ON' : 'OFF');
             }
-            me.wlanName.push(wlanName);
-            me.wlanState.push(wlanState);
+            this.wlanName.push(wlanName);
+            this.wlanState.push(wlanState);
           }
         }
-        me.wlanLength = wlanLength;
+        this.wlanLength = wlanLength;
       }
-      me.checkDeviceState = true;
+      this.checkDeviceState = true;
 
       //start prepare accessory
-      if (me.startPrepareAccessory) {
-        me.prepareAccessory();
+      if (this.startPrepareAccessory) {
+        this.prepareAccessory();
       }
     } catch (error) {
-      me.log.error('Device: %s, update status error: %s, state: Offline', me.name, error);
-      me.checkDeviceState = false;
-      me.checkDeviceInfo = true;
+      this.log.error('Device: %s, update status error: %s, state: Offline', this.name, error);
+      this.checkDeviceState = false;
+      this.checkDeviceInfo = true;
     }
   }
 
@@ -212,10 +203,7 @@ class merakiDevice {
         this.merakiService = new Service.Switch(this.wlanName[i], 'merakiService' + i);
         this.merakiService.getCharacteristic(Characteristic.On)
           .onGet(async () => {
-            let state = this.wlanState[i];
-            if (state === undefined) {
-              state = false;
-            }
+            const state = this.wlanState[i];
             if (!this.disableLogInfo) {
               this.log('Device: %s, SSIDs: %s state: %s', accessoryName, this.wlanName[i], state ? 'ON' : 'OFF');
             }
@@ -223,7 +211,7 @@ class merakiDevice {
           })
           .onSet(async (state) => {
             state = state ? true : false;
-            let response = this.meraki.put(this.mrUrl + '/' + [i], { 'enabled': state });
+            const response = this.meraki.put(this.mrUrl + '/' + [i], { 'enabled': state });
             if (!this.disableLogInfo) {
               this.log('Device: %s, SSIDs: %s state: %s', accessoryName, this.wlanName[i], state ? 'ON' : 'OFF');
             }
