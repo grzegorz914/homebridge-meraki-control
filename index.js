@@ -80,8 +80,6 @@ class merakiDevice {
     this.checkDeviceInfo = false;
     this.checkDeviceState = false;
     this.startPrepareAccessory = true;
-    this.wlanName = '';
-    this.wlanState = false;
     this.wlanLength = 0;
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
     this.mxUrl = this.host + '/api/v1/networks/' + this.networkId + '/appliance/ports';
@@ -144,22 +142,18 @@ class merakiDevice {
 
       const response = await this.meraki.get(this.mrUrl);
       this.log.debug('Device %s, get device status data: %s', this.name, response.data);
-      if (response.status == 200) {
-        const wlanLength = response.data.length;
-        for (let i = 0; i < wlanLength; i++) {
-          const wlanName = response.data[i].name;
-          const wlanState = (response.data[i].enabled === true)
-          if (wlanState !== undefined && wlanName !== undefined) {
-            if (this.merakiService) {
-              this.merakiService.updateCharacteristic(Characteristic.On, wlanState);
-              this.log.debug('Device: %s, SSIDs: %s state: %s', this.name, wlanName, wlanState ? 'ON' : 'OFF');
-            }
-            this.wlanName.push(wlanName);
-            this.wlanState.push(wlanState);
-          }
+      const wlanLength = response.data.length;
+      for (let i = 0; i < wlanLength; i++) {
+        const wlanName = (wlanLength > 0) ? response.data[i].name : 'undefined';
+        const wlanState = (wlanLength > 0) ? response.data[i].enabled : false;
+        if (this.merakiService) {
+          this.merakiService.updateCharacteristic(Characteristic.On, wlanState);
+          this.log.debug('Device: %s, SSIDs: %s state: %s', this.name, wlanName, wlanState ? 'ON' : 'OFF');
         }
-        this.wlanLength = wlanLength;
+        this.wlanName.push(wlanName);
+        this.wlanState.push(wlanState);
       }
+      this.wlanLength = wlanLength;
       this.checkDeviceState = true;
 
       //start prepare accessory
