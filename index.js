@@ -147,7 +147,8 @@ class merakiDevice {
         const wlanName = (wlanLength > 0) ? response.data[i].name : 'undefined';
         const wlanState = (wlanLength > 0) ? response.data[i].enabled : false;
         if (this.merakiService) {
-          this.merakiService.updateCharacteristic(Characteristic.On, wlanState);
+          this.merakiService
+            .updateCharacteristic(Characteristic.On, wlanState);
           this.log.debug('Device: %s, SSIDs: %s state: %s', this.name, wlanName, wlanState ? 'ON' : 'OFF');
         }
         this.wlanName.push(wlanName);
