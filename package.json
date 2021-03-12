@@ -1,7 +1,7 @@
 {
     "displayName": "Meraki control",
     "name": "homebridge-meraki-control",
-    "version": "0.7.0",
+    "version": "0.7.8",
     "description": "Homebridge plugin (https://github.com/homebridge/homebridge) to control Meraki devices.",
     "license": "MIT",
     "author": "grzegorz914",
@@ -41,7 +41,6 @@
         "cisco"
     ],
     "contributors": [],
-    "devDependencies": {},
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     }
