@@ -77,7 +77,7 @@ class merakiDevice {
     this.firmwareRevision = config.firmwareRevision || 'Firmware Revision';
 
     //setup variables
-    this.checkDeviceInfo = false;
+    this.checkDeviceInfo = true;
     this.checkDeviceState = false;
     this.responseDataOK = false
     this.startPrepareAccessory = true;
@@ -110,12 +110,16 @@ class merakiDevice {
     setInterval(function () {
       if (this.checkDeviceInfo) {
         this.getDeviceInfo();
-      } else if (!this.checkDeviceInfo && this.checkDeviceState) {
+      }
+      if (!this.checkDeviceInfo && this.checkDeviceState) {
         this.updateDeviceState();
       }
     }.bind(this), this.refreshInterval * 1000);
 
-    this.getDeviceInfo()
+    //start prepare accessory
+    if (this.startPrepareAccessory) {
+      this.prepareAccessory();
+    }
   }
 
   async getDeviceInfo() {
@@ -148,7 +152,7 @@ class merakiDevice {
 
         for (let i = 0; i < wlanLength; i++) {
           const wlanName = response.data[i].name;
-          const wlanState = (response.data[i].enabled === true) || false;
+          const wlanState = (response.data[i].enabled !== undefined) ? (response.data[i].enabled === true) : false;
 
           if (this.servicesMeraki) {
             this.servicesMeraki[i]
@@ -159,12 +163,8 @@ class merakiDevice {
         }
         this.responseDataOK = true
         this.wlanLength = wlanLength;
-        this.checkDeviceState = true;
 
-        //start prepare accessory
-        if (this.startPrepareAccessory) {
-          this.prepareAccessory();
-        }
+        this.checkDeviceState = true;
       }
     } catch (error) {
       this.log.error('Device: %s, update status error: %s, state: Offline', this.name, error);
