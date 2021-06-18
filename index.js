@@ -2,6 +2,7 @@
 
 const axios = require('axios').default;
 const fs = require('fs');
+const fsPromises = require('fs').promises;
 const path = require('path');
 
 const PLUGIN_NAME = 'homebridge-meraki-control';
