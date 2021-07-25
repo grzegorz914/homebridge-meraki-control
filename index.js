@@ -141,7 +141,7 @@ class merakiDevice {
     this.log.debug('Device: %s %s, requesting merakiMrData.', this.host, this.name);
     try {
       const merakiMrData = await this.meraki.get(this.mrUrl);
-      this.log.debug('Debug metersReadingData: %s', merakiMrData.data);
+      this.log.debug('Debug merakiMrData: %s', merakiMrData.data);
       this.merakiMrData = merakiMrData;
 
       const updateDeviceState = !this.checkDeviceState ? this.updateDeviceState() : false;
@@ -194,7 +194,7 @@ class merakiDevice {
   }
 
   //Prepare accessory
-  async prepareAccessory() {
+  prepareAccessory() {
     this.log.debug('prepareAccessory');
     const accessoryName = this.name;
     const accessoryUUID = UUID.generate(accessoryName);
