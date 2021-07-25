@@ -80,6 +80,8 @@ class merakiDevice {
     //setup variables
     this.checkDeviceInfo = true;
     this.checkDeviceState = false;
+    this.wlanLength = 0;
+    
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
     this.mxUrl = this.host + '/api/v1/networks/' + this.networkId + '/appliance/ports';
     this.mrUrl = this.host + '/api/v1/networks/' + this.networkId + '/wireless/ssids';
@@ -137,20 +139,33 @@ class merakiDevice {
   }
 
   async updateDeviceState() {
+    this.log.debug('Device: %s %s, update device state.', this.host, this.name);
     try {
-      const response = await this.meraki.get(this.mrUrl);
-      this.log.debug('Device %s, get device status data: %s', this.name, response.data);
-      const wlanLength = response.data.length;
+      const merakiData = await this.meraki.get(this.mrUrl);
+      this.log.debug('Device %s, get device status data: %s', this.name, merakiData.data);
+      
+      this.wlanName = new Array();
+      this.wlanState = new Array();
 
+      const wlanLength = merakiData.data.length;
       for (let i = 0; i < wlanLength; i++) {
-        const wlanState = (response.data[i].enabled !== undefined) ? (response.data[i].enabled === true) : false;
+        const wlanName = merakiData.data[i].name;
+        const wlanState = (merakiData.data[i].enabled === true);
 
-        if (this.servicesMeraki[i]) {
+        if (this.servicesMeraki) {
           this.servicesMeraki[i]
             .updateCharacteristic(Characteristic.On, wlanState);
         }
-
+        
+        this.wlanLength = wlanLength;
+        this.wlanName.push(wlanName);
+        this.wlanState.push(wlanState);
+      }
         this.checkDeviceState = true;
+
+      //start prepare accessory
+      if (this.startPrepareAccessory) {
+        this.prepareAccessory();
       }
     } catch (error) {
       this.log.error('Device: %s, update status error: %s, state: Offline', this.name, error);
@@ -186,17 +201,15 @@ class merakiDevice {
 
     //Prepare service 
     this.log.debug('prepareMerakiService');
-    try {
+    
       this.servicesMeraki = new Array();
-      const response = await this.meraki.get(this.mrUrl);
-      const wlanLength = response.data.length
+      const wlanLength = this.wlanLength;
       for (let i = 0; i < wlanLength; i++) {
-        const wlanName = (response.data[i].name !== undefined) ? response.data[i].name : 'Undefined';
-        const wlanState = (response.data[i].enabled !== undefined) ? (response.data[i].enabled === true) : false;
+        const wlanName = this.wlanName[i];
         const merakiService = new Service.Switch(wlanName, 'merakiService' + i);
         merakiService.getCharacteristic(Characteristic.On)
           .onGet(async () => {
-            const state = wlanState;
+            const state = this.wlanState[i];;
             if (!this.disableLogInfo) {
               this.log('Device: %s, SSIDs: %s get state: %s', accessoryName, wlanName, state ? 'ON' : 'OFF');
             }
@@ -214,9 +227,6 @@ class merakiDevice {
         this.servicesMeraki.push(merakiService);
         accessory.addService(this.servicesMeraki[i]);
       }
-    } catch (error) {
-      this.log.error('Device: %s, error: %s, state: Offline', this.name, error);
-    }
 
     this.log.debug('Device: %s %s, publishExternalAccessories.', this.host, accessoryName);
     this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
