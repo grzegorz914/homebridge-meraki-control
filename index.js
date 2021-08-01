@@ -119,7 +119,7 @@ class merakiDevice {
     }.bind(this), this.refreshInterval * 1000);
   }
 
-  async getDeviceInfo() {
+  getDeviceInfo() {
     try {
       this.log('Device: %s, state: Online.', this.name);
       this.log('-------- %s --------', this.name);
@@ -130,9 +130,10 @@ class merakiDevice {
       this.log('----------------------------------');
 
       this.checkDeviceInfo = false;
-      this.updateMerakiMrData();
+      const updateMerakiMrData = !this.checkDeviceState ? this.updateMerakiMrData() : false;
     } catch (error) {
       this.log.error('Device: %s, getDeviceInfo error: %s', this.name, error);
+      this.checkDeviceState = false;
       this.checkDeviceInfo = true;
     }
   }
@@ -179,7 +180,6 @@ class merakiDevice {
         }
         this.wlanLength = wlanLength;
       }
-
       this.checkDeviceState = true;
 
       //start prepare accessory
