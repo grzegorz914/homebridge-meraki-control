@@ -114,6 +114,7 @@ class merakiDevice {
         this.getDeviceInfo();
       }
       if (!this.checkDeviceInfo && this.checkDeviceState) {
+        this.updateMerakiMrData();
         this.updateDeviceState();
       }
     }.bind(this), this.refreshInterval * 1000);
