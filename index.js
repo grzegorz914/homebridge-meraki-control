@@ -1,21 +1,21 @@
 'use strict';
 
+const path = require('path');
 const axios = require('axios').default;
 const fs = require('fs');
 const fsPromises = require('fs').promises;
-const path = require('path');
 
 const PLUGIN_NAME = 'homebridge-meraki-control';
 const PLATFORM_NAME = 'Meraki';
 
-let Accessory, Characteristic, Service, Categories, UUID;
+let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 module.exports = (api) => {
   Accessory = api.platformAccessory;
   Characteristic = api.hap.Characteristic;
   Service = api.hap.Service;
   Categories = api.hap.Categories;
-  UUID = api.hap.uuid;
+  AccessoryUUID = api.hap.uuid;
   api.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, merakiPlatform, true);
 }
 
@@ -100,11 +100,11 @@ class merakiDevice {
     });
 
     //check if prefs directory ends with a /, if not then add it
-    if (this.prefDir.endsWith('/') === false) {
+    if (this.prefDir.endsWith('/') == false) {
       this.prefDir = this.prefDir + '/';
     }
     //check if the directory exists, if not then create it
-    if (fs.existsSync(this.prefDir) === false) {
+    if (fs.existsSync(this.prefDir) == false) {
       fsPromises.mkdir(this.prefDir);
     }
 
@@ -161,7 +161,7 @@ class merakiDevice {
       const merakiMrData = this.merakiMrData;
       
       //MR device
-      if (merakiMrData.status === 200) {
+      if (merakiMrData.status == 200) {
         this.wlanName = new Array();
         this.wlanState = new Array();
 
@@ -197,7 +197,7 @@ class merakiDevice {
   prepareAccessory() {
     this.log.debug('prepareAccessory');
     const accessoryName = this.name;
-    const accessoryUUID = UUID.generate(accessoryName);
+    const accessoryUUID = AccessoryUUID.generate(accessoryName);
     const accessoryCategory = Categories.AIRPORT;
     const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
