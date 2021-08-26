@@ -70,6 +70,7 @@ class merakiDevice {
     this.networkId = config.networkId;
     this.refreshInterval = config.refreshInterval || 5;
     this.disableLogInfo = config.disableLogInfo;
+    this.displayOnlyConfiguredWlan = config.displayOnlyConfiguredWlan;
 
     //get Device info
     this.manufacturer = config.manufacturer || 'Cisco/Meraki';
@@ -168,17 +169,28 @@ class merakiDevice {
         const wlanCount = merakiMrData.data.length;
         for (let i = 0; i < wlanCount; i++) {
           const wlanName = merakiMrData.data[i].name;
+          const displayAllOrOnlyConfiguredWlan = this.displayOnlyConfiguredWlan ? (wlanName.substr(0, 12) != 'Unconfigured') : true;
+          if (displayAllOrOnlyConfiguredWlan) {
+            const wlanName = merakiMrData.data[i].name;
+            const wlanState = (merakiMrData.data[i].enabled == true);
+
+            this.wlanName.push(wlanName);
+            this.wlanState.push(wlanState);
+          }
+        }
+
+        const wlanConfiguredCount = this.wlanName.length;
+        for (let i = 0; i < wlanConfiguredCount; i++) {
+          const wlanName = merakiMrData.data[i].name;
           const wlanState = (merakiMrData.data[i].enabled == true);
 
           if (this.merakiServices) {
             this.merakiServices[i]
               .updateCharacteristic(Characteristic.On, wlanState);
           }
-
-          this.wlanName.push(wlanName);
-          this.wlanState.push(wlanState);
         }
-        this.wlanCount = wlanCount;
+
+        this.wlanCount = this.displayOnlyConfiguredWlan ? wlanConfiguredCount : wlanCount;
       }
       this.checkDeviceState = true;
 

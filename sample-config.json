@@ -26,6 +26,7 @@
                     "networkId": "1234567",
                     "refreshInterval": 10,
                     "disableLogInfo": false,
+                    "displayOnlyConfiguredWlan": false,
                     "manufacturer": "Manufacturer",
                     "modelName": "Model",
                     "serialNumber": "Serial Number",

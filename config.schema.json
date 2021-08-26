@@ -59,6 +59,13 @@
               "required": false,
               "description": "This disable log info, all values and state will not be displayed in Homebridge log console."
             },
+            "displayOnlyConfiguredWlan": {
+              "title": "Display only configured SSIDS",
+              "type": "boolean",
+              "default": false,
+              "required": false,
+              "description": "This disable not configured SSIDS."
+            },
             "manufacturer": {
               "name": "Manufacturer",
               "type": "string",
@@ -108,6 +115,7 @@
           "expanded": false,
           "items": [
             "devices[].disableLogInfo",
+            "devices[].displayOnlyConfiguredWlan",
             "devices[].refreshInterval",
             "devices[].apiKey",
             "devices[].organizationId",
