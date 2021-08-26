@@ -163,12 +163,14 @@ class merakiDevice {
 
       //MR device
       if (merakiMrData.status == 200) {
+        this.allWlanName = new Array();
         this.wlanName = new Array();
         this.wlanState = new Array();
 
         const wlanCount = merakiMrData.data.length;
         for (let i = 0; i < wlanCount; i++) {
           const wlanName = merakiMrData.data[i].name;
+          this.allWlanName.push(wlanName);
           const displayAllOrOnlyConfiguredWlan = this.displayOnlyConfiguredWlan ? (wlanName.substr(0, 12) != 'Unconfigured') : true;
           if (displayAllOrOnlyConfiguredWlan) {
             const wlanName = merakiMrData.data[i].name;
@@ -248,7 +250,8 @@ class merakiDevice {
         })
         .onSet(async (state) => {
           state = state ? true : false;
-          const response = this.meraki.put(this.mrUrl + '/' + [i], {
+          let j = this.allWlanName.indexOf(wlanName);
+          const response = this.meraki.put(this.mrUrl + '/' + [j], {
             'enabled': state
           });
           this.log.debug('Device: %s %s, debug response: %s', this.host, this.name, response);
