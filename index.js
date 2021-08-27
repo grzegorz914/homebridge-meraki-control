@@ -70,7 +70,8 @@ class merakiDevice {
     this.networkId = config.networkId;
     this.refreshInterval = config.refreshInterval || 5;
     this.disableLogInfo = config.disableLogInfo;
-    this.displayOnlyConfiguredWlan = config.displayOnlyConfiguredWlan;
+    this.hideUnconfiguredSsids = config.hideUnconfiguredSsids;
+    this.filterSsidByName = config.filterSsidByName || [];
 
     //get Device info
     this.manufacturer = config.manufacturer || 'Cisco/Meraki';
@@ -86,6 +87,8 @@ class merakiDevice {
     this.checkDeviceState = false;
     this.startPrepareAccessory = true;
     this.wlanCount = 0;
+    this.showNotFilteredSsid = true;
+    this.filteredSsidCount = 0;
 
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
     this.mxUrl = this.host + '/api/v1/networks/' + this.networkId + '/appliance/ports';
@@ -167,24 +170,30 @@ class merakiDevice {
         this.wlanName = new Array();
         this.wlanState = new Array();
 
-        const wlanCount = merakiMrData.data.length;
-        for (let i = 0; i < wlanCount; i++) {
-          const wlanName = merakiMrData.data[i].name;
-          this.allWlanName.push(wlanName);
-          const displayAllOrOnlyConfiguredWlan = this.displayOnlyConfiguredWlan ? (wlanName.substr(0, 12) != 'Unconfigured') : true;
-          if (displayAllOrOnlyConfiguredWlan) {
-            const wlanName = merakiMrData.data[i].name;
-            const wlanState = (merakiMrData.data[i].enabled == true);
+        const allWlanCount = merakiMrData.data.length;
+        const filteredSsidCount = this.filterSsidByName.length;
+
+        for (let j = 0; j < allWlanCount; j++) {
+          const currentWlanName = merakiMrData.data[j].name;
+          this.allWlanName.push(currentWlanName);
+
+          for (let i = 0; i < filteredSsidCount; i++) {
+            this.showNotFilteredSsid = filteredSsidCount > 0 ? (currentWlanName != this.filterSsidByName[i].name) : true;
+          }
+
+          const showConfiguredSsids = this.hideUnconfiguredSsids ? (currentWlanName.substr(0, 12) != 'Unconfigured') : true;
+          if (showConfiguredSsids && this.showNotFilteredSsid) {
+            const wlanName = merakiMrData.data[j].name;
+            const wlanState = (merakiMrData.data[j].enabled == true);
 
             this.wlanName.push(wlanName);
             this.wlanState.push(wlanState);
           }
         }
 
-        const wlanConfiguredCount = this.wlanName.length;
-        for (let i = 0; i < wlanConfiguredCount; i++) {
-          const wlanName = merakiMrData.data[i].name;
-          const wlanState = (merakiMrData.data[i].enabled == true);
+        const wlanCount = this.wlanName.length;
+        for (let i = 0; i < wlanCount; i++) {
+          const wlanState = this.wlanState[i];
 
           if (this.merakiServices) {
             this.merakiServices[i]
@@ -192,7 +201,8 @@ class merakiDevice {
           }
         }
 
-        this.wlanCount = this.displayOnlyConfiguredWlan ? wlanConfiguredCount : wlanCount;
+        this.wlanCount = wlanCount;
+        this.filteredSsidCount = filteredSsidCount;
       }
       this.checkDeviceState = true;
 
@@ -225,7 +235,6 @@ class merakiDevice {
     accessory.removeService(accessory.getService(Service.AccessoryInformation));
     const informationService = new Service.AccessoryInformation();
     informationService
-      .setCharacteristic(Characteristic.Name, accessoryName)
       .setCharacteristic(Characteristic.Manufacturer, manufacturer)
       .setCharacteristic(Characteristic.Model, modelName)
       .setCharacteristic(Characteristic.SerialNumber, serialNumber)
@@ -265,7 +274,6 @@ class merakiDevice {
     }
 
     this.startPrepareAccessory = false;
-
     this.log.debug('Device: %s %s, publishExternalAccessories.', this.host, accessoryName);
     this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
   }

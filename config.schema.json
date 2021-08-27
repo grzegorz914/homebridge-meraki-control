@@ -45,13 +45,13 @@
               "required": true
             },
             "refreshInterval": {
-							"title": "Refresh interval (sec)",
-							"type": "integer",
-							"default": 10,
-							"minimum": 0,
-							"maximum": 60,
-							"required": true
-						},
+              "title": "Refresh interval (sec)",
+              "type": "integer",
+              "default": 10,
+              "minimum": 0,
+              "maximum": 60,
+              "required": true
+            },
             "disableLogInfo": {
               "title": "Disable log info",
               "type": "boolean",
@@ -59,12 +59,29 @@
               "required": false,
               "description": "This disable log info, all values and state will not be displayed in Homebridge log console."
             },
-            "displayOnlyConfiguredWlan": {
-              "title": "Display only configured SSIDS",
+            "hideUnconfiguredSsids": {
+              "title": "Hide unconfigured SSIDs",
               "type": "boolean",
               "default": false,
               "required": false,
-              "description": "This disable not configured SSIDS."
+              "description": "This hide not configured SSIDs."
+            },
+            "filterSsidByName": {
+              "title": "SSIDs Name",
+              "buttonText": "Add SSIDS",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "SSID Name",
+                    "type": "string",
+                    "default": "",
+                    "description": "Here set SSID to be filtered and not exposed to the Home app.",
+                    "required": false
+                  }
+                }
+              }
             },
             "manufacturer": {
               "name": "Manufacturer",
@@ -99,43 +116,59 @@
       }
     }
   },
-  "layout": [
-    {
-      "key": "devices",
-      "type": "tabarray",
-      "title": "{{ value.name || 'new device' }}",
-      "items": [
-        "devices[].name",
-        "devices[].host",
-        {
-          "key": "devices[]",
-          "type": "section",
-          "title": "Advanced Settings",
-          "expandable": true,
-          "expanded": false,
-          "items": [
-            "devices[].disableLogInfo",
-            "devices[].displayOnlyConfiguredWlan",
-            "devices[].refreshInterval",
-            "devices[].apiKey",
-            "devices[].organizationId",
-            "devices[].networkId"
-          ]
-        },
-        {
-          "key": "devices[]",
-          "type": "section",
-          "title": "Branding",
-          "expandable": true,
-          "expanded": false,
-          "items": [
-            "devices[].manufacturer",
-            "devices[].modelName",
-            "devices[].serialNumber",
-            "devices[].firmwareRevision"
-          ]
-        }
-      ]
-    }
-  ]
+  "layout": [{
+    "key": "devices",
+    "type": "tabarray",
+    "title": "{{ value.name || 'new device' }}",
+    "items": [
+      "devices[].name",
+      "devices[].host",
+      {
+        "key": "devices[]",
+        "type": "section",
+        "title": "Filter SSIDs",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "devices[].hideUnconfiguredSsids",
+          {
+            "key": "devices[].filterSsidByName",
+            "type": "array",
+            "orderable": false,
+            "buttonText": "Add SSID",
+            "items": [
+              "devices[].filterSsidByName[].name"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "devices[]",
+        "type": "section",
+        "title": "Advanced Settings",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "devices[].disableLogInfo",
+          "devices[].refreshInterval",
+          "devices[].apiKey",
+          "devices[].organizationId",
+          "devices[].networkId"
+        ]
+      },
+      {
+        "key": "devices[]",
+        "type": "section",
+        "title": "Branding",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "devices[].manufacturer",
+          "devices[].modelName",
+          "devices[].serialNumber",
+          "devices[].firmwareRevision"
+        ]
+      }
+    ]
+  }]
 }

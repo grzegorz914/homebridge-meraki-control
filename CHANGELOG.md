@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.8.2] - (27.08.2021)
+## Changes
+- added possibility to hidden SSIDSs by custom configured name.
+
 ## [0.8.0] - (26.08.2021)
 ## Changes
-- added possibility to hidden unconfigured SSIDS
+- added possibility to hidde all unconfigured SSIDs
 
 ## [0.6.0] - (23.02.2021)
 ## Changes
