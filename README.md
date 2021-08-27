@@ -37,8 +37,10 @@ Homebridge plugin for Meraki devices using RESTFull API.
 1. Versin 0.6.0 and above need to be used with Homebridge min. v1.3.x.
 
 ## Info
-1. This plugin control ON/OFF configured WLAN networks in Your organisation(MR devices).
-2. More comming soon...
+1. This plugin control ON/OFF configured WLAN networks in Your organisation (MR devices).
+2. You have possibility hidden all unconfigured networks, this option is available in plugin settings.
+3. You have possibility hidden networks by configured name, this option is available in plugin settings.
+4. More comming soon...
 
 ## Configuration
 1. Use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) to configure the plugin (strongly recomended), or update your configuration file manually. See `sample-config.json` in this repository for a sample or add the bottom example to Your config.json file.
