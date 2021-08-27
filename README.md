@@ -53,8 +53,8 @@ Homebridge plugin for Meraki devices using RESTFull API.
 7. In `refreshInterval` set the data refresh time in seconds.
 8. If `disableLogInfo` enabled, disable log info, all values and state will not be displayed in Homebridge log console.
 9. If `hideUnconfiguredSsids` enabled, all unconfigured SSIDs will be hidden.
-10. `filterSsidByName` here set SSIDs names to be filtered and not exposed to the Home app.
-11. `manufacturer`, `model`, `serialNumber`, `firmwareRevision` - optional branding data displayed in Home.app
+10. In `filterSsidByName` set SSIDs names which You want hide and not expose to the Homebridge/HomeKit.
+11. In `manufacturer`, `model`, `serialNumber`, `firmwareRevision` - set optional branding data displayed in Home.app
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/master/graphics/ustawienia.png" height="170"></a>
