@@ -214,18 +214,15 @@ class merakiDevice {
         this.clientsPolicyState = new Array();
 
         for (let i = 0; i < merakiDashboardClientsCount; i++) {
-          const currentClientUser = merakiDashboardClientsData.data[i].description;
-          this.allClientsName.push(currentClientUser);
+          const clientDescription = merakiDashboardClientsData.data[i].description;
+          this.allClientsName.push(clientDescription);
 
           for (let j = 0; j < exposedClientByNameCount; j++) {
-            const showClientsByName = (exposedClientByNameCount > 0) ? (currentClientUser == this.getClientByName[j].name) : false;
+            const showClientsByName = this.allClientsName.indexOf(this.getClientByName[j].name) >= 0);
 
             if (showClientsByName) {
               const clientId = merakiDashboardClientsData.data[i].id;
               const clientUser = merakiDashboardClientsData.data[i].description;
-
-              this.clientsId.push(clientId);
-              this.clientsUser.push(clientUser);
 
               try {
                 const dashboardClientsByIdPolicyUrl = this.host + '/api/v1/networks/' + this.networkId + '/clients/' + clientId + '/policy';
@@ -241,16 +238,17 @@ class merakiDevice {
                 this.clientsPolicyPolicy.push(clientPolicyPolicy);
                 this.clientsPolicyGroupPolicyId.push(clientPolicyGroupPolicyId);
                 this.clientsPolicyState.push(clientPolicyState);
+                
+                if (this.merakiClientPolicyServices) {
+                    this.merakiClientPolicyServices[j]
+                    .updateCharacteristic(Characteristic.On, clientsPolicyState);
+                 }
               } catch (error) {
                 this.log.error('Device: %s %s, merakiDashboardClientPolicyData error: %s', this.host, this.name, error);
               }
+              this.clientsId.push(clientId);
+              this.clientsUser.push(clientUser);
             }
-          }
-        }
-        for (let j = 0; j < exposedClientByNameCount; j++) {
-          if (this.merakiClientPolicyServices) {
-            this.merakiClientPolicyServices[j]
-              .updateCharacteristic(Characteristic.On, this.clientsPolicyState[j]);
           }
         }
       }
