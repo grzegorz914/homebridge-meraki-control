@@ -68,7 +68,7 @@
             },
             "hideSsidByName": {
               "title": "SSIDs Name",
-              "buttonText": "Add SSIDS",
+              "buttonText": "Add SSID",
               "type": "array",
               "items": {
                 "type": "object",
@@ -76,7 +76,6 @@
                   "name": {
                     "title": "SSID Name",
                     "type": "string",
-                    "default": "",
                     "description": "Here set the SSID name to be filtered and not exposed to the Homebridge/HomeKit.",
                     "required": false
                   }
@@ -85,7 +84,7 @@
             },
             "getClientByName": {
               "title": "Client Name",
-              "buttonText": "Add client",
+              "buttonText": "Add Client",
               "type": "array",
               "items": {
                 "type": "object",
@@ -93,7 +92,6 @@
                   "name": {
                     "title": "Client Name",
                     "type": "string",
-                    "default": "",
                     "description": "Here set the client (Description in meraki dashboard) which You want expose to the Homebridge/HomeKit and change policy.",
                     "required": false
                   }

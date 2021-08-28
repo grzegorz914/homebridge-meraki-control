@@ -102,7 +102,6 @@ class merakiDevice {
     this.allSsidsCount = 0;
     this.exposedSsidsCount = 0;
     this.hiddenSsidsCount = this.hideSsidByName.length;
-    this.showNotFilteredSsid = true;
 
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
     this.dashboardClientsUrl = this.host + '/api/v1/networks/' + this.networkId + '/clients?perPage=255';
@@ -219,32 +218,32 @@ class merakiDevice {
           this.allClientsName.push(currentClientUser);
 
           for (let j = 0; j < exposedClientByNameCount; j++) {
-            this.showClientsByName = (exposedClientByNameCount > 0) ? (currentClientUser == this.getClientByName[j].name) : false;
-          }
+            const showClientsByName = (exposedClientByNameCount > 0) ? (currentClientUser == this.getClientByName[j].name) : false;
 
-          if (this.showClientsByName) {
-            const clientId = merakiDashboardClientsData.data[i].id;
-            const clientUser = merakiDashboardClientsData.data[i].description;
+            if (showClientsByName) {
+              const clientId = merakiDashboardClientsData.data[i].id;
+              const clientUser = merakiDashboardClientsData.data[i].description;
 
-            this.clientsId.push(clientId);
-            this.clientsUser.push(clientUser);
+              this.clientsId.push(clientId);
+              this.clientsUser.push(clientUser);
 
-            try {
-              const dashboardClientsByIdPolicyUrl = this.host + '/api/v1/networks/' + this.networkId + '/clients/' + clientId + '/policy';
-              const merakiDashboardClientPolicyData = await this.meraki.get(dashboardClientsByIdPolicyUrl);
-              this.log.debug('Debug merakiDashboardClientPolicyData: %s', merakiDashboardClientPolicyData.data);
+              try {
+                const dashboardClientsByIdPolicyUrl = this.host + '/api/v1/networks/' + this.networkId + '/clients/' + clientId + '/policy';
+                const merakiDashboardClientPolicyData = await this.meraki.get(dashboardClientsByIdPolicyUrl);
+                this.log.debug('Debug merakiDashboardClientPolicyData: %s', merakiDashboardClientPolicyData.data);
 
-              const clientPolicyMac = merakiDashboardClientPolicyData.data.mac;
-              const clientPolicyPolicy = merakiDashboardClientPolicyData.data.devicePolicy;
-              const clientPolicyGroupPolicyId = merakiDashboardClientPolicyData.data.groupPolicyId;
-              const clientPolicyState = (clientPolicyPolicy == 'Normal' || clientPolicyPolicy == 'Whitelisted');
+                const clientPolicyMac = merakiDashboardClientPolicyData.data.mac;
+                const clientPolicyPolicy = merakiDashboardClientPolicyData.data.devicePolicy;
+                const clientPolicyGroupPolicyId = merakiDashboardClientPolicyData.data.groupPolicyId;
+                const clientPolicyState = (clientPolicyPolicy == 'Normal' || clientPolicyPolicy == 'Whitelisted');
 
-              this.clientsPolicyMac.push(clientPolicyMac);
-              this.clientsPolicyPolicy.push(clientPolicyPolicy);
-              this.clientsPolicyGroupPolicyId.push(clientPolicyGroupPolicyId);
-              this.clientsPolicyState.push(clientPolicyState);
-            } catch (error) {
-              this.log.error('Device: %s %s, merakiDashboardClientPolicyData error: %s', this.host, this.name, error);
+                this.clientsPolicyMac.push(clientPolicyMac);
+                this.clientsPolicyPolicy.push(clientPolicyPolicy);
+                this.clientsPolicyGroupPolicyId.push(clientPolicyGroupPolicyId);
+                this.clientsPolicyState.push(clientPolicyState);
+              } catch (error) {
+                this.log.error('Device: %s %s, merakiDashboardClientPolicyData error: %s', this.host, this.name, error);
+              }
             }
           }
         }
@@ -263,21 +262,23 @@ class merakiDevice {
         this.ssidsName = new Array();
         this.ssidsState = new Array();
 
+        this.hidenSsidsByName = new Array();
+        for (let j = 0; j < hiddenSsidsCount; j++) {
+          const hiddedSsidByName = this.hideSsidByName[j].name;
+          this.hidenSsidsByName.push(hiddedSsidByName);
+        }
+
         for (let i = 0; i < allSsidsCount; i++) {
           const currentSsidName = merakiMrSsidsData.data[i].name;
           this.allSsidsName.push(currentSsidName);
 
-          for (let j = 0; j < hiddenSsidsCount; j++) {
-            this.showNotFilteredSsid = hiddenSsidsCount > 0 ? (currentSsidName != this.hideSsidByName[j].name) : true;
-          }
-
           const showConfiguredSsids = this.hideUnconfiguredSsids ? (currentSsidName.substr(0, 12) != 'Unconfigured') : true;
-          if (showConfiguredSsids && this.showNotFilteredSsid) {
+          if (showConfiguredSsids) {
             const ssidName = merakiMrSsidsData.data[i].name;
-            const ssidState = (merakiMrSsidsData.data[i].enabled == true);
+            const ssidState = (merakiMrSsidsData.data[i].enabled == true)
 
-            this.ssidsName.push(ssidName);
-            this.ssidsState.push(ssidState);
+            const pushName = (this.hidenSsidsByName.indexOf(ssidName) >= 0) ? false : this.ssidsName.push(ssidName);
+            const pushState = (this.hidenSsidsByName.indexOf(ssidName) >= 0) ? false : this.ssidsState.push(ssidState);
           }
         }
 
