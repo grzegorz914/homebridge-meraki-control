@@ -66,7 +66,7 @@
               "required": false,
               "description": "This hide not configured SSIDs."
             },
-            "filterSsidByName": {
+            "hideSsidByName": {
               "title": "SSIDs Name",
               "buttonText": "Add SSIDS",
               "type": "array",
@@ -77,7 +77,24 @@
                     "title": "SSID Name",
                     "type": "string",
                     "default": "",
-                    "description": "Here set SSID to be filtered and not exposed to the Home app.",
+                    "description": "Here set the SSID name to be filtered and not exposed to the Homebridge/HomeKit.",
+                    "required": false
+                  }
+                }
+              }
+            },
+            "getClientByName": {
+              "title": "Client Name",
+              "buttonText": "Add client",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Client Name",
+                    "type": "string",
+                    "default": "",
+                    "description": "Here set the client (Description in meraki dashboard) which You want expose to the Homebridge/HomeKit and change policy.",
                     "required": false
                   }
                 }
@@ -132,15 +149,31 @@
         "items": [
           "devices[].hideUnconfiguredSsids",
           {
-            "key": "devices[].filterSsidByName",
+            "key": "devices[].hideSsidByName",
             "type": "array",
             "orderable": false,
             "buttonText": "Add SSID",
             "items": [
-              "devices[].filterSsidByName[].name"
+              "devices[].hideSsidByName[].name"
             ]
           }
         ]
+      },
+      {
+        "key": "devices[]",
+        "type": "section",
+        "title": "Filter Clients",
+        "expandable": true,
+        "expanded": false,
+        "items": [{
+          "key": "devices[].getClientByName",
+          "type": "array",
+          "orderable": false,
+          "buttonText": "Add Client",
+          "items": [
+            "devices[].getClientByName[].name"
+          ]
+        }]
       },
       {
         "key": "devices[]",

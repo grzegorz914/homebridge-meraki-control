@@ -25,8 +25,11 @@
             "refreshInterval": 10,
             "disableLogInfo": false,
             "hideUnconfiguredSsids": false,
-            "filterSsidByName": [{
+            "hideSsidByName": [{
                 "name": "SSID Name"
+            }],
+            "getClientByName": [{
+                "name": "Client Name"
             }],
             "manufacturer": "Manufacturer",
             "modelName": "Model",

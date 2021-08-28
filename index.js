@@ -71,7 +71,8 @@ class merakiDevice {
     this.refreshInterval = config.refreshInterval || 5;
     this.disableLogInfo = config.disableLogInfo;
     this.hideUnconfiguredSsids = config.hideUnconfiguredSsids;
-    this.filterSsidByName = config.filterSsidByName || [];
+    this.hideSsidByName = config.hideSsidByName || [];
+    this.getClientByName = config.getClientByName || [];
 
     //get Device info
     this.manufacturer = config.manufacturer || 'Cisco/Meraki';
@@ -80,19 +81,33 @@ class merakiDevice {
     this.firmwareRevision = config.firmwareRevision || 'Firmware Revision';
 
     //setup variables
-    this.merakiMrData = {
-      'status': 0
-    };
     this.checkDeviceInfo = false;
     this.checkDeviceState = false;
     this.startPrepareAccessory = true;
-    this.wlanCount = 0;
+
+    //data
+    this.merakiDashboardClientsData = {
+      'status': 0
+    };
+    this.merakiMrSsidsData = {
+      'status': 0
+    };
+
+    //meraki dashboard
+    this.merakiDashboardClientsCount = 0;
+    this.exposedClientByNameCount = this.getClientByName.length;
+    this.showClientsByName = false;
+
+    //meraki mr
+    this.allSsidsCount = 0;
+    this.exposedSsidsCount = 0;
+    this.hiddenSsidsCount = this.hideSsidByName.length;
     this.showNotFilteredSsid = true;
-    this.filteredSsidCount = 0;
 
     this.prefDir = path.join(api.user.storagePath(), 'meraki');
+    this.dashboardClientsUrl = this.host + '/api/v1/networks/' + this.networkId + '/clients?perPage=255';
     this.mxUrl = this.host + '/api/v1/networks/' + this.networkId + '/appliance/ports';
-    this.mrUrl = this.host + '/api/v1/networks/' + this.networkId + '/wireless/ssids';
+    this.mrSsidUrl = this.host + '/api/v1/networks/' + this.networkId + '/wireless/ssids';
     this.msUrl = this.host + '/api/v1/devices/' + this.serialNumber + '/switch/ports';
     this.mvUrl = this.host + '/api/v1/devices/' + this.serialNumber + '/camera';
 
@@ -106,10 +121,6 @@ class merakiDevice {
     });
 
     //check if prefs directory ends with a /, if not then add it
-    if (this.prefDir.endsWith('/') == false) {
-      this.prefDir = this.prefDir + '/';
-    }
-    //check if the directory exists, if not then create it
     if (fs.existsSync(this.prefDir) == false) {
       fsPromises.mkdir(this.prefDir);
     }
@@ -117,23 +128,44 @@ class merakiDevice {
     //Check device state
     setInterval(function () {
       if (this.checkDeviceInfo || this.checkDeviceState) {
-        this.updateMerakiMrData();
+        this.updateMerakiDashboardClientsData();
       }
     }.bind(this), this.refreshInterval * 1000);
 
-    this.updateMerakiMrData();
+    this.updateMerakiDashboardClientsData();
   }
 
-  async updateMerakiMrData() {
-    this.log.debug('Device: %s %s, requesting merakiMrData.', this.host, this.name);
+  async updateMerakiDashboardClientsData() {
+    this.log.debug('Device: %s %s, requesting merakiDashboardClientsData.', this.host, this.name);
     try {
-      const merakiMrData = await this.meraki.get(this.mrUrl);
-      this.log.debug('Debug merakiMrData: %s', merakiMrData.data);
-      this.merakiMrData = merakiMrData;
+      const merakiDashboardClientsData = await this.meraki.get(this.dashboardClientsUrl);
+      this.log.debug('Debug merakiDashboardClientsData: %s', merakiDashboardClientsData.data[0]);
+      const merakiDashboardClientsCount = merakiDashboardClientsData.data.length;
+
+      this.merakiDashboardClientsData = merakiDashboardClientsData;
+      this.merakiDashboardClientsCount = merakiDashboardClientsCount;
+
+      this.updateMerakiMrSsidsData();
+    } catch (error) {
+      this.log.error('Device: %s %s, merakiDashboardClientsData error: %s', this.host, this.name, error);
+      this.checkDeviceState = false;
+      this.checkDeviceInfo = true;
+    };
+  }
+
+  async updateMerakiMrSsidsData() {
+    this.log.debug('Device: %s %s, requesting merakiMrSsidsData.', this.host, this.name);
+    try {
+      const merakiMrSsidsData = await this.meraki.get(this.mrSsidUrl);
+      this.log.debug('Debug merakiMrData: %s', merakiMrSsidsData.data[0]);
+      const allSsidsCount = merakiMrSsidsData.data.length;
+
+      this.merakiMrSsidsData = merakiMrSsidsData;
+      this.allSsidsCount = allSsidsCount;
 
       const getDeviceInfo = !this.checkDeviceState ? this.getDeviceInfo() : this.updateDeviceState();
     } catch (error) {
-      this.log.error('Device: %s %s, merakiMrData error: %s', this.host, this.name, error);
+      this.log.error('Device: %s %s, merakiMrSsidsData error: %s', this.host, this.name, error);
       this.checkDeviceState = false;
       this.checkDeviceInfo = true;
     };
@@ -162,47 +194,103 @@ class merakiDevice {
     this.log.debug('Device: %s %s, update device state.', this.host, this.name);
     try {
       //get devices data;
-      const merakiMrData = this.merakiMrData;
+      const merakiDashboardClientsData = this.merakiDashboardClientsData;
+      const merakiMrSsidsData = this.merakiMrSsidsData;
+
+      //get devices data variables
+      const merakiDashboardClientsCount = this.merakiDashboardClientsCount;
+      const exposedClientByNameCount = this.exposedClientByNameCount;
+      const allSsidsCount = this.allSsidsCount;
+      const hiddenSsidsCount = this.hiddenSsidsCount;
+
+
+      //daschboards filter clients
+      if (merakiDashboardClientsData.status == 200) {
+        this.allClientsName = new Array();
+        this.clientsId = new Array();
+        this.clientsUser = new Array();
+        this.clientsPolicyMac = new Array();
+        this.clientsPolicyPolicy = new Array();
+        this.clientsPolicyGroupPolicyId = new Array();
+        this.clientsPolicyState = new Array();
+
+        for (let i = 0; i < merakiDashboardClientsCount; i++) {
+          const currentClientUser = merakiDashboardClientsData.data[i].description;
+          this.allClientsName.push(currentClientUser);
+
+          for (let j = 0; j < exposedClientByNameCount; j++) {
+            this.showClientsByName = (exposedClientByNameCount > 0) ? (currentClientUser == this.getClientByName[j].name) : false;
+          }
+
+          if (this.showClientsByName) {
+            const clientId = merakiDashboardClientsData.data[i].id;
+            const clientUser = merakiDashboardClientsData.data[i].description;
+
+            this.clientsId.push(clientId);
+            this.clientsUser.push(clientUser);
+
+            try {
+              const dashboardClientsByIdPolicyUrl = this.host + '/api/v1/networks/' + this.networkId + '/clients/' + clientId + '/policy';
+              const merakiDashboardClientPolicyData = await this.meraki.get(dashboardClientsByIdPolicyUrl);
+              this.log.debug('Debug merakiDashboardClientPolicyData: %s', merakiDashboardClientPolicyData.data);
+
+              const clientPolicyMac = merakiDashboardClientPolicyData.data.mac;
+              const clientPolicyPolicy = merakiDashboardClientPolicyData.data.devicePolicy;
+              const clientPolicyGroupPolicyId = merakiDashboardClientPolicyData.data.groupPolicyId;
+              const clientPolicyState = (clientPolicyPolicy == 'Normal' || clientPolicyPolicy == 'Whitelisted');
+
+              this.clientsPolicyMac.push(clientPolicyMac);
+              this.clientsPolicyPolicy.push(clientPolicyPolicy);
+              this.clientsPolicyGroupPolicyId.push(clientPolicyGroupPolicyId);
+              this.clientsPolicyState.push(clientPolicyState);
+            } catch (error) {
+              this.log.error('Device: %s %s, merakiDashboardClientPolicyData error: %s', this.host, this.name, error);
+            }
+          }
+        }
+        for (let j = 0; j < exposedClientByNameCount; j++) {
+          if (this.merakiClientPolicyServices) {
+            this.merakiClientPolicyServices[j]
+              .updateCharacteristic(Characteristic.On, this.clientsPolicyState[j]);
+          }
+        }
+      }
+
 
       //MR device
-      if (merakiMrData.status == 200) {
-        this.allWlanName = new Array();
-        this.wlanName = new Array();
-        this.wlanState = new Array();
+      if (merakiMrSsidsData.status == 200) {
+        this.allSsidsName = new Array();
+        this.ssidsName = new Array();
+        this.ssidsState = new Array();
 
-        const allWlanCount = merakiMrData.data.length;
-        const filteredSsidCount = this.filterSsidByName.length;
+        for (let i = 0; i < allSsidsCount; i++) {
+          const currentSsidName = merakiMrSsidsData.data[i].name;
+          this.allSsidsName.push(currentSsidName);
 
-        for (let j = 0; j < allWlanCount; j++) {
-          const currentWlanName = merakiMrData.data[j].name;
-          this.allWlanName.push(currentWlanName);
-
-          for (let i = 0; i < filteredSsidCount; i++) {
-            this.showNotFilteredSsid = filteredSsidCount > 0 ? (currentWlanName != this.filterSsidByName[i].name) : true;
+          for (let j = 0; j < hiddenSsidsCount; j++) {
+            this.showNotFilteredSsid = hiddenSsidsCount > 0 ? (currentSsidName != this.hideSsidByName[j].name) : true;
           }
 
-          const showConfiguredSsids = this.hideUnconfiguredSsids ? (currentWlanName.substr(0, 12) != 'Unconfigured') : true;
+          const showConfiguredSsids = this.hideUnconfiguredSsids ? (currentSsidName.substr(0, 12) != 'Unconfigured') : true;
           if (showConfiguredSsids && this.showNotFilteredSsid) {
-            const wlanName = merakiMrData.data[j].name;
-            const wlanState = (merakiMrData.data[j].enabled == true);
+            const ssidName = merakiMrSsidsData.data[i].name;
+            const ssidState = (merakiMrSsidsData.data[i].enabled == true);
 
-            this.wlanName.push(wlanName);
-            this.wlanState.push(wlanState);
+            this.ssidsName.push(ssidName);
+            this.ssidsState.push(ssidState);
           }
         }
 
-        const wlanCount = this.wlanName.length;
-        for (let i = 0; i < wlanCount; i++) {
-          const wlanState = this.wlanState[i];
+        const exposedSsidsCount = this.ssidsName.length;
+        for (let i = 0; i < exposedSsidsCount; i++) {
+          const ssidState = this.ssidsState[i];
 
-          if (this.merakiServices) {
-            this.merakiServices[i]
-              .updateCharacteristic(Characteristic.On, wlanState);
+          if (this.merakiSsidServices) {
+            this.merakiSsidServices[i]
+              .updateCharacteristic(Characteristic.On, ssidState);
           }
         }
-
-        this.wlanCount = wlanCount;
-        this.filteredSsidCount = filteredSsidCount;
+        this.exposedSsidsCount = exposedSsidsCount;
       }
       this.checkDeviceState = true;
 
@@ -244,33 +332,67 @@ class merakiDevice {
     //Prepare service 
     this.log.debug('prepareMerakiService');
 
-    this.merakiServices = new Array();
-    const wlanCount = this.wlanCount;
-    for (let i = 0; i < wlanCount; i++) {
-      const wlanName = this.wlanName[i];
-      const merakiService = new Service.Switch(wlanName, 'merakiService' + i);
-      merakiService.getCharacteristic(Characteristic.On)
+    //get devices data variables
+    const merakiDashboardClientsCount = this.merakiDashboardClientsCount;
+    const allSsidsCount = this.allSsidsCount;
+    const hiddenSsidsCount = this.hiddenSsidsCount;
+    const exposedClientByNameCount = this.exposedClientByNameCount;
+    const exposedSsidsCount = this.exposedSsidsCount;
+
+    this.merakiClientPolicyServices = new Array();
+    for (let i = 0; i < exposedClientByNameCount; i++) {
+      const clientName = this.clientsUser[i];
+      const merakiClientPolicyService = new Service.Switch(clientName, 'merakiClientPolicyService' + i);
+      merakiClientPolicyService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
-          const state = this.wlanState[i];
+          const state = this.clientsPolicyState[i];
           if (!this.disableLogInfo) {
-            this.log('Device: %s, SSIDs: %s get state: %s', accessoryName, wlanName, state ? 'ON' : 'OFF');
+            this.log('Device: %s, client: %s, get policy, state: %s', accessoryName, clientName, this.clientsPolicyPolicy[i]);
+          }
+          return state;
+        })
+        .onSet(async (state) => {
+          const policy = state ? 'Normal' : 'Blocked';
+          const dashboardClientsByIdPolicyUrl = this.host + '/api/v1/networks/' + this.networkId + '/clients/' + this.clientsId[i] + '/policy';
+          const setClientPolicy = this.meraki.put(dashboardClientsByIdPolicyUrl, {
+            'devicePolicy': policy
+          });
+          this.log.debug('Device: %s %s, debug setClientPolicy: %s', this.host, this.name, setClientPolicy.data);
+          if (!this.disableLogInfo) {
+            this.log('Device: %s, client: %s, set policy, state: %s', accessoryName, clientName, policy);
+          }
+        });
+
+      this.merakiClientPolicyServices.push(merakiClientPolicyService);
+      accessory.addService(this.merakiClientPolicyServices[i]);
+    }
+
+    this.merakiSsidServices = new Array();
+    for (let i = 0; i < exposedSsidsCount; i++) {
+      const ssidName = this.ssidsName[i];
+      const merakiSsidService = new Service.Switch(ssidName, 'merakiSsidService' + i);
+      merakiSsidService.getCharacteristic(Characteristic.On)
+        .onGet(async () => {
+          const state = this.ssidsState[i];
+          if (!this.disableLogInfo) {
+            this.log('Device: %s, SSIDs: %s get state: %s', accessoryName, ssidName, state ? 'ON' : 'OFF');
           }
           return state;
         })
         .onSet(async (state) => {
           state = state ? true : false;
-          let j = this.allWlanName.indexOf(wlanName);
-          const response = this.meraki.put(this.mrUrl + '/' + [j], {
+          let j = this.allSsidsName.indexOf(ssidName);
+          const setSsid = this.meraki.put(this.mrSsidUrl + '/' + [j], {
             'enabled': state
           });
-          this.log.debug('Device: %s %s, debug response: %s', this.host, this.name, response);
+          this.log.debug('Device: %s %s, debug response: %s', this.host, this.name, setSsid.data);
           if (!this.disableLogInfo) {
-            this.log('Device: %s, SSIDs: %s set state: %s', accessoryName, wlanName, state ? 'ON' : 'OFF');
+            this.log('Device: %s, SSID: %s set state: %s', accessoryName, ssidName, state ? 'ON' : 'OFF');
           }
         });
 
-      this.merakiServices.push(merakiService);
-      accessory.addService(this.merakiServices[i]);
+      this.merakiSsidServices.push(merakiSsidService);
+      accessory.addService(this.merakiSsidServices[i]);
     }
 
     this.startPrepareAccessory = false;
