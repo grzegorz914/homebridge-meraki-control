@@ -8,7 +8,7 @@ const fsPromises = require('fs').promises;
 const PLUGIN_NAME = 'homebridge-meraki-control';
 const PLATFORM_NAME = 'Meraki';
 
-const API_BASE_URL = 'https://api.meraki.com/api/v1'
+const BASE_API_URL = 'https://api.meraki.com/api/v1'
 
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
@@ -32,28 +32,29 @@ class merakiPlatform {
     this.config = config;
     this.api = api;
     this.devices = config.devices || [];
+    this.accessories = [];
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching');
       for (let i = 0; i < this.devices.length; i++) {
-        const deviceName = this.devices[i];
-        if (!deviceName.name) {
+        const device = this.devices[i];
+        if (!device.name) {
           this.log.warn('Device Name Missing');
         } else {
-          new merakiDevice(this.log, deviceName, this.api);
+          new merakiDevice(this.log, device, this.api);
         }
       }
     });
-
   }
 
-  configureAccessory(platformAccessory) {
+  configureAccessory(accessory) {
     this.log.debug('configurePlatformAccessory');
+    this.accessories.push(accessory);
   }
 
-  removeAccessory(platformAccessory) {
+  removeAccessory(accessory) {
     this.log.debug('removePlatformAccessory');
-    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [platformAccessory]);
+    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
   }
 }
 
@@ -61,8 +62,6 @@ class merakiDevice {
   constructor(log, config, api) {
     this.log = log;
     this.api = api;
-    this.config = config;
-
 
     //device configuration
     this.name = config.name;
@@ -87,33 +86,47 @@ class merakiDevice {
     this.startPrepareAccessory = true;
 
     //data
+    this.networkData = {
+      'status': 0
+    };
+    this.devicesData = {
+      'status': 0
+    };
     this.dashboardClientsData = {
+      'status': 0
+    };
+    this.aplianceData = {
       'status': 0
     };
     this.wirelessData = {
       'status': 0
     };
+    this.switchData = {
+      'status': 0
+    };
+    this.cameraData = {
+      'status': 0
+    };
 
     //meraki dashboard
     this.dashboardClientsCount = 0;
-    this.exposedClientByNameCount = this.getClientByNameOrMac.length;
+    this.exposedClientByNameCount = this.getClientByNameOrMac.length != undefined ? this.getClientByNameOrMac.length : 0;
 
     //meraki mr
     this.ssidsCount = 0;
-    this.exposedSsidsCount = 0;
-    this.hiddenSsidsCount = this.hideSsidByName.length;
+    this.hiddenSsidsCount = this.hideSsidByName.length != undefined ? this.hideSsidByName.length : 0;
 
     //meraki url
-    this.networkUrl = API_BASE_URL + '/networks/' + this.networkId;
-    this.deviceskUrl = API_BASE_URL + '/organizations/' + this.organizationId + '/devices';
-    this.dashboardClientsUrl = API_BASE_URL + '/networks/' + this.networkId + '/clients';
-    this.apliancesUrl = API_BASE_URL + '/networks/' + this.networkId + '/appliance/ports';
-    this.wirelessUrl = API_BASE_URL + '/networks/' + this.networkId + '/wireless/ssids';
-    this.switchesUrl = API_BASE_URL + '/devices/' + this.serialNumber + '/switch/ports';
-    this.camerasUrl = API_BASE_URL + '/devices/' + this.serialNumber + '/camera';
+    this.networkUrl = BASE_API_URL + '/networks/' + this.networkId;
+    this.devicesUrl = BASE_API_URL + '/organizations/' + this.organizationId + '/devices';
+    this.dashboardClientsUrl = BASE_API_URL + '/networks/' + this.networkId + '/clients';
+    this.aplianceUrl = BASE_API_URL + '/networks/' + this.networkId + '/appliance/ports';
+    this.wirelessUrl = BASE_API_URL + '/networks/' + this.networkId + '/wireless/ssids';
+    this.switchUrl = BASE_API_URL + '/devices/' + this.serialNumber + '/switch/ports';
+    this.cameraUrl = BASE_API_URL + '/devices/' + this.serialNumber + '/camera';
 
     this.meraki = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL: BASE_API_URL,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -207,62 +220,57 @@ class merakiDevice {
       const ssidsCount = this.ssidsCount;
       const hiddenSsidsCount = this.hiddenSsidsCount;
 
-
       //daschboard clients
       if (dashboardClientsData.status == 200) {
         this.clientsId = new Array();
         this.clientsMac = new Array();
         this.clientsDescription = new Array();
 
+        for (let i = 0; i < dashboardClientsCount; i++) {
+          const clientId = dashboardClientsData.data[i].id;
+          const clientMac = dashboardClientsData.data[i].mac;
+          const clientDescription = dashboardClientsData.data[i].description;
+
+          this.clientsId.push(clientId);
+          this.clientsMac.push(clientMac);
+          this.clientsDescription.push(clientDescription);
+        }
+
+        this.exposedClientsId = new Array();
         this.clientsPolicyMac = new Array();
         this.clientsPolicyPolicy = new Array();
         this.clientsPolicyGroupPolicyId = new Array();
         this.clientsPolicyState = new Array();
 
-        const dashboardClientsDescription = new Array();
-        const dashboardClientsMac = new Array();
-        for (let i = 0; i < dashboardClientsCount; i++) {
-          const clientDescription = dashboardClientsData.data[i].description;
-          const clientMac = dashboardClientsData.data[i].mac;
-          dashboardClientsDescription.push(clientDescription);
-          dashboardClientsMac.push(clientMac);
+        for (let j = 0; j < exposedClientByNameCount; j++) {
+          const clientMode = (this.getClientByNameOrMac[j].mode == true);
+          const clientNameOrMac = this.getClientByNameOrMac[j].name;
+          const clientsByNameOrMac = clientMode ? this.clientsMac : this.clientsDescription;
 
-          for (let j = 0; j < exposedClientByNameCount; j++) {
-            const clientMode = this.getClientByNameOrMac[j].mode;
-            const clientNameOrMac = this.getClientByNameOrMac[j].name;
-            const clientsByNameOrMac = clientMode ? dashboardClientsMac : dashboardClientsDescription;
-            const getClient = (clientsByNameOrMac.indexOf(clientNameOrMac) >= 0);
+          try {
+            const index = clientsByNameOrMac.indexOf(clientNameOrMac);
+            const exposedClientId = this.clientsId[index];
+            this.exposedClientsId.push(exposedClientId);
 
-            if (getClient) {
-              const clientId = dashboardClientsData.data[i].id;
-              const clientMac = dashboardClientsData.data[i].mac;
-              const clientDescription = dashboardClientsData.data[i].description;
+            const dashboardClientsPolicyData = await this.meraki.get(this.dashboardClientsUrl + '/' + exposedClientId + '/policy');
+            this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
 
-              try {
-                const dashboardClientsPolicyData = await this.meraki.get(this.dashboardClientsUrl + '/' + clientId + '/policy');
-                this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
+            const clientPolicyMac = dashboardClientsPolicyData.data.mac;
+            const clientPolicyPolicy = dashboardClientsPolicyData.data.devicePolicy;
+            const clientPolicyGroupPolicyId = dashboardClientsPolicyData.data.groupPolicyId;
+            const clientPolicyState = (clientPolicyPolicy === 'Normal' || clientPolicyPolicy === 'Whitelisted');
 
-                const clientPolicyMac = dashboardClientsPolicyData.data.mac;
-                const clientPolicyPolicy = dashboardClientsPolicyData.data.devicePolicy;
-                const clientPolicyGroupPolicyId = dashboardClientsPolicyData.data.groupPolicyId;
-                const clientPolicyState = (clientPolicyPolicy == 'Normal' || clientPolicyPolicy == 'Whitelisted');
-
-                if (this.merakiDashboardClientPolicyServices) {
-                  this.merakiDashboardClientPolicyServices[j]
-                    .updateCharacteristic(Characteristic.On, clientPolicyState);
-                }
-
-                this.clientsPolicyMac.push(clientPolicyMac);
-                this.clientsPolicyPolicy.push(clientPolicyPolicy);
-                this.clientsPolicyGroupPolicyId.push(clientPolicyGroupPolicyId);
-                this.clientsPolicyState.push(clientPolicyState);
-              } catch (error) {
-                this.log.error('Device: %s, dashboardClientsPolicyData error: %s', this.name, error);
-              }
-              this.clientsId.push(clientId);
-              this.clientsMac.push(clientMac);
-              this.clientsDescription.push(clientDescription);
+            if (this.merakiDashboardClientPolicyServices) {
+              this.merakiDashboardClientPolicyServices[j]
+                .updateCharacteristic(Characteristic.On, clientPolicyState);
             }
+
+            this.clientsPolicyMac.push(clientPolicyMac);
+            this.clientsPolicyPolicy.push(clientPolicyPolicy);
+            this.clientsPolicyGroupPolicyId.push(clientPolicyGroupPolicyId);
+            this.clientsPolicyState.push(clientPolicyState);
+          } catch (error) {
+            this.log.error('Device: %s, dashboardClientsPolicyData error: %s', this.name, error);
           }
         }
       }
@@ -273,11 +281,11 @@ class merakiDevice {
         this.ssidsName = new Array();
         this.exposedSsidsName = new Array();
         this.exposedSsidsState = new Array();
-        this.hidenSsidsName = new Array();
+        this.hiddenSsidsName = new Array();
 
         for (let j = 0; j < hiddenSsidsCount; j++) {
-          const hiddedSsidByName = this.hideSsidByName[j].name;
-          this.hidenSsidsName.push(hiddedSsidByName);
+          const hiddenSsidByName = this.hideSsidByName[j].name;
+          this.hiddenSsidsName.push(hiddenSsidByName);
         }
 
         for (let i = 0; i < ssidsCount; i++) {
@@ -289,8 +297,8 @@ class merakiDevice {
             const ssidName = wirelessData.data[i].name;
             const ssidState = (wirelessData.data[i].enabled == true)
 
-            const pushName = (this.hidenSsidsName.indexOf(ssidName) >= 0) ? false : this.exposedSsidsName.push(ssidName);
-            const pushState = (this.hidenSsidsName.indexOf(ssidName) >= 0) ? false : this.exposedSsidsState.push(ssidState);
+            const pushName = (this.hiddenSsidsName.indexOf(ssidName) >= 0) ? false : this.exposedSsidsName.push(ssidName);
+            const pushState = (this.hiddenSsidsName.indexOf(ssidName) >= 0) ? false : this.exposedSsidsState.push(ssidState);
           }
         }
 
@@ -346,9 +354,6 @@ class merakiDevice {
     this.log.debug('prepareMerakiService');
 
     //get devices data variables
-    const dashboardClientsCount = this.dashboardClientsCount;
-    const ssidsCount = this.ssidsCount;
-    const hiddenSsidsCount = this.hiddenSsidsCount;
     const exposedClientByNameCount = this.exposedClientByNameCount;
     const exposedSsidsCount = this.exposedSsidsCount;
 
@@ -356,7 +361,7 @@ class merakiDevice {
     for (let i = 0; i < exposedClientByNameCount; i++) {
       const clientDescription = this.clientsDescription[i];
       const clientCustomName = this.getClientByNameOrMac[i].customName;
-      const clientNameToBeExposed = clientCustomName.length > 0 ? clientCustomName : clientDescription;
+      const clientNameToBeExposed = clientCustomName != undefined ? clientCustomName : clientDescription;
 
       const merakiDashboardClientPolicyService = new Service.Switch(clientNameToBeExposed, 'merakiDashboardClientPolicyService' + i);
       merakiDashboardClientPolicyService.getCharacteristic(Characteristic.On)
@@ -369,7 +374,8 @@ class merakiDevice {
         })
         .onSet(async (state) => {
           const policy = state ? 'Normal' : 'Blocked';
-          const setClientPolicy = this.meraki.put(this.dashboardClientsUrl + '/' + this.clientsId[i] + '/policy', {
+          const clientId = this.exposedClientsId[i];
+          const setClientPolicy = await this.meraki.put(this.dashboardClientsUrl + '/' + clientId + '/policy', {
             'devicePolicy': policy
           });
           this.log.debug('Device: %s, client: %s, debug setClientPolicy: %s', accessoryName, clientNameToBeExposed, setClientPolicy.data);
@@ -397,8 +403,8 @@ class merakiDevice {
         })
         .onSet(async (state) => {
           state = state ? true : false;
-          let ssidIndex = this.ssidsName.indexOf(ssidName);
-          const setSsid = this.meraki.put(this.wirelessUrl + '/' + [ssidIndex], {
+          const ssidIndex = this.ssidsName.indexOf(ssidName);
+          const setSsid = await this.meraki.put(this.wirelessUrl + '/' + [ssidIndex], {
             'enabled': state
           });
           this.log.debug('Device: %s, SSID: %s, debug setSsid: %s', accessoryName, ssidName, setSsid);
