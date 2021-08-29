@@ -14,17 +14,22 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 
 </span>
 
-## Package
-1. [Homebridge](https://github.com/homebridge/homebridge)
-2. [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x)
+## Note
+1. Versin 0.6.0 and above need to be used with Homebridge min. v1.3.x.
+
+## Know issues
+1. If use with Hoobs possible config incompatibilty.
+
+## Package Requirements
+| Package Link | Required |
+| --- | --- |
+| [Homebridge](https://github.com/homebridge/homebridge) | Required | 
+| [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) | Highly Recommended |
 
 ## Installation
 1. Follow the step-by-step instructions on the [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) for how to install Homebridge.
 2. Follow the step-by-step instructions on the [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) for how to install Homebridge Config UI X.
 3. Install homebridge-meraki-control using: `npm install -g homebridge-meraki-control` or search for `meraki` in Config UI X.
-
-## Know issues
-1. If use with Hoobs possible config incompatibilty.
 
 ## HomeKit pairing
 1. Each accessories needs to be manually paired. 
@@ -33,27 +38,26 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 4. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan*. 
 5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.
 
-## Note
-1. Versin 0.6.0 and above need to be used with Homebridge min. v1.3.x.
-
-## Info
-1. You have possibility switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
-2. You have possibility hidden `Unconfigured SSIDs` networks, this option is available in plugin settings.
-3. You have possibility hidden `SSIDs networks` by network name, this option is available in plugin settings.
-4. You have possibility expose `Clients` filtered by *Description or Mac Adress in Meraki Dashboard* and change its policy `Normal` and `Blocked`.
-5. More comming soon...
+## Features and How To Use Them
+* You have possibility switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
+* You have possibility hidden `Unconfigured SSIDs` networks, this option is available in plugin settings.
+* You have possibility hidden `SSIDs networks` by network name, this option is available in plugin settings.
+* You have possibility expose `Clients` filtered by *Description or Mac Adress in Meraki Dashboard* and change its policy `Normal` and `Blocked`.
+* More comming soon...
 
 ## Configuration
-1. Use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) to configure the plugin (strongly recomended), or update your configuration file manually. See `sample-config.json` in this repository for a sample or add the bottom example to Your config.json file.
-2. In `host` set the *baseUrl* like `https://n123.meraki.com`, do not use `https://api.meraki.com`.
-3. In `apiKey` set the *X-Cisco-Meraki-API-Key*.
-4. In `organizationId` set Your *Organization Id*.
-5. In `networkId` set Your *Network Id*.
-6. In `refreshInterval` set the data refresh time in seconds.
-7. If `disableLogInfo` enabled, disable log info, all values and state will not be displayed in *Homebridge* log.
-8. If `hideUnconfiguredSsids` enabled, all *Unconfigured SSIDs* will be hidden.
-9. In `hideSsidByName` set SSIDs names which You want hide and not expose to the *Homebridge/HomeKit*.
-10. In `getClientByNameOrMac` set the Client *Description or Mac Adress in Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy.
+Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) plugin to configure this plugin (strongly recomended). The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
+| Key | Description | 
+| --- | --- |
+| `apiKey` | Here set the *X-Cisco-Meraki-API-Key*. |
+| `organizationId` | Here set Your *Organization Id*. |
+| `networkId` | Here set Your *Network Id*. |
+| `refreshInterval` | Here set the data refresh time in seconds. |
+| `disableLogInfo` | If enabled, disable log info, all values and state will not be displayed in *Homebridge* log. |
+| `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden. |
+| `hideSsidByName` | Here set SSIDs names which You want hide and not expose to the *Homebridge/HomeKit*. |
+| `getClientByNameOrMac` | Here set the Client *Description or Mac Adress in Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
+
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/master/graphics/ustawienia.png" height="170"></a>
@@ -65,7 +69,6 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
             "devices": [
                 {
                     "name": "Network Name",
-                    "host": "https://n123.meraki.com",
                     "apiKey": "01032453453421923",
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",
