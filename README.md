@@ -37,10 +37,10 @@ Homebridge plugin for Meraki devices using RESTFull API.
 1. Versin 0.6.0 and above need to be used with Homebridge min. v1.3.x.
 
 ## Info
-1. This plugin control ON/OFF configured WLAN networks in Your organisation (MR devices).
-2. You have possibility hidden all `Unconfigured SSIDs` networks, this option is available in plugin settings.
+1. You have possibility switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
+2. You have possibility hidden `Unconfigured SSIDs` networks, this option is available in plugin settings.
 3. You have possibility hidden `SSIDs networks` by network name, this option is available in plugin settings.
-4. You have possibility expose dashboard `Clients` filtered by (Description in meraki dashboard) and change its policy between `Normal` and `Blocked`.
+4. You have possibility expose `Clients` filtered by (Description in meraki dashboard) and change its policy `Normal` and `Blocked`.
 5. More comming soon...
 
 ## Configuration
