@@ -70,6 +70,12 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "mode": {
+                    "title": "Enable",
+                    "type": "boolean",
+                    "description": "Here set the function ON or OFF.",
+                    "required": false
+                  },
                   "name": {
                     "title": "SSID Name",
                     "type": "string",
@@ -127,12 +133,12 @@
         "items": [
           "devices[].hideUnconfiguredSsids",
           {
-            "key": "devices[].hideSsidByName",
             "type": "array",
             "orderable": false,
             "buttonText": "Add SSID",
             "items": [
-              "devices[].hideSsidByName[].name"
+              "devices[].hideSsidByName[].name",
+              "devices[].hideSsidByName[].mode"
             ]
           }
         ]

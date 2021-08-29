@@ -76,7 +76,8 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                     "disableLogInfo": false,
                     "hideUnconfiguredSsids": false,
                     "hideSsidByName": [{
-                         "name": "SSID Name"
+                         "name": "SSID Name",
+                         "mode": false
                      }],
                     "getClientByNameOrMac": [{
                          "mode": false,

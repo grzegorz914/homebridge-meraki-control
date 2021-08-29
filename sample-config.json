@@ -25,7 +25,8 @@
             "disableLogInfo": false,
             "hideUnconfiguredSsids": false,
             "hideSsidByName": [{
-                "name": "SSID Name"
+                "name": "SSID Name",
+                "mode": false
             }],
             "getClientByNameOrMac": [{
                 "mode": false,

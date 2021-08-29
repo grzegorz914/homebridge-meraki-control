@@ -282,10 +282,13 @@ class merakiDevice {
         this.exposedSsidsName = new Array();
         this.exposedSsidsState = new Array();
         this.hiddenSsidsName = new Array();
+        this.hiddenSsidsMode = new Array();
 
         for (let j = 0; j < hiddenSsidsCount; j++) {
-          const hiddenSsidByName = this.hideSsidByName[j].name;
-          this.hiddenSsidsName.push(hiddenSsidByName);
+          const hiddenSsidByNameName = this.hideSsidByName[j].name;
+          const hiddenSsidByNameMode = (this.hideSsidByName[j].mode == true);
+          const push = hiddenSsidByNameMode ? this.hiddenSsidsName.push(hiddenSsidByNameName) : false;
+          this.hiddenSsidsMode.push(hiddenSsidByNameMode);
         }
 
         for (let i = 0; i < ssidsCount; i++) {
