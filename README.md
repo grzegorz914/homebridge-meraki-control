@@ -10,7 +10,7 @@
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/grzegorz914/homebridge-meraki-control.svg)](https://github.com/grzegorz914/homebridge-meraki-control/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/grzegorz914/homebridge-meraki-control.svg)](https://github.com/grzegorz914/homebridge-meraki-control/issues)
 
-Homebridge plugin for Meraki devices using RESTFull API.
+Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 
 </span>
 
@@ -45,14 +45,14 @@ Homebridge plugin for Meraki devices using RESTFull API.
 
 ## Configuration
 1. Use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) to configure the plugin (strongly recomended), or update your configuration file manually. See `sample-config.json` in this repository for a sample or add the bottom example to Your config.json file.
-2. In `host` set the *baseUrl* like `https://n123.meraki.com`, do not use `https://api.meraki.com.`
+2. In `host` set the *baseUrl* like `https://n123.meraki.com`, do not use `https://api.meraki.com`.
 3. In `apiKey` set the *X-Cisco-Meraki-API-Key*.
 4. In `organizationId` set Your *Organization Id*.
 5. In `networkId` set Your *Network Id*.
 5. In `deviceSerial` set device serial.
-6. In `wlanControl` set numbers of *Configured SSIDs* in Your network. (removed from v0.5.0 and above)
+6. In `wlanControl` set numbers of *Configured SSIDs* in Your network (removed from v0.5.0 and above).
 7. In `refreshInterval` set the data refresh time in seconds.
-8. If `disableLogInfo` enabled, disable log info, all values and state will not be displayed in *Homebridge* log console.
+8. If `disableLogInfo` enabled, disable log info, all values and state will not be displayed in *Homebridge* log.
 9. If `hideUnconfiguredSsids` enabled, all *Unconfigured SSIDs* will be hidden.
 10. In `hideSsidByName` set SSIDs names which You want hide and not expose to the *Homebridge/HomeKit*.
 11. In `getClientByNameOrMac` set the Client *Description or Mac Adress in Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy.
@@ -66,7 +66,7 @@ Homebridge plugin for Meraki devices using RESTFull API.
             "platform": "Meraki",
             "devices": [
                 {
-                    "name": "Meraki MR52",
+                    "name": "Network Name",
                     "host": "https://n123.meraki.com",
                     "apiKey": "01032453453421923",
                     "organizationId": "123456789",
