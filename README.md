@@ -79,7 +79,8 @@ Homebridge plugin for Meraki devices using RESTFull API.
                      }],
                     "getClientByNameOrMac": [{
                          "mode": false,
-                         "name": "Client Name"
+                         "name": "Client Name or Mac",
+                         "customName": "Client custom Name"
                     }]
                 }
             ]

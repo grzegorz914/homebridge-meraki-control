@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changes
 - added possibility to chose between Name or Mac Adress for clients to be exposed with its poplicy state.
 - added possibility to set custom Name to be exposed for client policy.
+- code cleanup
 
 ## [0.8.2] - (28.08.2021)
 ## Changes

@@ -30,7 +30,8 @@
             }],
             "getClientByNameOrMac": [{
                 "mode": false,
-                "name": "Client Name"
+                "name": "Client Name or Mac",
+                "customName": "Client custom Name"
             }]
         }]
     }]
