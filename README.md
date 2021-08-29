@@ -49,13 +49,11 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 3. In `apiKey` set the *X-Cisco-Meraki-API-Key*.
 4. In `organizationId` set Your *Organization Id*.
 5. In `networkId` set Your *Network Id*.
-5. In `deviceSerial` set device serial.
-6. In `wlanControl` set numbers of *Configured SSIDs* in Your network (removed from v0.5.0 and above).
-7. In `refreshInterval` set the data refresh time in seconds.
-8. If `disableLogInfo` enabled, disable log info, all values and state will not be displayed in *Homebridge* log.
-9. If `hideUnconfiguredSsids` enabled, all *Unconfigured SSIDs* will be hidden.
-10. In `hideSsidByName` set SSIDs names which You want hide and not expose to the *Homebridge/HomeKit*.
-11. In `getClientByNameOrMac` set the Client *Description or Mac Adress in Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy.
+6. In `refreshInterval` set the data refresh time in seconds.
+7. If `disableLogInfo` enabled, disable log info, all values and state will not be displayed in *Homebridge* log.
+8. If `hideUnconfiguredSsids` enabled, all *Unconfigured SSIDs* will be hidden.
+9. In `hideSsidByName` set SSIDs names which You want hide and not expose to the *Homebridge/HomeKit*.
+10. In `getClientByNameOrMac` set the Client *Description or Mac Adress in Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy.
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/master/graphics/ustawienia.png" height="170"></a>
