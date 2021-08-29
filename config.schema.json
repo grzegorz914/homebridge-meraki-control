@@ -8,13 +8,13 @@
     "type": "object",
     "properties": {
       "devices": {
-        "title": "Devices",
+        "title": "Networks",
         "type": "array",
         "items": {
           "type": "object",
           "properties": {
             "name": {
-              "title": "Device name",
+              "title": "Network name",
               "type": "string",
               "default": "iDom",
               "required": true
@@ -30,18 +30,21 @@
               "title": "API key",
               "type": "string",
               "default": "01032453453421923",
+              "description": "Here set the Meraki Api Key.",
               "required": true
             },
             "organizationId": {
               "title": "Organization Id",
               "type": "string",
               "default": "123456789",
+              "description": "Here set the Organization ID.",
               "required": true
             },
             "networkId": {
               "title": "Network Id",
               "type": "string",
               "default": "L_0123456789",
+              "description": "Here set the Network ID.",
               "required": true
             },
             "refreshInterval": {
@@ -50,6 +53,7 @@
               "default": 10,
               "minimum": 0,
               "maximum": 60,
+              "description": "Here set the data refresh time.",
               "required": true
             },
             "disableLogInfo": {
@@ -57,17 +61,17 @@
               "type": "boolean",
               "default": false,
               "required": false,
-              "description": "This disable log info, all values and state will not be displayed in Homebridge log console."
+              "description": "This disable log info, all values and state will not be displayed in Homebridge log."
             },
             "hideUnconfiguredSsids": {
               "title": "Hide unconfigured SSIDs",
               "type": "boolean",
               "default": false,
               "required": false,
-              "description": "This hide not configured SSIDs."
+              "description": "This option hide all unconfigured SSIDs."
             },
             "hideSsidByName": {
-              "title": "SSIDs Name",
+              "title": "SSIDs",
               "buttonText": "Add SSID",
               "type": "array",
               "items": {
@@ -76,55 +80,39 @@
                   "name": {
                     "title": "SSID Name",
                     "type": "string",
-                    "description": "Here set the SSID name to be filtered and not exposed to the Homebridge/HomeKit.",
+                    "description": "Here set the SSID Name to be hidden and not exposed to the Homebridge/HomeKit.",
                     "required": false
                   }
                 }
               }
             },
-            "getClientByName": {
-              "title": "Client Name",
+            "getClientByNameOrMac": {
+              "title": "Clients",
               "buttonText": "Add Client",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
+                  "mode": {
+                    "title": "Use Mac Adress instead Name",
+                    "type": "boolean",
+                    "description": "This options enable expose *Client* to the Homebridge/HomeKit usind its Mac Adress instead Name.",
+                    "required": false
+                  },
                   "name": {
+                    "title": "Dashboard Client Name or Mac",
+                    "type": "string",
+                    "description": "Here set the Client Description or Mac Adress in Meraki Dashboard which You want expose to the Homebridge/HomeKit and change its policy.",
+                    "required": false
+                  },
+                  "customName": {
                     "title": "Client Name",
                     "type": "string",
-                    "description": "Here set the client (Description in meraki dashboard) which You want expose to the Homebridge/HomeKit and change policy.",
+                    "description": "Optionally set the custom Client Name to be exposed in Homebridge/HomeKit instead Dashboard Name or Mac.",
                     "required": false
                   }
                 }
               }
-            },
-            "manufacturer": {
-              "name": "Manufacturer",
-              "type": "string",
-              "placeholder": "Cisco/Meraki",
-              "description": "Set the manufacturer name.",
-              "required": false
-            },
-            "modelName": {
-              "name": "Model",
-              "type": "string",
-              "placeholder": "Model",
-              "description": "Set the model name.",
-              "required": false
-            },
-            "serialNumber": {
-              "name": "Serial Number",
-              "type": "string",
-              "placeholder": "SerialNumber",
-              "description": "Set the serial number.",
-              "required": false
-            },
-            "firmwareRevision": {
-              "name": "Firmware Revision",
-              "type": "string",
-              "placeholder": "Firmware Revision",
-              "description": "Set the firmware revision.",
-              "required": false
             }
           }
         }
@@ -134,14 +122,14 @@
   "layout": [{
     "key": "devices",
     "type": "tabarray",
-    "title": "{{ value.name || 'new device' }}",
+    "title": "{{ value.name || 'new network' }}",
     "items": [
       "devices[].name",
       "devices[].host",
       {
         "key": "devices[]",
         "type": "section",
-        "title": "Filter SSIDs",
+        "title": "SSIDs",
         "expandable": true,
         "expanded": false,
         "items": [
@@ -160,16 +148,18 @@
       {
         "key": "devices[]",
         "type": "section",
-        "title": "Filter Clients",
+        "title": "Clients",
         "expandable": true,
         "expanded": false,
         "items": [{
-          "key": "devices[].getClientByName",
+          "key": "devices[].getClientByNameOrMac",
           "type": "array",
           "orderable": false,
           "buttonText": "Add Client",
           "items": [
-            "devices[].getClientByName[].name"
+            "devices[].getClientByNameOrMac[].mode",
+            "devices[].getClientByNameOrMac[].name",
+            "devices[].getClientByNameOrMac[].customName"
           ]
         }]
       },
@@ -180,24 +170,11 @@
         "expandable": true,
         "expanded": false,
         "items": [
-          "devices[].disableLogInfo",
-          "devices[].refreshInterval",
           "devices[].apiKey",
           "devices[].organizationId",
-          "devices[].networkId"
-        ]
-      },
-      {
-        "key": "devices[]",
-        "type": "section",
-        "title": "Branding",
-        "expandable": true,
-        "expanded": false,
-        "items": [
-          "devices[].manufacturer",
-          "devices[].modelName",
-          "devices[].serialNumber",
-          "devices[].firmwareRevision"
+          "devices[].networkId",
+          "devices[].disableLogInfo",
+          "devices[].refreshInterval"
         ]
       }
     ]

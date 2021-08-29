@@ -28,13 +28,10 @@
             "hideSsidByName": [{
                 "name": "SSID Name"
             }],
-            "getClientByName": [{
+            "getClientByNameOrMac": [{
+                "mode": false,
                 "name": "Client Name"
-            }],
-            "manufacturer": "Manufacturer",
-            "modelName": "Model",
-            "serialNumber": "Serial Number",
-            "firmwareRevision": "Firmware Revision"
+            }]
         }]
     }]
 }
