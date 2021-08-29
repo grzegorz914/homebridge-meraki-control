@@ -40,7 +40,7 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 1. You have possibility switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
 2. You have possibility hidden `Unconfigured SSIDs` networks, this option is available in plugin settings.
 3. You have possibility hidden `SSIDs networks` by network name, this option is available in plugin settings.
-4. You have possibility expose `Clients` filtered by (Description in meraki dashboard) and change its policy `Normal` and `Blocked`.
+4. You have possibility expose `Clients` filtered by *Description or Mac Adress in Meraki Dashboard* and change its policy `Normal` and `Blocked`.
 5. More comming soon...
 
 ## Configuration
