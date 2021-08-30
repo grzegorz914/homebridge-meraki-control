@@ -110,12 +110,12 @@ class merakiDevice {
 
     //meraki dashboard
     this.dashboardClientsCount = 0;
-    this.configuredClientByNameCount = this.getClientByNameOrMac.length != undefined ? this.getClientByNameOrMac.length : 0;
-    this.exposedAndExistongClientOnDashboardCount = 0;
+    this.configuredClientsByNameCount = (this.getClientByNameOrMac.length != undefined) ? this.getClientByNameOrMac.length : 0;
+    this.exposedAndExistongClientsOnDashboardCount = 0;
 
     //meraki mr
-    this.ssidsCount = 0;
-    this.hiddenSsidsCount = this.hideSsidByName.length != undefined ? this.hideSsidByName.length : 0;
+    this.wirelessSsidsCount = 0;
+    this.configuredHiddenSsidsCount = (this.hideSsidByName.length != undefined) ? this.hideSsidByName.length : 0;
 
     //meraki url
     this.networkUrl = BASE_API_URL + '/networks/' + this.networkId;
@@ -176,10 +176,10 @@ class merakiDevice {
     try {
       const wirelessData = await this.meraki.get(this.wirelessUrl);
       this.log.debug('Debug merakiMrData: %s', wirelessData.data[0]);
-      const ssidsCount = wirelessData.data.length;
+      const wirelessSsidsCount = wirelessData.data.length;
 
       this.wirelessData = wirelessData;
-      this.ssidsCount = ssidsCount;
+      this.wirelessSsidsCount = wirelessSsidsCount;
 
       const getDeviceInfo = !this.checkDeviceState ? this.getDeviceInfo() : this.updateDeviceState();
     } catch (error) {
@@ -217,9 +217,9 @@ class merakiDevice {
 
       //get devices data variables
       const dashboardClientsCount = this.dashboardClientsCount;
-      const configuredClientByNameCount = this.configuredClientByNameCount;
-      const ssidsCount = this.ssidsCount;
-      const hiddenSsidsCount = this.hiddenSsidsCount;
+      const configuredClientsByNameCount = this.configuredClientsByNameCount;
+      const wirelessSsidsCount = this.wirelessSsidsCount;
+      const configuredHiddenSsidsCount = this.configuredHiddenSsidsCount;
 
       //daschboard clients
       if (dashboardClientsData.status == 200) {
@@ -243,7 +243,7 @@ class merakiDevice {
         this.exposedAndExistongClientsOnDashboardDescription = new Array();
         this.exposedAndExistongClientsOnDashboardCustomName = new Array();
 
-        for (let j = 0; j < configuredClientByNameCount; j++) {
+        for (let j = 0; j < configuredClientsByNameCount; j++) {
           const clientMode = (this.getClientByNameOrMac[j].mode == true);
           const clientNameOrMac = this.getClientByNameOrMac[j].name;
           const clientCustomName = this.getClientByNameOrMac[j].customName;
@@ -281,7 +281,7 @@ class merakiDevice {
             const clientPolicyGroupPolicyId = dashboardClientsPolicyData.data.groupPolicyId;
             const clientPolicyState = (clientPolicyPolicy === 'Normal' || clientPolicyPolicy === 'Whitelisted');
 
-            if (this.merakiDashboardClientPolicyServices) {
+            if (this.merakiDashboardClientPolicyServices && (clientPolicyPolicy != undefined)) {
               this.merakiDashboardClientPolicyServices[k]
                 .updateCharacteristic(Characteristic.On, clientPolicyState);
             }
@@ -305,14 +305,14 @@ class merakiDevice {
         this.hiddenSsidsName = new Array();
         this.hiddenSsidsMode = new Array();
 
-        for (let j = 0; j < hiddenSsidsCount; j++) {
+        for (let j = 0; j < configuredHiddenSsidsCount; j++) {
           const hiddenSsidByNameName = this.hideSsidByName[j].name;
           const hiddenSsidByNameMode = (this.hideSsidByName[j].mode == true);
           const push = hiddenSsidByNameMode ? this.hiddenSsidsName.push(hiddenSsidByNameName) : false;
           this.hiddenSsidsMode.push(hiddenSsidByNameMode);
         }
 
-        for (let i = 0; i < ssidsCount; i++) {
+        for (let i = 0; i < wirelessSsidsCount; i++) {
           const ssidName = wirelessData.data[i].name;
           this.ssidsName.push(ssidName);
 
@@ -330,7 +330,7 @@ class merakiDevice {
         for (let i = 0; i < exposedSsidsCount; i++) {
           const ssidState = this.exposedSsidsState[i];
 
-          if (this.merakiWirelessServices) {
+          if (this.merakiWirelessServices && (this.exposedSsidsState[i] != undefined)) {
             this.merakiWirelessServices[i]
               .updateCharacteristic(Characteristic.On, ssidState);
           }
