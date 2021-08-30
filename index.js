@@ -281,7 +281,7 @@ class merakiDevice {
             const clientPolicyGroupPolicyId = dashboardClientsPolicyData.data.groupPolicyId;
             const clientPolicyState = (clientPolicyPolicy === 'Normal' || clientPolicyPolicy === 'Whitelisted');
 
-            if (this.merakiDashboardClientPolicyServices && (clientPolicyPolicy != undefined)) {
+            if (this.merakiDashboardClientPolicyServices && (clientPolicyState != undefined)) {
               this.merakiDashboardClientPolicyServices[k]
                 .updateCharacteristic(Characteristic.On, clientPolicyState);
             }
@@ -330,7 +330,7 @@ class merakiDevice {
         for (let i = 0; i < exposedSsidsCount; i++) {
           const ssidState = this.exposedSsidsState[i];
 
-          if (this.merakiWirelessServices && (this.exposedSsidsState[i] != undefined)) {
+          if (this.merakiWirelessServices && (ssidState != undefined)) {
             this.merakiWirelessServices[i]
               .updateCharacteristic(Characteristic.On, ssidState);
           }
