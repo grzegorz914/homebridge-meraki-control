@@ -63,7 +63,7 @@ class merakiDevice {
     this.log = log;
     this.api = api;
 
-    //device configuration
+    //network configuration
     this.name = config.name;
     this.apiKey = config.apiKey;
     this.organizationId = config.organizationId;
@@ -143,7 +143,7 @@ class merakiDevice {
       fsPromises.mkdir(this.prefDir);
     }
 
-    //Check device state
+    //Check network state
     setInterval(function () {
       if (this.checkDeviceInfo || this.checkDeviceState) {
         this.updateDashboardClientsData();
@@ -154,7 +154,7 @@ class merakiDevice {
   }
 
   async updateDashboardClientsData() {
-    this.log.debug('Device: %s, requesting dashboardClientsData.', this.name);
+    this.log.debug('Network: %s, requesting dashboardClientsData.', this.name);
     try {
       const dashboardClientsData = await this.meraki.get(this.dashboardClientsUrl + '?perPage=255&timespan=2592000');
       this.log.debug('Debug dashboardClientsData: %s', dashboardClientsData.data[0]);
@@ -165,14 +165,14 @@ class merakiDevice {
 
       this.updateWirelessData();
     } catch (error) {
-      this.log.error('Device: %s, dashboardClientsData error: %s', this.name, error);
+      this.log.error('Network: %s, dashboardClientsData error: %s', this.name, error);
       this.checkDeviceState = false;
       this.checkDeviceInfo = true;
     };
   }
 
   async updateWirelessData() {
-    this.log.debug('Device: %s, requesting wirelessData.', this.name);
+    this.log.debug('Network: %s, requesting wirelessData.', this.name);
     try {
       const wirelessData = await this.meraki.get(this.wirelessUrl);
       this.log.debug('Debug merakiMrData: %s', wirelessData.data[0]);
@@ -183,7 +183,7 @@ class merakiDevice {
 
       const getDeviceInfo = !this.checkDeviceState ? this.getDeviceInfo() : this.updateDeviceState();
     } catch (error) {
-      this.log.error('Device: %s, wirelessData error: %s', this.name, error);
+      this.log.error('Network: %s, wirelessData error: %s', this.name, error);
       this.checkDeviceState = false;
       this.checkDeviceInfo = true;
     };
@@ -191,7 +191,7 @@ class merakiDevice {
 
   getDeviceInfo() {
     try {
-      this.log('Device: %s, state: Online.', this.name);
+      this.log('Network: %s, state: Online.', this.name);
       this.log('-------- %s --------', this.name);
       this.log('Manufacturer: %s', this.manufacturer);
       this.log('Model: %s', this.modelName);
@@ -202,16 +202,16 @@ class merakiDevice {
       this.checkDeviceInfo = false;
       this.updateDeviceState();
     } catch (error) {
-      this.log.error('Device: %s, getDeviceInfo error: %s', this.name, error);
+      this.log.error('Network: %s, getDeviceInfo error: %s', this.name, error);
       this.checkDeviceState = false;
       this.checkDeviceInfo = true;
     }
   }
 
   async updateDeviceState() {
-    this.log.debug('Device: %s, update device state.', this.name);
+    this.log.debug('Network: %s, update state.', this.name);
     try {
-      //get devices data;
+      //get networks data;
       const dashboardClientsData = this.dashboardClientsData;
       const wirelessData = this.wirelessData;
 
@@ -275,21 +275,23 @@ class merakiDevice {
           const dashboardClientsPolicyData = await this.meraki.get(this.dashboardClientsUrl + '/' + clientId + '/policy');
           this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
 
-          const clientPolicyMac = dashboardClientsPolicyData.data.mac;
-          const clientPolicyPolicy = dashboardClientsPolicyData.data.devicePolicy;
-          const clientPolicyState = (clientPolicyPolicy == 'Normal' || clientPolicyPolicy == 'Whitelisted');
+          if (dashboardClientsPolicyData.status == 200) {
+            const clientPolicyMac = dashboardClientsPolicyData.data.mac;
+            const clientPolicyPolicy = (dashboardClientsPolicyData.data.devicePolicy != undefined) ? (dashboardClientsPolicyData.data.devicePolicy) : 'Normal';
+            const clientPolicyState = (clientPolicyPolicy == 'Normal' || clientPolicyPolicy == 'Whitelisted');
 
-          if (this.merakiDashboardClientPolicyServices && (clientPolicyState != undefined)) {
-            this.merakiDashboardClientPolicyServices[k]
-              .updateCharacteristic(Characteristic.On, clientPolicyState);
+            if (this.merakiDashboardClientPolicyServices && clientPolicyPolicy != undefined) {
+              this.merakiDashboardClientPolicyServices[k]
+                .updateCharacteristic(Characteristic.On, clientPolicyState);
+            }
+
+            this.clientsPolicyMac.push(clientPolicyMac);
+            this.clientsPolicyPolicy.push(clientPolicyPolicy);
+            this.clientsPolicyState.push(clientPolicyState);
           }
-
-          this.clientsPolicyMac.push(clientPolicyMac);
-          this.clientsPolicyPolicy.push(clientPolicyPolicy);
-          this.clientsPolicyState.push(clientPolicyState);
         }
       } catch (error) {
-        this.log.error('Device: %s, dashboardClientsPolicyData error: %s', this.name, error);
+        this.log.error('Network: %s, dashboardClientsPolicyData error: %s', this.name, error);
       }
 
       //SSIDs
@@ -338,7 +340,7 @@ class merakiDevice {
         this.prepareAccessory();
       }
     } catch (error) {
-      this.log.error('Device: %s, update Device state error: %s', this.name, error);
+      this.log.error('Network: %s, update Device state error: %s', this.name, error);
       this.checkDeviceState = false;
       this.checkDeviceInfo = true;
     }
@@ -382,9 +384,9 @@ class merakiDevice {
       const merakiDashboardClientPolicyService = new Service.Switch(clientNameToBeExposed, 'merakiDashboardClientPolicyService' + i);
       merakiDashboardClientPolicyService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
-          const state = this.clientsPolicyState[i];
+          const state = (this.clientsPolicyState[i] != undefined) ? this.clientsPolicyState[i] : true;
           if (!this.disableLogInfo) {
-            this.log('Device: %s, client: %s, get policy, state: %s', accessoryName, clientNameToBeExposed, this.clientsPolicyPolicy[i]);
+            this.log('Network: %s, client: %s, get policy, state: %s', accessoryName, clientNameToBeExposed, state ? 'Normal' : 'Blocked');
           }
           return state;
         })
@@ -394,9 +396,9 @@ class merakiDevice {
           const setClientPolicy = await this.meraki.put(this.dashboardClientsUrl + '/' + clientId + '/policy', {
             'devicePolicy': policy
           });
-          this.log.debug('Device: %s, client: %s, debug setClientPolicy: %s', accessoryName, clientNameToBeExposed, setClientPolicy.data);
+          this.log.debug('Network: %s, client: %s, debug setClientPolicy: %s', accessoryName, clientNameToBeExposed, setClientPolicy.data);
           if (!this.disableLogInfo) {
-            this.log('Device: %s, client: %s, set policy, state: %s', accessoryName, clientNameToBeExposed, policy);
+            this.log('Network: %s, client: %s, set policy, state: %s', accessoryName, clientNameToBeExposed, policy);
           }
         });
 
@@ -413,7 +415,7 @@ class merakiDevice {
         .onGet(async () => {
           const state = this.exposedSsidsState[i];
           if (!this.disableLogInfo) {
-            this.log('Device: %s, SSIDs: %s, get state: %s', accessoryName, ssidName, state ? 'Enabled' : 'Disabled');
+            this.log('Network: %s, SSIDs: %s, get state: %s', accessoryName, ssidName, state ? 'Enabled' : 'Disabled');
           }
           return state;
         })
@@ -423,9 +425,9 @@ class merakiDevice {
           const setSsid = await this.meraki.put(this.wirelessUrl + '/' + ssidIndex, {
             'enabled': state
           });
-          this.log.debug('Device: %s, SSID: %s, debug setSsid: %s', accessoryName, ssidName, setSsid);
+          this.log.debug('Network: %s, SSID: %s, debug setSsid: %s', accessoryName, ssidName, setSsid);
           if (!this.disableLogInfo) {
-            this.log('Device: %s, SSID: %s, set state: %s', accessoryName, ssidName, state ? 'Enabled' : 'Disabled');
+            this.log('Network: %s, SSID: %s, set state: %s', accessoryName, ssidName, state ? 'Enabled' : 'Disabled');
           }
         });
 
@@ -434,7 +436,7 @@ class merakiDevice {
     }
 
     this.startPrepareAccessory = false;
-    this.log.debug('Device: %s, publishExternalAccessories.', accessoryName);
+    this.log.debug('Network: %s, publishExternalAccessories.', accessoryName);
     this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
   }
 }
