@@ -110,7 +110,8 @@ class merakiDevice {
 
     //meraki dashboard
     this.dashboardClientsCount = 0;
-    this.exposedClientByNameCount = this.getClientByNameOrMac.length != undefined ? this.getClientByNameOrMac.length : 0;
+    this.configuredClientByNameCount = this.getClientByNameOrMac.length != undefined ? this.getClientByNameOrMac.length : 0;
+    this.exposedAndExistongClientOnDashboardCount = 0;
 
     //meraki mr
     this.ssidsCount = 0;
@@ -216,7 +217,7 @@ class merakiDevice {
 
       //get devices data variables
       const dashboardClientsCount = this.dashboardClientsCount;
-      const exposedClientByNameCount = this.exposedClientByNameCount;
+      const configuredClientByNameCount = this.configuredClientByNameCount;
       const ssidsCount = this.ssidsCount;
       const hiddenSsidsCount = this.hiddenSsidsCount;
 
@@ -236,23 +237,43 @@ class merakiDevice {
           this.clientsDescription.push(clientDescription);
         }
 
-        this.exposedClientsId = new Array();
+        //client configured
+        this.exposedAndExistongClientsOnDashboardId = new Array();
+        this.exposedAndExistongClientsOnDashboardMac = new Array();
+        this.exposedAndExistongClientsOnDashboardDescription = new Array();
+        this.exposedAndExistongClientsOnDashboardCustomName = new Array();
+
+        for (let j = 0; j < configuredClientByNameCount; j++) {
+          const clientMode = (this.getClientByNameOrMac[j].mode == true);
+          const clientNameOrMac = this.getClientByNameOrMac[j].name;
+          const clientCustomName = this.getClientByNameOrMac[j].customName;
+          const clientsByNameOrMac = clientMode ? this.clientsMac : this.clientsDescription;
+
+          const clientIndex = clientsByNameOrMac.indexOf(clientNameOrMac);
+          const configuredClientId = this.clientsId[clientIndex];
+          const configuredClientMac = this.clientsMac[clientIndex];
+          const configuredClientDescription = this.clientsDescription[clientIndex];
+
+          //check client exist in dshboard
+          const exposedAndExistongClientOnDashboardId = (this.clientsId.indexOf(configuredClientId) >= 0) ? this.exposedAndExistongClientsOnDashboardId.push(configuredClientId) : false;
+          const exposedAndExistongClientOnDashboardMac = (this.clientsId.indexOf(configuredClientId) >= 0) ? this.exposedAndExistongClientsOnDashboardMac.push(configuredClientMac) : false;
+          const exposedAndExistongClientOnDashboardDescription = (this.clientsId.indexOf(configuredClientId) >= 0) ? this.exposedAndExistongClientsOnDashboardDescription.push(configuredClientDescription) : false;
+          const exposedAndExistongClientsOnDashboardCustomName = (this.clientsId.indexOf(configuredClientId) >= 0) ? (clientMode && clientCustomName != undefined) ? this.exposedAndExistongClientsOnDashboardCustomName.push(clientCustomName) : this.exposedAndExistongClientsOnDashboardCustomName.push(configuredClientDescription) : false;
+        }
+
+        //cliects policy
         this.clientsPolicyMac = new Array();
         this.clientsPolicyPolicy = new Array();
         this.clientsPolicyGroupPolicyId = new Array();
         this.clientsPolicyState = new Array();
 
-        for (let j = 0; j < exposedClientByNameCount; j++) {
-          const clientMode = (this.getClientByNameOrMac[j].mode == true);
-          const clientNameOrMac = this.getClientByNameOrMac[j].name;
-          const clientsByNameOrMac = clientMode ? this.clientsMac : this.clientsDescription;
+        const exposedAndExistongClientsOnDashboardCount = this.exposedAndExistongClientsOnDashboardId.length;
+        this.exposedAndExistongClientsOnDashboardCount = exposedAndExistongClientsOnDashboardCount;
+        for (let k = 0; k < exposedAndExistongClientsOnDashboardCount; k++) {
 
           try {
-            const index = clientsByNameOrMac.indexOf(clientNameOrMac);
-            const exposedClientId = this.clientsId[index];
-            this.exposedClientsId.push(exposedClientId);
-
-            const dashboardClientsPolicyData = await this.meraki.get(this.dashboardClientsUrl + '/' + exposedClientId + '/policy');
+            const clientId = this.exposedAndExistongClientsOnDashboardId[k];
+            const dashboardClientsPolicyData = await this.meraki.get(this.dashboardClientsUrl + '/' + clientId + '/policy');
             this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
 
             const clientPolicyMac = dashboardClientsPolicyData.data.mac;
@@ -261,7 +282,7 @@ class merakiDevice {
             const clientPolicyState = (clientPolicyPolicy === 'Normal' || clientPolicyPolicy === 'Whitelisted');
 
             if (this.merakiDashboardClientPolicyServices) {
-              this.merakiDashboardClientPolicyServices[j]
+              this.merakiDashboardClientPolicyServices[k]
                 .updateCharacteristic(Characteristic.On, clientPolicyState);
             }
 
@@ -357,14 +378,12 @@ class merakiDevice {
     this.log.debug('prepareMerakiService');
 
     //get devices data variables
-    const exposedClientByNameCount = this.exposedClientByNameCount;
+    const exposedAndExistongClientsOnDashboardCount = this.exposedAndExistongClientsOnDashboardCount;
     const exposedSsidsCount = this.exposedSsidsCount;
 
     this.merakiDashboardClientPolicyServices = new Array();
-    for (let i = 0; i < exposedClientByNameCount; i++) {
-      const clientDescription = this.clientsDescription[i];
-      const clientCustomName = this.getClientByNameOrMac[i].customName;
-      const clientNameToBeExposed = clientCustomName != undefined ? clientCustomName : clientDescription;
+    for (let i = 0; i < exposedAndExistongClientsOnDashboardCount; i++) {
+      const clientNameToBeExposed = this.exposedAndExistongClientsOnDashboardCustomName[i];
 
       const merakiDashboardClientPolicyService = new Service.Switch(clientNameToBeExposed, 'merakiDashboardClientPolicyService' + i);
       merakiDashboardClientPolicyService.getCharacteristic(Characteristic.On)
@@ -377,7 +396,7 @@ class merakiDevice {
         })
         .onSet(async (state) => {
           const policy = state ? 'Normal' : 'Blocked';
-          const clientId = this.exposedClientsId[i];
+          const clientId = this.exposedAndExistongClientsOnDashboardId[i];
           const setClientPolicy = await this.meraki.put(this.dashboardClientsUrl + '/' + clientId + '/policy', {
             'devicePolicy': policy
           });
