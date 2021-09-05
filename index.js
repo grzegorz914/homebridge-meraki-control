@@ -61,6 +61,7 @@ class merakiPlatform {
 class merakiDevice {
   constructor(log, config, api) {
     this.log = log;
+    this.config = config;
     this.api = api;
 
     //network configuration
@@ -350,9 +351,10 @@ class merakiDevice {
   prepareAccessory() {
     this.log.debug('prepareAccessory');
     const accessoryName = this.name;
-    const accessoryUUID = AccessoryUUID.generate(accessoryName);
+    const accessoryUUID = AccessoryUUID.generate(this.networkId);
     const accessoryCategory = Categories.AIRPORT;
     const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
+    accessory.context.device = this.config.device;
 
     //Prepare information service
     this.log.debug('prepareInformationService');
