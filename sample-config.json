@@ -18,6 +18,7 @@
         "platform": "Meraki",
         "devices": [{
             "name": "Network Name",
+            "host": "https://123.meraki.com",
             "apiKey": "01032453453421923",
             "organizationId": "L_0123456789",
             "networkId": "1234567",

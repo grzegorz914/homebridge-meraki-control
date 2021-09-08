@@ -49,6 +49,8 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) plugin to configure this plugin (strongly recomended). The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
 | Key | Description | 
 | --- | --- |
+| `name` | Here set the name. |
+| `host` | Here set the *baseUrl* like `https://n123.meraki.com`, do not use `https://api.meraki.com` |
 | `apiKey` | Here set the *X-Cisco-Meraki-API-Key*. |
 | `organizationId` | Here set Your *Organization Id*. |
 | `networkId` | Here set Your *Network Id*. |
@@ -69,6 +71,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
             "devices": [
                 {
                     "name": "Network Name",
+                    "host": "https://123.meraki.com",
                     "apiKey": "01032453453421923",
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",

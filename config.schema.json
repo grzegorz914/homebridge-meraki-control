@@ -16,27 +16,34 @@
             "name": {
               "title": "Network name",
               "type": "string",
-              "default": "iDom",
+              "placeholder": "iDom",
               "required": true
+            },
+            "host": {
+              "title": "API path",
+              "type": "string",
+              "placeholder": "https://n123.meraki.com",
+              "required": true,
+              "format": "hostname"
             },
             "apiKey": {
               "title": "API key",
               "type": "string",
-              "default": "01032453453421923",
+              "placeholder": "01032453453421923",
               "description": "Here set the Meraki Api Key.",
               "required": true
             },
             "organizationId": {
               "title": "Organization Id",
               "type": "string",
-              "default": "123456789",
+              "placeholder": "123456789",
               "description": "Here set the Organization ID.",
               "required": true
             },
             "networkId": {
               "title": "Network Id",
               "type": "string",
-              "default": "L_0123456789",
+              "placeholder": "L_0123456789",
               "description": "Here set the Network ID.",
               "required": true
             },
@@ -80,6 +87,7 @@
                   "name": {
                     "title": "SSID Name",
                     "type": "string",
+                    "placeholder": "SSID Name",
                     "description": "Here set the SSID Name to be hidden and not exposed to the Homebridge/HomeKit.",
                     "required": false
                   }
@@ -103,12 +111,14 @@
                   "name": {
                     "title": "Dashboard Client Name or Mac",
                     "type": "string",
+                    "placeholder": "Client name or mac",
                     "description": "Here set the Client Description or Mac Adress in Meraki Dashboard which You want expose to the Homebridge/HomeKit and change its policy.",
                     "required": false
                   },
                   "customName": {
                     "title": "Client Name",
                     "type": "string",
+                    "placeholder": "Client custom name",
                     "description": "Optionally set the custom Client Name to be exposed in Homebridge/HomeKit instead Dashboard Name or Mac.",
                     "required": false
                   }
@@ -126,6 +136,7 @@
     "title": "{{ value.name || 'new network' }}",
     "items": [
       "devices[].name",
+      "devices[].host",
       {
         "key": "devices[]",
         "type": "section",

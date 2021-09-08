@@ -8,8 +8,6 @@ const fsPromises = require('fs').promises;
 const PLUGIN_NAME = 'homebridge-meraki-control';
 const PLATFORM_NAME = 'Meraki';
 
-const BASE_API_URL = 'https://api.meraki.com/api/v1'
-
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 module.exports = (api) => {
@@ -65,6 +63,7 @@ class merakiDevice {
     this.api = api;
 
     //network configuration
+    this.host = config.host;
     this.name = config.name;
     this.apiKey = config.apiKey;
     this.organizationId = config.organizationId;
@@ -119,6 +118,7 @@ class merakiDevice {
     this.configuredHiddenSsidsCount = (this.hideSsidByName.length != undefined) ? this.hideSsidByName.length : 0;
 
     //meraki url
+    const BASE_API_URL = this.host + '/api/v1';
     this.networkUrl = BASE_API_URL + '/networks/' + this.networkId;
     this.devicesUrl = BASE_API_URL + '/organizations/' + this.organizationId + '/devices';
     this.dashboardClientsUrl = BASE_API_URL + '/networks/' + this.networkId + '/clients';
@@ -393,14 +393,19 @@ class merakiDevice {
           return state;
         })
         .onSet(async (state) => {
-          const policy = state ? 'Normal' : 'Blocked';
-          const clientId = this.exposedAndExistingClientsOnDashboardId[i];
-          const setClientPolicy = await this.meraki.put(this.dashboardClientsUrl + '/' + clientId + '/policy', {
-            'devicePolicy': policy
-          });
-          this.log.debug('Network: %s, client: %s, debug setClientPolicy: %s', accessoryName, clientNameToBeExposed, setClientPolicy.data);
-          if (!this.disableLogInfo) {
-            this.log('Network: %s, client: %s, set policy, state: %s', accessoryName, clientNameToBeExposed, policy);
+          try {
+            const policy = state ? 'Normal' : 'Blocked';
+            const clientId = this.exposedAndExistingClientsOnDashboardId[i];
+            const setClientPolicy = await this.meraki.put(this.dashboardClientsUrl + '/' + clientId + '/policy', {
+              'devicePolicy': policy
+            });
+            this.log.debug('Network: %s, client: %s, debug setClientPolicy: %s', accessoryName, clientNameToBeExposed, setClientPolicy.data);
+            if (!this.disableLogInfo) {
+              this.log('Network: %s, client: %s, set policy, state: %s', accessoryName, clientNameToBeExposed, policy);
+            }
+            this.updateDashboardClientsData();
+          } catch (error) {
+            this.log.error(('Network: %s, client: %s, set policy, error: %s', accessoryName, clientNameToBeExposed, error));
           }
         });
 
@@ -422,14 +427,19 @@ class merakiDevice {
           return state;
         })
         .onSet(async (state) => {
-          state = state ? true : false;
-          const ssidIndex = this.wirelessSsidsName.indexOf(ssidName);
-          const setSsid = await this.meraki.put(this.wirelessUrl + '/' + ssidIndex, {
-            'enabled': state
-          });
-          this.log.debug('Network: %s, SSID: %s, debug setSsid: %s', accessoryName, ssidName, setSsid);
-          if (!this.disableLogInfo) {
-            this.log('Network: %s, SSID: %s, set state: %s', accessoryName, ssidName, state ? 'Enabled' : 'Disabled');
+          try {
+            state = state ? true : false;
+            const ssidIndex = this.wirelessSsidsName.indexOf(ssidName);
+            const setSsid = await this.meraki.put(this.wirelessUrl + '/' + ssidIndex, {
+              'enabled': state
+            });
+            this.log.debug('Network: %s, SSID: %s, debug setSsid: %s', accessoryName, ssidName, setSsid.data);
+            if (!this.disableLogInfo) {
+              this.log('Network: %s, SSID: %s, set state: %s', accessoryName, ssidName, state ? 'Enabled' : 'Disabled');
+            }
+            this.updateDashboardClientsData();
+          } catch (error) {
+            this.log.error(('Network: %s, SSID: %s, set  error: %s', accessoryName, ssidName, error));
           }
         });
 
