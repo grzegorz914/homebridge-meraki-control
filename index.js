@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const axios = require('axios').default;
+const axios = require('axios');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 
@@ -119,21 +119,22 @@ class merakiDevice {
 
     //meraki url
     const BASE_API_URL = this.host + '/api/v1';
-    this.networkUrl = BASE_API_URL + '/networks/' + this.networkId;
-    this.devicesUrl = BASE_API_URL + '/organizations/' + this.organizationId + '/devices';
-    this.dashboardClientsUrl = BASE_API_URL + '/networks/' + this.networkId + '/clients';
-    this.aplianceUrl = BASE_API_URL + '/networks/' + this.networkId + '/appliance/ports';
-    this.wirelessUrl = BASE_API_URL + '/networks/' + this.networkId + '/wireless/ssids';
-    this.switchUrl = BASE_API_URL + '/devices/' + this.serialNumber + '/switch/ports';
-    this.cameraUrl = BASE_API_URL + '/devices/' + this.serialNumber + '/camera';
+    this.networkUrl = '/networks/' + this.networkId;
+    this.devicesUrl = '/organizations/' + this.organizationId + '/devices';
+    this.dashboardClientsUrl = '/networks/' + this.networkId + '/clients';
+    this.aplianceUrl = '/networks/' + this.networkId + '/appliance/ports';
+    this.wirelessUrl = '/networks/' + this.networkId + '/wireless/ssids';
+    this.switchUrl = '/devices/' + this.serialNumber + '/switch/ports';
+    this.cameraUrl = '/devices/' + this.serialNumber + '/camera';
 
-    this.meraki = axios.create({
+    this.axiosInstance = axios.create({
       baseURL: BASE_API_URL,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-Cisco-Meraki-API-Key': this.apiKey
-      }
+      },
+      timeout: 5000
     });
 
     //preferences directory
@@ -157,7 +158,7 @@ class merakiDevice {
   async updateDashboardClientsData() {
     this.log.debug('Network: %s, requesting dashboardClientsData.', this.name);
     try {
-      const dashboardClientsData = await this.meraki.get(this.dashboardClientsUrl + '?perPage=255&timespan=2592000');
+      const dashboardClientsData = await this.axiosInstance.get(this.dashboardClientsUrl + '?perPage=255&timespan=2592000');
       this.log.debug('Debug dashboardClientsData: %s', dashboardClientsData.data[0]);
       const dashboardClientsCount = dashboardClientsData.data.length;
 
@@ -175,7 +176,7 @@ class merakiDevice {
   async updateWirelessData() {
     this.log.debug('Network: %s, requesting wirelessData.', this.name);
     try {
-      const wirelessData = await this.meraki.get(this.wirelessUrl);
+      const wirelessData = await this.axiosInstance.get(this.wirelessUrl);
       this.log.debug('Debug merakiMrData: %s', wirelessData.data[0]);
       const wirelessSsidsCount = wirelessData.data.length;
 
@@ -273,7 +274,7 @@ class merakiDevice {
         this.exposedAndExistingClientsOnDashboardCount = exposedAndExistingClientsOnDashboardCount;
         for (let k = 0; k < exposedAndExistingClientsOnDashboardCount; k++) {
           const clientId = this.exposedAndExistingClientsOnDashboardId[k];
-          const dashboardClientsPolicyData = await this.meraki.get(this.dashboardClientsUrl + '/' + clientId + '/policy');
+          const dashboardClientsPolicyData = await this.axiosInstance.get(this.dashboardClientsUrl + '/' + clientId + '/policy');
           this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
 
           if (dashboardClientsPolicyData.status == 200) {
@@ -396,7 +397,7 @@ class merakiDevice {
           try {
             const policy = state ? 'Normal' : 'Blocked';
             const clientId = this.exposedAndExistingClientsOnDashboardId[i];
-            const setClientPolicy = await this.meraki.put(this.dashboardClientsUrl + '/' + clientId + '/policy', {
+            const setClientPolicy = await this.axiosInstance.put(this.dashboardClientsUrl + '/' + clientId + '/policy', {
               'devicePolicy': policy
             });
             this.log.debug('Network: %s, client: %s, debug setClientPolicy: %s', accessoryName, clientNameToBeExposed, setClientPolicy.data);
@@ -430,7 +431,7 @@ class merakiDevice {
           try {
             state = state ? true : false;
             const ssidIndex = this.wirelessSsidsName.indexOf(ssidName);
-            const setSsid = await this.meraki.put(this.wirelessUrl + '/' + ssidIndex, {
+            const setSsid = await this.axiosInstance.put(this.wirelessUrl + '/' + ssidIndex, {
               'enabled': state
             });
             this.log.debug('Network: %s, SSID: %s, debug setSsid: %s', accessoryName, ssidName, setSsid.data);
