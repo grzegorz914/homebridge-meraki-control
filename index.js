@@ -138,11 +138,11 @@ class merakiDevice {
     });
 
     //preferences directory
-    this.prefDir = path.join(api.user.storagePath(), 'meraki');
+    const prefDir = path.join(api.user.storagePath(), 'meraki');
 
     //check if prefs directory exist
-    if (fs.existsSync(this.prefDir) == false) {
-      fsPromises.mkdir(this.prefDir);
+    if (fs.existsSync(prefDir) == false) {
+      fsPromises.mkdir(prefDir);
     }
 
     //Check network state

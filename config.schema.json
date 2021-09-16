@@ -80,7 +80,6 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "default": false,
                     "description": "Here set the function ON or OFF.",
                     "required": false
                   },
@@ -104,7 +103,6 @@
                   "mode": {
                     "title": "Use Mac Adress instead Name",
                     "type": "boolean",
-                    "default": false,
                     "description": "This options enable expose *Client* to the Homebridge/HomeKit usind its Mac Adress instead Name.",
                     "required": false
                   },
