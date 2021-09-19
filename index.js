@@ -3,7 +3,7 @@
 const path = require('path');
 const axios = require('axios');
 const fs = require('fs');
-const fsPromises = require('fs').promises;
+const fsPromises = fs.promises;
 
 const PLUGIN_NAME = 'homebridge-meraki-control';
 const PLATFORM_NAME = 'Meraki';
@@ -133,15 +133,14 @@ class merakiDevice {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-Cisco-Meraki-API-Key': this.apiKey
-      },
-      timeout: 5000
+      }
     });
 
     //preferences directory
     const prefDir = path.join(api.user.storagePath(), 'meraki');
 
     //check if prefs directory exist
-    if (fs.existsSync(prefDir) == false) {
+    if (!fs.existsSync(prefDir)) {
       fsPromises.mkdir(prefDir);
     }
 
@@ -191,7 +190,7 @@ class merakiDevice {
     };
   }
 
-  getDeviceInfo() {
+  async getDeviceInfo() {
     try {
       this.log('Network: %s, state: Online.', this.name);
       this.log('-------- %s --------', this.name);
