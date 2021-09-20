@@ -306,7 +306,7 @@ class merakiDevice {
         for (let j = 0; j < configuredHiddenSsidsCount; j++) {
           const hiddenSsidByNameName = this.hideSsidByName[j].name;
           const hiddenSsidByNameMode = (this.hideSsidByName[j].mode == true);
-          const push = hiddenSsidByNameMode ? this.hiddenSsidsName.push(hiddenSsidByNameName) : false;
+          const push = (hiddenSsidByNameMode && hiddenSsidByNameName != undefined) ? this.hiddenSsidsName.push(hiddenSsidByNameName) : false;
         }
 
         for (let i = 0; i < wirelessSsidsCount; i++) {

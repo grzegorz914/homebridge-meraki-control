@@ -144,8 +144,8 @@
         "items": [
           "devices[].hideUnconfiguredSsids",
           {
+            "key": "devices[].hideSsidByName",
             "type": "array",
-            "orderable": false,
             "buttonText": "Add SSID",
             "items": [
               "devices[].hideSsidByName[].name",
@@ -161,8 +161,8 @@
         "expandable": true,
         "expanded": false,
         "items": [{
+          "key": "devices[].getClientByNameOrMac",
           "type": "array",
-          "orderable": false,
           "buttonText": "Add Client",
           "items": [
             "devices[].getClientByNameOrMac[].name",
