@@ -81,32 +81,9 @@ class merakiDevice {
     this.firmwareRevision = this.organizationId || 'Organization ID';
 
     //setup variables
-    this.checkDeviceInfo = false;
+    this.checkDeviceInfo = true;
     this.checkDeviceState = false;
     this.startPrepareAccessory = true;
-
-    //data
-    this.networkData = {
-      'status': 0
-    };
-    this.devicesData = {
-      'status': 0
-    };
-    this.dashboardClientsData = {
-      'status': 0
-    };
-    this.aplianceData = {
-      'status': 0
-    };
-    this.wirelessData = {
-      'status': 0
-    };
-    this.switchData = {
-      'status': 0
-    };
-    this.cameraData = {
-      'status': 0
-    };
 
     //meraki dashboard
     this.dashboardClientsCount = 0;
@@ -146,9 +123,7 @@ class merakiDevice {
 
     //Check network state
     setInterval(function () {
-      if (this.checkDeviceInfo || this.checkDeviceState) {
-        this.updateDashboardClientsData();
-      }
+      const updateData = this.checkDeviceState ? this.updateDashboardClientsData() : false;
     }.bind(this), this.refreshInterval * 1000);
 
     this.updateDashboardClientsData();
@@ -159,71 +134,10 @@ class merakiDevice {
     try {
       const dashboardClientsData = await this.axiosInstance.get(this.dashboardClientsUrl + '?perPage=255&timespan=2592000');
       this.log.debug('Debug dashboardClientsData: %s', dashboardClientsData.data[0]);
-      const dashboardClientsCount = dashboardClientsData.data.length;
 
-      this.dashboardClientsData = dashboardClientsData;
-      this.dashboardClientsCount = dashboardClientsCount;
-
-      this.updateWirelessData();
-    } catch (error) {
-      this.log.error('Network: %s, dashboardClientsData error: %s', this.name, error);
-      this.checkDeviceState = false;
-      this.checkDeviceInfo = true;
-    };
-  }
-
-  async updateWirelessData() {
-    this.log.debug('Network: %s, requesting wirelessData.', this.name);
-    try {
-      const wirelessData = await this.axiosInstance.get(this.wirelessUrl);
-      this.log.debug('Debug merakiMrData: %s', wirelessData.data[0]);
-      const wirelessSsidsCount = wirelessData.data.length;
-
-      this.wirelessData = wirelessData;
-      this.wirelessSsidsCount = wirelessSsidsCount;
-
-      const getDeviceInfo = !this.checkDeviceState ? this.getDeviceInfo() : this.updateDeviceState();
-    } catch (error) {
-      this.log.error('Network: %s, wirelessData error: %s', this.name, error);
-      this.checkDeviceState = false;
-      this.checkDeviceInfo = true;
-    };
-  }
-
-  async getDeviceInfo() {
-    try {
-      this.log('Network: %s, state: Online.', this.name);
-      this.log('-------- %s --------', this.name);
-      this.log('Manufacturer: %s', this.manufacturer);
-      this.log('Model: %s', this.modelName);
-      this.log('Serialnr: %s', this.serialNumber);
-      this.log('Firmware: %s', this.firmwareRevision);
-      this.log('----------------------------------');
-
-      this.checkDeviceInfo = false;
-      this.updateDeviceState();
-    } catch (error) {
-      this.log.error('Network: %s, getDeviceInfo error: %s', this.name, error);
-      this.checkDeviceState = false;
-      this.checkDeviceInfo = true;
-    }
-  }
-
-  async updateDeviceState() {
-    this.log.debug('Network: %s, update state.', this.name);
-    try {
-      //get networks data;
-      const dashboardClientsData = this.dashboardClientsData;
-      const wirelessData = this.wirelessData;
-
-      //get devices data variables
-      const dashboardClientsCount = this.dashboardClientsCount;
-      const configuredClientsByNameCount = this.configuredClientsByNameCount;
-      const wirelessSsidsCount = this.wirelessSsidsCount;
-      const configuredHiddenSsidsCount = this.configuredHiddenSsidsCount;
-
-      //daschboard clients
       if (dashboardClientsData.status == 200) {
+        const configuredClientsByNameCount = this.configuredClientsByNameCount;
+        const dashboardClientsCount = dashboardClientsData.data.length;
         this.clientsId = new Array();
         this.clientsMac = new Array();
         this.clientsDescription = new Array();
@@ -261,41 +175,58 @@ class merakiDevice {
           const exposedAndExistongClientOnDashboardDescription = (this.clientsId.indexOf(configuredClientId) >= 0) ? this.exposedAndExistongClientsOnDashboardDescription.push(configuredClientDescription) : false;
           const exposedAndExistongClientsOnDashboardCustomName = (this.clientsId.indexOf(configuredClientId) >= 0) ? (clientMode && clientCustomName != undefined) ? this.exposedAndExistongClientsOnDashboardCustomName.push(clientCustomName) : this.exposedAndExistongClientsOnDashboardCustomName.push(configuredClientDescription) : false;
         }
+        this.dashboardClientsCount = dashboardClientsCount;
+        this.exposedAndExistingClientsOnDashboardCount = this.exposedAndExistingClientsOnDashboardId.length;
+        this.updateDashboardClientsPolicyData();
       }
+    } catch (error) {
+      this.log.error('Network: %s, dashboardClientsData error: %s', this.name, error);
+      this.checkDeviceInfo = true;
+    };
+  }
 
-      //cliects policy
-      try {
-        this.clientsPolicyMac = new Array();
-        this.clientsPolicyPolicy = new Array();
-        this.clientsPolicyState = new Array();
+  async updateDashboardClientsPolicyData() {
+    this.log.debug('Network: %s, requesting dashboardClientsPolicyData.', this.name);
+    try {
+      this.clientsPolicyMac = new Array();
+      this.clientsPolicyPolicy = new Array();
+      this.clientsPolicyState = new Array();
 
-        const exposedAndExistingClientsOnDashboardCount = this.exposedAndExistingClientsOnDashboardId.length;
-        this.exposedAndExistingClientsOnDashboardCount = exposedAndExistingClientsOnDashboardCount;
-        for (let k = 0; k < exposedAndExistingClientsOnDashboardCount; k++) {
-          const clientId = this.exposedAndExistingClientsOnDashboardId[k];
-          const dashboardClientsPolicyData = await this.axiosInstance.get(this.dashboardClientsUrl + '/' + clientId + '/policy');
-          this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
+      const exposedAndExistingClientsOnDashboardCount = this.exposedAndExistingClientsOnDashboardCount;
+      for (let i = 0; i < exposedAndExistingClientsOnDashboardCount; i++) {
+        const clientId = this.exposedAndExistingClientsOnDashboardId[i];
+        const dashboardClientsPolicyData = await this.axiosInstance.get(this.dashboardClientsUrl + '/' + clientId + '/policy');
+        this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
 
-          if (dashboardClientsPolicyData.status == 200) {
-            const clientPolicyMac = dashboardClientsPolicyData.data.mac;
-            const clientPolicyPolicy = (dashboardClientsPolicyData.data.devicePolicy != undefined) ? (dashboardClientsPolicyData.data.devicePolicy) : 'Normal';
-            const clientPolicyState = (clientPolicyPolicy == 'Normal' || clientPolicyPolicy == 'Whitelisted');
+        if (dashboardClientsPolicyData.status == 200) {
+          const clientPolicyMac = dashboardClientsPolicyData.data.mac;
+          const clientPolicyPolicy = (dashboardClientsPolicyData.data.devicePolicy != undefined) ? (dashboardClientsPolicyData.data.devicePolicy) : 'Normal';
+          const clientPolicyState = (clientPolicyPolicy == 'Normal' || clientPolicyPolicy == 'Whitelisted');
 
-            if (this.merakiDashboardClientPolicyServices && clientPolicyPolicy != undefined) {
-              this.merakiDashboardClientPolicyServices[k]
-                .updateCharacteristic(Characteristic.On, clientPolicyState);
-            }
-
-            this.clientsPolicyMac.push(clientPolicyMac);
-            this.clientsPolicyPolicy.push(clientPolicyPolicy);
-            this.clientsPolicyState.push(clientPolicyState);
+          if (this.merakiDashboardClientPolicyServices && clientPolicyPolicy != undefined) {
+            this.merakiDashboardClientPolicyServices[i]
+              .updateCharacteristic(Characteristic.On, clientPolicyState);
           }
+
+          this.clientsPolicyMac.push(clientPolicyMac);
+          this.clientsPolicyPolicy.push(clientPolicyPolicy);
+          this.clientsPolicyState.push(clientPolicyState);
         }
-      } catch (error) {
-        this.log.error('Network: %s, dashboardClientsPolicyData error: %s', this.name, error);
       }
 
-      //SSIDs
+      this.updateWirelessData();
+    } catch (error) {
+      this.log.error('Network: %s, dashboardClientsPolicyData error: %s', this.name, error);
+      this.checkDeviceInfo = true;
+    };
+  }
+
+  async updateWirelessData() {
+    this.log.debug('Network: %s, requesting wirelessData.', this.name);
+    try {
+      const wirelessData = await this.axiosInstance.get(this.wirelessUrl);
+      this.log.debug('Debug merakiMrData: %s', wirelessData.data[0]);
+
       if (wirelessData.status == 200) {
         this.wirelessSsidsName = new Array();
         this.wirelessSsidsState = new Array();
@@ -303,6 +234,8 @@ class merakiDevice {
         this.exposedSsidsName = new Array();
         this.exposedSsidsState = new Array();
 
+        const configuredHiddenSsidsCount = this.configuredHiddenSsidsCount;
+        const wirelessSsidsCount = wirelessData.data.length;
         for (let j = 0; j < configuredHiddenSsidsCount; j++) {
           const hiddenSsidByNameName = this.hideSsidByName[j].name;
           const hiddenSsidByNameMode = (this.hideSsidByName[j].mode == true);
@@ -333,16 +266,30 @@ class merakiDevice {
           }
         }
         this.exposedSsidsCount = exposedSsidsCount;
-      }
-      this.checkDeviceState = true;
+        this.wirelessSsidsCount = wirelessSsidsCount;
 
-      //start prepare accessory
-      if (this.startPrepareAccessory) {
-        this.prepareAccessory();
+        const getDeviceInfo = this.checkDeviceInfo ? this.getDeviceInfo() : false;
       }
     } catch (error) {
-      this.log.error('Network: %s, update Device state error: %s', this.name, error);
-      this.checkDeviceState = false;
+      this.log.error('Network: %s, wirelessData error: %s', this.name, error);
+      this.checkDeviceInfo = true;
+    };
+  }
+
+  async getDeviceInfo() {
+    try {
+      this.log('-------- %s --------', this.name);
+      this.log('Manufacturer: %s', this.manufacturer);
+      this.log('Model: %s', this.modelName);
+      this.log('Serialnr: %s', this.serialNumber);
+      this.log('Firmware: %s', this.firmwareRevision);
+      this.log('----------------------------------');
+
+      this.checkDeviceInfo = false;
+      this.checkDeviceState = true;
+      const startPrepareAccessory = this.startPrepareAccessory ? this.prepareAccessory() : false;
+    } catch (error) {
+      this.log.error('Network: %s, getDeviceInfo error: %s', this.name, error);
       this.checkDeviceInfo = true;
     }
   }
