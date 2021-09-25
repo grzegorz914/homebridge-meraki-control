@@ -95,7 +95,7 @@
                 }
               }
             },
-            "dashboartdClientsPolicy": {
+            "dashboardClientsPolicy": {
               "title": "Clients",
               "type": "array",
               "items": {
@@ -188,17 +188,17 @@
         "expandable": true,
         "expanded": false,
         "items": [{
-          "key": "devices[].dashboartdClientsPolicy",
+          "key": "devices[].dashboardClientsPolicy",
           "type": "tabarray",
           "title": "{{ value.name || 'new Client' }}",
           "expandable": true,
           "expanded": true,
           "orderable": false,
           "items": [
-            "devices[].dashboartdClientsPolicy[].name",
-            "devices[].dashboartdClientsPolicy[].mac",
-            "devices[].dashboartdClientsPolicy[].type",
-            "devices[].dashboartdClientsPolicy[].mode"
+            "devices[].dashboardClientsPolicy[].name",
+            "devices[].dashboardClientsPolicy[].mac",
+            "devices[].dashboardClientsPolicy[].type",
+            "devices[].dashboardClientsPolicy[].mode"
           ]
         }]
       },

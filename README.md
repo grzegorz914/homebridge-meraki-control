@@ -59,10 +59,10 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden. |
 | `hideSsidByName.name` | Here set SSIDs name which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `hideSsidByName.mode` | Here set mode *ON/OFF* for this SSID. |
-| `dashboartdClientsPolicy.name` | Here set the own *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
-| `dashboartdClientsPolicy.mac` | Here set the client *Mac Address from Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
-| `dashboartdClientsPolicy.type` | Here choice the policy *Type* to be appiled for Client. |
-| `dashboartdClientsPolicy.mode` | Here set the mode *ON/OFF* for Client. |
+| `dashboardClientsPolicy.name` | Here set the own *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
+| `dashboardClientsPolicy.mac` | Here set the client *Mac Address from Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
+| `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for Client. |
+| `dashboardClientsPolicy.mode` | Here set the mode *ON/OFF* for Client. |
 
 
 <p align="left">
@@ -86,7 +86,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                          "name": "SSID Name",
                          "mode": false
                      }],
-                    "dashboartdClientsPolicy": [{
+                    "dashboardClientsPolicy": [{
                          "name": "Own Name",
                          "mac": "Mac Address",
                          "type": "Policy type",

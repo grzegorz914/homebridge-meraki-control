@@ -72,7 +72,7 @@ class merakiDevice {
     this.disableLogInfo = config.disableLogInfo;
     this.hideUnconfiguredSsids = config.hideUnconfiguredSsids;
     this.hideSsidByName = config.hideSsidByName || [];
-    this.dashboartdClientsPolicy = config.dashboartdClientsPolicy || [];
+    this.dashboardClientsPolicy = config.dashboardClientsPolicy || [];
 
     //setup variables
     this.checkDeviceInfo = true;
@@ -81,7 +81,7 @@ class merakiDevice {
 
     //meraki dashboard
     this.dashboardClientsCount = 0;
-    this.configuredDashboardClientsCount = this.dashboartdClientsPolicy.length;
+    this.configuredDashboardClientsCount = this.dashboardClientsPolicy.length;
     this.exposedAndExistingDaschboardClientsCount = 0;
 
     //meraki mr
@@ -153,10 +153,10 @@ class merakiDevice {
         this.exposedAndExistongClientsOnDashboardType = new Array();
 
         for (let j = 0; j < this.configuredDashboardClientsCount; j++) {
-          const clientName = this.dashboartdClientsPolicy[j].name;
-          const clientMac = this.dashboartdClientsPolicy[j].mac;
-          const clientPolicyType = this.dashboartdClientsPolicy[j].type;
-          const clientEnabled = this.dashboartdClientsPolicy[j].mode;
+          const clientName = this.dashboardClientsPolicy[j].name;
+          const clientMac = this.dashboardClientsPolicy[j].mac;
+          const clientPolicyType = this.dashboardClientsPolicy[j].type;
+          const clientEnabled = this.dashboardClientsPolicy[j].mode;
 
           const clientIndex = this.clientsMac.indexOf(clientMac);
           const configuredClientId = this.clientsId[clientIndex];

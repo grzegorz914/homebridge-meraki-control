@@ -29,7 +29,7 @@
                 "name": "SSID Name",
                 "mode": false
             }],
-            "dashboartdClientsPolicy": [{
+            "dashboardClientsPolicy": [{
                 "name": "Own Name",
                 "mac": "Mac Address",
                 "type": "Policy type",
