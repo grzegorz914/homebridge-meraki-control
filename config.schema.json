@@ -162,7 +162,7 @@
               "title": "Enable Control",
               "type": "boolean",
               "default": false,
-              "description": "This option enable/disable control of switches.",
+              "description": "This option enable/disable control of Switches.",
               "required": false
             },
             "switches": {
