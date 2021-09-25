@@ -233,7 +233,6 @@ class merakiDevice {
 
         const configuredHiddenSsidsCount = this.configuredHiddenSsidsCount;
         const wirelessSsidsCount = wirelessData.data.length;
-        const exposedSsidsCount = this.exposedSsidsName.length;
 
         for (let j = 0; j < configuredHiddenSsidsCount; j++) {
           const hiddenSsidName = this.hideSsidByName[j].name;
@@ -257,6 +256,7 @@ class merakiDevice {
           }
         }
 
+        const exposedSsidsCount = this.exposedSsidsName.length;
         for (let i = 0; i < exposedSsidsCount; i++) {
           const ssidState = (this.exposedSsidsState[i] == true);
 
