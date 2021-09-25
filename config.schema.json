@@ -184,7 +184,7 @@
       {
         "key": "devices[]",
         "type": "section",
-        "title": "Clients policy",
+        "title": "Clients Policy",
         "expandable": true,
         "expanded": false,
         "items": [{
