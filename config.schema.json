@@ -8,9 +8,9 @@
     "type": "object",
     "properties": {
       "devices": {
-        "title": "Networks",
         "type": "array",
         "items": {
+          "title": "Networks",
           "type": "object",
           "properties": {
             "name": {
@@ -72,52 +72,50 @@
             },
             "hideSsidByName": {
               "title": "SSIDs",
-              "buttonText": "Add SSID",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
-                  "mode": {
-                    "title": "Enable",
-                    "type": "boolean",
-                    "description": "Here set the function ON or OFF.",
-                    "required": false
-                  },
                   "name": {
                     "title": "SSID Name",
                     "type": "string",
                     "placeholder": "SSID Name",
                     "description": "Here set the SSID Name to be hidden and not exposed to the Homebridge/HomeKit.",
                     "required": false
+                  },
+                  "mode": {
+                    "title": "Enable",
+                    "type": "boolean",
+                    "description": "Here set the function ON/OFF.",
+                    "required": false
                   }
                 }
               }
             },
-            "getClientByNameOrMac": {
+            "dashboartdClientsPolicy": {
               "title": "Clients",
-              "buttonText": "Add Client",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
-                  "mode": {
-                    "title": "Use Mac Adress instead Name",
-                    "type": "boolean",
-                    "description": "This options enable expose *Client* to the Homebridge/HomeKit usind its Mac Adress instead Name.",
-                    "required": false
-                  },
                   "name": {
-                    "title": "Dashboard Client Name or Mac",
+                    "title": "Name",
                     "type": "string",
-                    "placeholder": "Client name or mac",
-                    "description": "Here set the Client Description or Mac Adress in Meraki Dashboard which You want expose to the Homebridge/HomeKit and change its policy.",
+                    "placeholder": "Name",
+                    "description": "Here set the own Name to be displayed in Homebridge/HomeKit for this client.",
                     "required": false
                   },
-                  "customName": {
-                    "title": "Client Name",
+                  "mac": {
+                    "title": "Mac Address",
                     "type": "string",
-                    "placeholder": "Client custom name",
-                    "description": "Optionally set the custom Client Name to be exposed in Homebridge/HomeKit instead Dashboard Name or Mac.",
+                    "placeholder": "Mac Address",
+                    "description": "Here set the Client Mac Address to be exposed in Homebridge/HomeKit and change its policy.",
+                    "required": false
+                  },
+                  "mode": {
+                    "title": "Enable",
+                    "type": "boolean",
+                    "description": "Here set the function ON/OFF.",
                     "required": false
                   }
                 }
@@ -145,8 +143,11 @@
           "devices[].hideUnconfiguredSsids",
           {
             "key": "devices[].hideSsidByName",
-            "type": "array",
-            "buttonText": "Add SSID",
+            "type": "tabarray",
+            "title": "{{ value.name || 'new SSID' }}",
+            "expandable": true,
+            "expanded": true,
+            "orderable": false,
             "items": [
               "devices[].hideSsidByName[].name",
               "devices[].hideSsidByName[].mode"
@@ -157,17 +158,20 @@
       {
         "key": "devices[]",
         "type": "section",
-        "title": "Clients",
+        "title": "Clients policy",
         "expandable": true,
         "expanded": false,
         "items": [{
-          "key": "devices[].getClientByNameOrMac",
-          "type": "array",
-          "buttonText": "Add Client",
+          "key": "devices[].dashboartdClientsPolicy",
+          "type": "tabarray",
+          "title": "{{ value.name || 'new Client' }}",
+          "expandable": true,
+          "expanded": true,
+          "orderable": false,
           "items": [
-            "devices[].getClientByNameOrMac[].name",
-            "devices[].getClientByNameOrMac[].customName",
-            "devices[].getClientByNameOrMac[].mode"
+            "devices[].dashboartdClientsPolicy[].name",
+            "devices[].dashboartdClientsPolicy[].mac",
+            "devices[].dashboartdClientsPolicy[].mode"
           ]
         }]
       },

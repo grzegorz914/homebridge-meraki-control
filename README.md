@@ -42,7 +42,7 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 * You have possibility switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
 * You have possibility hidden `Unconfigured SSIDs` networks, this option is available in plugin settings.
 * You have possibility hidden `SSIDs networks` by network name, this option is available in plugin settings.
-* You have possibility expose `Clients` filtered by *Description or Mac Adress in Meraki Dashboard* and change its policy `Normal` or `Blocked`.
+* You have possibility expose `Clients` filtered by *Mac Address* and change its policy `Normal` / `Blocked`.
 * More comming soon...
 
 ## Configuration
@@ -57,8 +57,11 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `refreshInterval` | Here set the data refresh time in seconds. |
 | `disableLogInfo` | If enabled, disable log info, all values and state will not be displayed in *Homebridge* log. |
 | `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden. |
-| `hideSsidByName` | Here set SSIDs names which You want hide and not expose to the *Homebridge/HomeKit*. |
-| `getClientByNameOrMac` | Here set the Client *Description or Mac Adress in Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
+| `hideSsidByName.name` | Here set SSIDs name which You want hide and not expose to the *Homebridge/HomeKit*. |
+| `hideSsidByName.mode` | Here set mode *ON/OFF* for this SSID. |
+| `dashboartdClientsPolicy.name` | Here set the own *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
+| `dashboartdClientsPolicy.mac` | Here set the Client *Mac Address from Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
+| `dashboartdClientsPolicy.mode` | Here set the mode *ON/OFF* for this Client. |
 
 
 <p align="left">
@@ -82,10 +85,10 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                          "name": "SSID Name",
                          "mode": false
                      }],
-                    "getClientByNameOrMac": [{
-                         "mode": false,
-                         "name": "Client Name or Mac",
-                         "customName": "Client custom Name"
+                    "dashboartdClientsPolicy": [{
+                         "name": "Own Name",
+                         "mac": "Mac Address",
+                         "mode": false
                     }]
                 }
             ]

@@ -8,14 +8,14 @@ const fsPromises = fs.promises;
 const PLUGIN_NAME = 'homebridge-meraki-control';
 const PLATFORM_NAME = 'Meraki';
 
-let Accessory, Characteristic, Service, Categories, AccessoryUUID;
+let Accessory, Characteristic, Service, Categories, UUID;
 
 module.exports = (api) => {
   Accessory = api.platformAccessory;
   Characteristic = api.hap.Characteristic;
   Service = api.hap.Service;
   Categories = api.hap.Categories;
-  AccessoryUUID = api.hap.uuid;
+  UUID = api.hap.uuid;
   api.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, merakiPlatform, true);
 }
 
@@ -72,13 +72,7 @@ class merakiDevice {
     this.disableLogInfo = config.disableLogInfo;
     this.hideUnconfiguredSsids = config.hideUnconfiguredSsids;
     this.hideSsidByName = config.hideSsidByName || [];
-    this.getClientByNameOrMac = config.getClientByNameOrMac || [];
-
-    //get Device info
-    this.manufacturer = 'Meraki';
-    this.modelName = this.name || 'Network Name';
-    this.serialNumber = this.networkId || 'Network ID';
-    this.firmwareRevision = this.organizationId || 'Organization ID';
+    this.dashboartdClientsPolicy = config.dashboartdClientsPolicy || [];
 
     //setup variables
     this.checkDeviceInfo = true;
@@ -87,7 +81,7 @@ class merakiDevice {
 
     //meraki dashboard
     this.dashboardClientsCount = 0;
-    this.configuredClientsByNameCount = (this.getClientByNameOrMac.length != undefined) ? this.getClientByNameOrMac.length : 0;
+    this.configuredDashboardClientsCount = (this.dashboartdClientsPolicy.length != undefined) ? this.dashboartdClientsPolicy.length : 0;
     this.exposedAndExistingClientsOnDashboardCount = 0;
 
     //meraki mr
@@ -131,12 +125,13 @@ class merakiDevice {
 
   async updateDashboardClientsData() {
     this.log.debug('Network: %s, requesting dashboardClientsData.', this.name);
+
     try {
       const dashboardClientsData = await this.axiosInstance.get(this.dashboardClientsUrl + '?perPage=255&timespan=2592000');
       this.log.debug('Debug dashboardClientsData: %s', dashboardClientsData.data[0]);
 
       if (dashboardClientsData.status == 200) {
-        const configuredClientsByNameCount = this.configuredClientsByNameCount;
+        const configuredDashboardClientsCount = this.configuredDashboardClientsCount;
         const dashboardClientsCount = dashboardClientsData.data.length;
         this.clientsId = new Array();
         this.clientsMac = new Array();
@@ -152,28 +147,24 @@ class merakiDevice {
           this.clientsDescription.push(clientDescription);
         }
 
-        //client configured
+        //configured clients
+        this.exposedAndExistongClientsOnDashboardName = new Array();
         this.exposedAndExistingClientsOnDashboardId = new Array();
         this.exposedAndExistongClientsOnDashboardMac = new Array();
-        this.exposedAndExistongClientsOnDashboardDescription = new Array();
-        this.exposedAndExistongClientsOnDashboardCustomName = new Array();
 
-        for (let j = 0; j < configuredClientsByNameCount; j++) {
-          const clientMode = (this.getClientByNameOrMac[j].mode == true);
-          const clientNameOrMac = this.getClientByNameOrMac[j].name;
-          const clientCustomName = this.getClientByNameOrMac[j].customName;
-          const clientsByNameOrMac = clientMode ? this.clientsMac : this.clientsDescription;
+        for (let j = 0; j < configuredDashboardClientsCount; j++) {
+          const clientName = this.dashboartdClientsPolicy[j].name;
+          const clientMac = this.dashboartdClientsPolicy[j].mac;
+          const clientMode = (this.dashboartdClientsPolicy[j].mode == true);
 
-          const clientIndex = clientsByNameOrMac.indexOf(clientNameOrMac);
+          const clientIndex = this.clientsMac.indexOf(clientMac);
           const configuredClientId = this.clientsId[clientIndex];
           const configuredClientMac = this.clientsMac[clientIndex];
-          const configuredClientDescription = this.clientsDescription[clientIndex];
 
           //check client exist in dshboard
-          const exposedAndExistongClientOnDashboardId = (this.clientsId.indexOf(configuredClientId) >= 0) ? this.exposedAndExistingClientsOnDashboardId.push(configuredClientId) : false;
-          const exposedAndExistongClientOnDashboardMac = (this.clientsId.indexOf(configuredClientId) >= 0) ? this.exposedAndExistongClientsOnDashboardMac.push(configuredClientMac) : false;
-          const exposedAndExistongClientOnDashboardDescription = (this.clientsId.indexOf(configuredClientId) >= 0) ? this.exposedAndExistongClientsOnDashboardDescription.push(configuredClientDescription) : false;
-          const exposedAndExistongClientsOnDashboardCustomName = (this.clientsId.indexOf(configuredClientId) >= 0) ? (clientMode && clientCustomName != undefined) ? this.exposedAndExistongClientsOnDashboardCustomName.push(clientCustomName) : this.exposedAndExistongClientsOnDashboardCustomName.push(configuredClientDescription) : false;
+          const exposedAndExistongClientsOnDashboardName = (this.clientsId.indexOf(configuredClientId) >= 0 && clientMode) ? this.exposedAndExistongClientsOnDashboardName.push(clientName) : false;
+          const exposedAndExistongClientOnDashboardId = (this.clientsId.indexOf(configuredClientId) >= 0 && clientMode) ? this.exposedAndExistingClientsOnDashboardId.push(configuredClientId) : false;
+          const exposedAndExistongClientOnDashboardMac = (this.clientsId.indexOf(configuredClientId) >= 0 && clientMode) ? this.exposedAndExistongClientsOnDashboardMac.push(configuredClientMac) : false;
         }
         this.dashboardClientsCount = dashboardClientsCount;
         this.exposedAndExistingClientsOnDashboardCount = this.exposedAndExistingClientsOnDashboardId.length;
@@ -187,6 +178,7 @@ class merakiDevice {
 
   async updateDashboardClientsPolicyData() {
     this.log.debug('Network: %s, requesting dashboardClientsPolicyData.', this.name);
+
     try {
       this.clientsPolicyMac = new Array();
       this.clientsPolicyPolicy = new Array();
@@ -195,6 +187,7 @@ class merakiDevice {
       const exposedAndExistingClientsOnDashboardCount = this.exposedAndExistingClientsOnDashboardCount;
       for (let i = 0; i < exposedAndExistingClientsOnDashboardCount; i++) {
         const clientId = this.exposedAndExistingClientsOnDashboardId[i];
+
         const dashboardClientsPolicyData = await this.axiosInstance.get(this.dashboardClientsUrl + '/' + clientId + '/policy');
         this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
 
@@ -223,6 +216,7 @@ class merakiDevice {
 
   async updateWirelessData() {
     this.log.debug('Network: %s, requesting wirelessData.', this.name);
+
     try {
       const wirelessData = await this.axiosInstance.get(this.wirelessUrl);
       this.log.debug('Debug merakiMrData: %s', wirelessData.data[0]);
@@ -279,10 +273,10 @@ class merakiDevice {
   async getDeviceInfo() {
     try {
       this.log('-------- %s --------', this.name);
-      this.log('Manufacturer: %s', this.manufacturer);
-      this.log('Model: %s', this.modelName);
-      this.log('Serialnr: %s', this.serialNumber);
-      this.log('Firmware: %s', this.firmwareRevision);
+      this.log('Manufacturer: %s', 'Cisco/Meraki');
+      this.log('Network: %s', this.name);
+      this.log('Network Id: %s', this.networkId);
+      this.log('Organization Id: %s', this.organizationId);
       this.log('----------------------------------');
 
       this.checkDeviceInfo = false;
@@ -298,17 +292,17 @@ class merakiDevice {
   prepareAccessory() {
     this.log.debug('prepareAccessory');
     const accessoryName = this.name;
-    const accessoryUUID = AccessoryUUID.generate(this.networkId);
+    const accessoryUUID = UUID.generate(this.networkId);
     const accessoryCategory = Categories.AIRPORT;
     const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
     accessory.context.device = this.config.device;
 
     //Prepare information service
     this.log.debug('prepareInformationService');
-    const manufacturer = this.manufacturer;
-    const modelName = this.modelName;
-    const serialNumber = this.serialNumber;
-    const firmwareRevision = this.firmwareRevision;
+    const manufacturer = 'Meraki';
+    const modelName = accessoryName;
+    const serialNumber = this.organizationId;
+    const firmwareRevision = this.networkId;
 
     accessory.removeService(accessory.getService(Service.AccessoryInformation));
     const informationService = new Service.AccessoryInformation();
@@ -328,7 +322,7 @@ class merakiDevice {
 
     this.merakiDashboardClientPolicyServices = new Array();
     for (let i = 0; i < exposedAndExistingClientsOnDashboardCount; i++) {
-      const clientNameToBeExposed = this.exposedAndExistongClientsOnDashboardCustomName[i];
+      const clientNameToBeExposed = this.exposedAndExistongClientsOnDashboardName[i];
 
       const merakiDashboardClientPolicyService = new Service.Switch(clientNameToBeExposed, 'merakiDashboardClientPolicyService' + i);
       merakiDashboardClientPolicyService.getCharacteristic(Characteristic.On)

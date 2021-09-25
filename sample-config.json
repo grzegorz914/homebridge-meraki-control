@@ -29,10 +29,10 @@
                 "name": "SSID Name",
                 "mode": false
             }],
-            "getClientByNameOrMac": [{
-                "mode": false,
-                "name": "Client Name or Mac",
-                "customName": "Client custom Name"
+            "dashboartdClientsPolicy": [{
+                "name": "Own Name",
+                "mac": "Mac Address",
+                "mode": false
             }]
         }]
     }]
