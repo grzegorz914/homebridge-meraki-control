@@ -17,7 +17,7 @@
               "title": "Name",
               "type": "string",
               "placeholder": "Network Name",
-              "description": "Here set the Name to be displayed in Homebridge/HomeKit for this accessoty.",
+              "description": "Here set the Name to be displayed in Homebridge/HomeKit for this accessory.",
               "required": true
             },
             "host": {
