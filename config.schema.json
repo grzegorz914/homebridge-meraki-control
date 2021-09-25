@@ -184,6 +184,12 @@
                     "placeholder": "Serial Number",
                     "description": "Here set the Serial Number of the Switch to be exposed to the Homebridge/HomeKit.",
                     "required": false
+                  },
+                  "mode": {
+                    "title": "Enable",
+                    "type": "boolean",
+                    "description": "Here set ON/OFF for activate/deactivate this function.",
+                    "required": false
                   }
                 }
               },
@@ -250,7 +256,7 @@
       {
         "key": "devices[]",
         "type": "section",
-        "title": "Switch",
+        "title": "Switches",
         "expandable": true,
         "expanded": false,
         "items": [
@@ -264,7 +270,8 @@
             "orderable": false,
             "items": [
               "devices[].switches[].name",
-              "devices[].switches[].serialNumber"
+              "devices[].switches[].serialNumber",
+              "devices[].switches[].mode"
             ]
           }
         ]

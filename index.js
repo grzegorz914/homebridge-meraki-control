@@ -290,11 +290,15 @@ class merakiDevice {
       this.switchPortsState = new Array();
       this.switchPortsPoeState = new Array();
 
+      this.exposedeSwitchPortsId = new Array();
+      this.exposedeSwitchPortsName = new Array();
+
       const switchesCount = this.switchesCount;
       const switchSerialNumber = this.switches[0].serialNumber;
+      const switchMode = this.switches[0].mode;
       const switchPortsUrl = '/devices/' + switchSerialNumber + '/switch/ports';
 
-      const switchPortsData = await this.axiosInstance.get(switchPortsUrl);
+      const switchPortsData = switchMode ? await this.axiosInstance.get(switchPortsUrl) : false;
       this.log.debug('Debug switchPortsData: %s', switchPortsData.data);
 
       if (switchPortsData.status == 200) {

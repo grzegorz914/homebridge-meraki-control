@@ -68,6 +68,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `switchesControl` | This option enable/disable control of Switches. |
 | `switches.name` | Here set Switch Name. |
 | `switches.serialNumber` | Here set the Serial Number of this Switch. |
+| `switches.mode` | Here set mode *ON/OFF* for this Port. |
 
 
 <p align="left">
@@ -101,7 +102,8 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                      "switchesControl": false,
                      "switches": [{
                          "name": "Switch Name",
-                         "serialNumber": "O1H1-GL5D-AXXX"
+                         "serialNumber": "O1H1-GL5D-AXXX",
+                         "mode": false
                      }]
                 }
             ]

@@ -39,7 +39,8 @@
             "switchesControl": false,
             "switches": [{
                 "name": "Switch Name",
-                "serialNumber": "O1H1-GL5D-AXXX"
+                "serialNumber": "O1H1-GL5D-AXXX",
+                "mode": false
             }]
         }]
     }]
