@@ -42,7 +42,7 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 * You have possibility switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
 * You have possibility hidden `Unconfigured SSIDs` networks, this option is available in plugin settings.
 * You have possibility hidden `SSIDs networks` by network name, this option is available in plugin settings.
-* You have possibility expose `Clients` filtered by *Mac Address* and change its policy `Normal` / `Blocked`.
+* You have possibility expose `Clients` filtered by *Mac Address* and change its policy `Normal, Whitelisted, Group Policy` / `Blocked`.
 * More comming soon...
 
 ## Configuration
@@ -60,8 +60,9 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `hideSsidByName.name` | Here set SSIDs name which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `hideSsidByName.mode` | Here set mode *ON/OFF* for this SSID. |
 | `dashboartdClientsPolicy.name` | Here set the own *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
-| `dashboartdClientsPolicy.mac` | Here set the Client *Mac Address from Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
-| `dashboartdClientsPolicy.mode` | Here set the mode *ON/OFF* for this Client. |
+| `dashboartdClientsPolicy.mac` | Here set the client *Mac Address from Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
+| `dashboartdClientsPolicy.type` | Here choice the policy *Type* to be appiled for Client. |
+| `dashboartdClientsPolicy.mode` | Here set the mode *ON/OFF* for Client. |
 
 
 <p align="left">
@@ -88,6 +89,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                     "dashboartdClientsPolicy": [{
                          "name": "Own Name",
                          "mac": "Mac Address",
+                         "type": "Policy type",
                          "mode": false
                     }]
                 }

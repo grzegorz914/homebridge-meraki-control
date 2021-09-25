@@ -32,6 +32,7 @@
             "dashboartdClientsPolicy": [{
                 "name": "Own Name",
                 "mac": "Mac Address",
+                "type": "Policy type",
                 "mode": false
             }]
         }]

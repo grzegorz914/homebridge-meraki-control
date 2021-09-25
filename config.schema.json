@@ -112,6 +112,28 @@
                     "description": "Here set the Client Mac Address to be exposed in Homebridge/HomeKit and change its policy.",
                     "required": false
                   },
+                  "type": {
+                    "title": "Policy Type",
+                    "type": "string",
+                    "description": "Here set the policy type to be appiled.",
+                    "oneOf": [{
+                      "title": "Normal",
+                      "enum": [
+                        "Normal"
+                      ]
+                    }, {
+                      "title": "Whitelisted",
+                      "enum": [
+                        "Whitelisted"
+                      ]
+                    }, {
+                      "title": "Group Policy",
+                      "enum": [
+                        "Group policy"
+                      ]
+                    }],
+                    "required": true
+                  },
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
@@ -171,6 +193,7 @@
           "items": [
             "devices[].dashboartdClientsPolicy[].name",
             "devices[].dashboartdClientsPolicy[].mac",
+            "devices[].dashboartdClientsPolicy[].type",
             "devices[].dashboartdClientsPolicy[].mode"
           ]
         }]
