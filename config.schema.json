@@ -2,7 +2,7 @@
   "pluginAlias": "Meraki",
   "pluginType": "platform",
   "singular": true,
-  "headerDisplay": "This plugin works with Meraki Dashboard and Devices and are exposed to HomeKit as separate accessories and each needs to be manually paired.\n\n1. Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' height='16.42px'> app on your device.\n2. Tap the Home tab, then tap <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' height='16.42px'>.\n3. Tap *Add Accessory*, and select *I Don't Have a Code or select More Options*.\n4. Select Accessory and Enter the Homebridge PIN, or scan the QR code in Homebridge UI.",
+  "headerDisplay": "This plugin works with Meraki (Dashboard API) and is exposed to the HomeKit as separate accessory and needs to be manually paired.\n\n1. Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' height='16.42px'> app on your device.\n2. Tap the Home tab, then tap <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' height='16.42px'>.\n3. Tap *Add Accessory*, and select *I Don't Have a Code or select More Options*.\n4. Select Accessory and Enter the Homebridge PIN, or scan the QR code in Homebridge UI.",
   "footerDisplay": "This plugin is available [here](https://github.com/grzegorz914/homebridge-meraki-control).",
   "schema": {
     "type": "object",
@@ -14,20 +14,22 @@
           "type": "object",
           "properties": {
             "name": {
-              "title": "Network name",
+              "title": "Name",
               "type": "string",
-              "placeholder": "iDom",
+              "placeholder": "Network Name",
+              "description": "Here set the Name to be displayed in Homebridge/HomeKit for this accessoty.",
               "required": true
             },
             "host": {
-              "title": "API path",
+              "title": "API Path",
               "type": "string",
               "placeholder": "https://n123.meraki.com",
-              "required": true,
-              "format": "hostname"
+              "format": "hostname",
+              "description": "Here set the Meraki Api Path.",
+              "required": true
             },
             "apiKey": {
-              "title": "API key",
+              "title": "API Key",
               "type": "string",
               "placeholder": "01032453453421923",
               "description": "Here set the Meraki Api Key.",
@@ -48,27 +50,27 @@
               "required": true
             },
             "refreshInterval": {
-              "title": "Refresh interval (sec)",
+              "title": "Refresh Interval (sec)",
               "type": "integer",
               "default": 10,
               "minimum": 0,
               "maximum": 60,
-              "description": "Here set the data refresh time.",
+              "description": "Here set the data refresh time in seconds.",
               "required": true
             },
             "disableLogInfo": {
-              "title": "Disable log info",
+              "title": "Disable Log Info",
               "type": "boolean",
               "default": false,
-              "required": false,
-              "description": "This disable log info, all values and state will not be displayed in Homebridge log."
+              "description": "This disable log info, all values and state will not be displayed in Homebridge log.",
+              "required": false
             },
             "hideUnconfiguredSsids": {
               "title": "Hide unconfigured SSIDs",
               "type": "boolean",
               "default": false,
-              "required": false,
-              "description": "This option hide all unconfigured SSIDs."
+              "description": "This option hide all unconfigured SSIDs.",
+              "required": false
             },
             "hideSsidByName": {
               "title": "SSIDs",
@@ -77,7 +79,7 @@
                 "type": "object",
                 "properties": {
                   "name": {
-                    "title": "SSID Name",
+                    "title": "Name",
                     "type": "string",
                     "placeholder": "SSID Name",
                     "description": "Here set the SSID Name to be hidden and not exposed to the Homebridge/HomeKit.",
@@ -86,7 +88,8 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set the function ON/OFF.",
+                    "default": false,
+                    "description": "Here set ON/OFF for activate/deactivate this function.",
                     "required": false
                   }
                 }
@@ -102,20 +105,20 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "Name",
-                    "description": "Here set the own Name to be displayed in Homebridge/HomeKit for this client.",
+                    "description": "Here set the Name to be displayed in Homebridge/HomeKit for this client.",
                     "required": false
                   },
                   "mac": {
-                    "title": "Mac Address",
+                    "title": "Mac",
                     "type": "string",
                     "placeholder": "Mac Address",
-                    "description": "Here set the Client Mac Address to be exposed in Homebridge/HomeKit and change its policy.",
+                    "description": "Here set the Mac Address of the client to be exposed in Homebridge/HomeKit.",
                     "required": false
                   },
                   "type": {
-                    "title": "Policy Type",
+                    "title": "Policy",
                     "type": "string",
-                    "description": "Here set the policy type to be appiled.",
+                    "description": "Here choice the policy type to be appiled.",
                     "oneOf": [{
                       "title": "Normal",
                       "enum": [
@@ -137,7 +140,8 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set the function ON/OFF.",
+                    "default": false,
+                    "description": "Here set ON/OFF for activate/deactivate this function.",
                     "required": false
                   }
                 }
