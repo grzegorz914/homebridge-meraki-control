@@ -65,36 +65,6 @@
               "description": "This disable log info, all values and state will not be displayed in Homebridge log.",
               "required": false
             },
-            "hideUnconfiguredSsids": {
-              "title": "Hide unconfigured SSIDs",
-              "type": "boolean",
-              "default": false,
-              "description": "This option hide all unconfigured SSIDs.",
-              "required": false
-            },
-            "hideSsidByName": {
-              "title": "SSIDs",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "title": "Name",
-                    "type": "string",
-                    "placeholder": "SSID Name",
-                    "description": "Here set the SSID Name to be hidden and not exposed to the Homebridge/HomeKit.",
-                    "required": false
-                  },
-                  "mode": {
-                    "title": "Enable",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Here set ON/OFF for activate/deactivate this function.",
-                    "required": false
-                  }
-                }
-              }
-            },
             "dashboardClientsPolicy": {
               "title": "Clients",
               "type": "array",
@@ -140,11 +110,85 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "default": false,
                     "description": "Here set ON/OFF for activate/deactivate this function.",
                     "required": false
                   }
                 }
+              }
+            },
+            "accessPointsControl": {
+              "title": "Enable Control",
+              "type": "boolean",
+              "default": false,
+              "description": "This option enable/disable control of access point.",
+              "required": false
+            },
+            "hideUnconfiguredSsids": {
+              "title": "Hide unconfigured SSIDs",
+              "type": "boolean",
+              "default": false,
+              "description": "This option hide all unconfigured SSIDs.",
+              "required": false,
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
+              }
+            },
+            "hideSsids": {
+              "title": "SSIDs",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "placeholder": "SSID Name",
+                    "description": "Here set the SSID Name to be hidden and not exposed to the Homebridge/HomeKit.",
+                    "required": false
+                  },
+                  "mode": {
+                    "title": "Enable",
+                    "type": "boolean",
+                    "description": "Here set ON/OFF for activate/deactivate this function.",
+                    "required": false
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
+              }
+            },
+            "switchesControl": {
+              "title": "Enable Control",
+              "type": "boolean",
+              "default": false,
+              "description": "This option enable/disable control of switch.",
+              "required": false
+            },
+            "switches": {
+              "title": "Switches",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "placeholder": "Switch Name",
+                    "description": "Here set the Switch Name.",
+                    "required": false
+                  },
+                  "serialNumber": {
+                    "title": "Serial Number",
+                    "type": "string",
+                    "placeholder": "Serial Number",
+                    "description": "Here set the Serial Number of the Switch to be exposed to the Homebridge/HomeKit.",
+                    "required": false
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].switchesControl === true;"
               }
             }
           }
@@ -159,28 +203,6 @@
     "items": [
       "devices[].name",
       "devices[].host",
-      {
-        "key": "devices[]",
-        "type": "section",
-        "title": "SSIDs",
-        "expandable": true,
-        "expanded": false,
-        "items": [
-          "devices[].hideUnconfiguredSsids",
-          {
-            "key": "devices[].hideSsidByName",
-            "type": "tabarray",
-            "title": "{{ value.name || 'new SSID' }}",
-            "expandable": true,
-            "expanded": true,
-            "orderable": false,
-            "items": [
-              "devices[].hideSsidByName[].name",
-              "devices[].hideSsidByName[].mode"
-            ]
-          }
-        ]
-      },
       {
         "key": "devices[]",
         "type": "section",
@@ -201,6 +223,51 @@
             "devices[].dashboardClientsPolicy[].mode"
           ]
         }]
+      },
+      {
+        "key": "devices[]",
+        "type": "section",
+        "title": "Acces Point",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "devices[].accessPointsControl",
+          "devices[].hideUnconfiguredSsids",
+          {
+            "key": "devices[].hideSsids",
+            "type": "tabarray",
+            "title": "{{ value.name || 'new SSID' }}",
+            "expandable": true,
+            "expanded": true,
+            "orderable": false,
+            "items": [
+              "devices[].hideSsids[].name",
+              "devices[].hideSsids[].mode"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "devices[]",
+        "type": "section",
+        "title": "Switch",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "devices[].switchesControl",
+          {
+            "key": "devices[].switches",
+            "type": "tabarray",
+            "title": "{{ value.name || 'new Switch' }}",
+            "expandable": true,
+            "expanded": true,
+            "orderable": false,
+            "items": [
+              "devices[].switches[].name",
+              "devices[].switches[].serialNumber"
+            ]
+          }
+        ]
       },
       {
         "key": "devices[]",

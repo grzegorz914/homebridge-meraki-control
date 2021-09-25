@@ -39,10 +39,11 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.
 
 ## Features and How To Use Them
-* You have possibility switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
-* You have possibility hidden `Unconfigured SSIDs` networks, this option is available in plugin settings.
-* You have possibility hidden `SSIDs networks` by network name, this option is available in plugin settings.
-* You have possibility expose `Clients` filtered by *Mac Address* and change its policy `Normal, Whitelisted, Group Policy` / `Blocked`.
+* Switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
+* Hidden `Unconfigured SSIDs` networks, this option is available in plugin settings.
+* Hidden `SSIDs networks` by network name, this option is available in plugin settings.
+* Expose `Clients` filtered by *Mac Address* and change its policy `Normal, Whitelisted, Group Policy` / `Blocked`.
+* Switch `ON/OFF Ports` of switches (MS devices), this option is available in plugin settings, right now only one switch is supported.
 * More comming soon...
 
 ## Configuration
@@ -56,13 +57,17 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `networkId` | Here set Your *Network Id*. |
 | `refreshInterval` | Here set the data refresh time in seconds. |
 | `disableLogInfo` | If enabled, disable log info, all values and state will not be displayed in *Homebridge* log. |
-| `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden. |
-| `hideSsidByName.name` | Here set SSIDs name which You want hide and not expose to the *Homebridge/HomeKit*. |
-| `hideSsidByName.mode` | Here set mode *ON/OFF* for this SSID. |
 | `dashboardClientsPolicy.name` | Here set the own *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
 | `dashboardClientsPolicy.mac` | Here set the client *Mac Address from Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
 | `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for Client. |
 | `dashboardClientsPolicy.mode` | Here set the mode *ON/OFF* for Client. |
+| `accessPointsControl` | This option enable/disable control of Access Points. |
+| `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden. |
+| `hideSsids.name` | Here set SSIDs Name which You want hide and not expose to the *Homebridge/HomeKit*. |
+| `hideSsids.mode` | Here set mode *ON/OFF* for this SSID. |
+| `switchesControl` | This option enable/disable control of Switches. |
+| `switches.name` | Here set Switch Name. |
+| `switches.serialNumber` | Here set the Serial Number of this Switch. |
 
 
 <p align="left">
@@ -81,17 +86,23 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                     "networkId": "L_0123456789",
                     "refreshInterval": 10,
                     "disableLogInfo": false,
-                    "hideUnconfiguredSsids": false,
-                    "hideSsidByName": [{
-                         "name": "SSID Name",
-                         "mode": false
-                     }],
                     "dashboardClientsPolicy": [{
                          "name": "Own Name",
                          "mac": "Mac Address",
                          "type": "Policy type",
                          "mode": false
-                    }]
+                    }],
+                    "accessPointsControl": false,
+                    "hideUnconfiguredSsids": false,
+                    "hideSsids": [{
+                         "name": "SSID Name",
+                         "mode": false
+                     }],
+                     "switchesControl": false,
+                     "switches": [{
+                         "name": "Switch Name",
+                         "serialNumber": "O1H1-GL5D-AXXX"
+                     }]
                 }
             ]
         }
