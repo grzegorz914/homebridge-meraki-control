@@ -75,14 +75,14 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "Name",
-                    "description": "Here set the Name to be displayed in Homebridge/HomeKit for this client.",
+                    "description": "Here set the Name to be displayed in Homebridge/HomeKit for this Client.",
                     "required": false
                   },
                   "mac": {
                     "title": "Mac",
                     "type": "string",
                     "placeholder": "Mac Address",
-                    "description": "Here set the Mac Address of the client to be exposed in Homebridge/HomeKit.",
+                    "description": "Here set the Mac Address of the Client to be exposed in Homebridge/HomeKit.",
                     "required": false
                   },
                   "type": {
@@ -110,7 +110,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for activate/deactivate this function.",
+                    "description": "Here set ON/OFF for activate/deactivate this Client.",
                     "required": false
                   }
                 }
@@ -120,7 +120,7 @@
               "title": "Enable Control",
               "type": "boolean",
               "default": false,
-              "description": "This option enable/disable control of access point.",
+              "description": "This option enable/disable control of Access Points.",
               "required": false
             },
             "hideUnconfiguredSsids": {
@@ -149,7 +149,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for activate/deactivate this function.",
+                    "description": "Here set ON/OFF for activate/deactivate this SSID.",
                     "required": false
                   }
                 }
@@ -162,7 +162,7 @@
               "title": "Enable Control",
               "type": "boolean",
               "default": false,
-              "description": "This option enable/disable control of switch.",
+              "description": "This option enable/disable control of switches.",
               "required": false
             },
             "switches": {
@@ -188,7 +188,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for activate/deactivate this function.",
+                    "description": "Here set ON/OFF for activate/deactivate this Switch.",
                     "required": false
                   }
                 }
@@ -212,7 +212,7 @@
       {
         "key": "devices[]",
         "type": "section",
-        "title": "Clients Policy",
+        "title": "Dashboard Clients",
         "expandable": true,
         "expanded": false,
         "items": [{
@@ -233,7 +233,7 @@
       {
         "key": "devices[]",
         "type": "section",
-        "title": "Acces Point",
+        "title": "Access Points",
         "expandable": true,
         "expanded": false,
         "items": [
