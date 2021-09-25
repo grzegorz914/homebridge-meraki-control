@@ -86,7 +86,8 @@ class merakiDevice {
 
     //meraki mr
     this.wirelessSsidsCount = 0;
-    this.configuredHiddenSsidsCount = (this.hideSsidByName.length != undefined) ? this.hideSsidByName.length : 0;
+    this.configuredHiddenSsidsCount = this.hideSsidByName.length;
+    this.exposedSsidsCount = 0;
 
     //meraki url
     const BASE_API_URL = this.host + '/api/v1';
@@ -232,6 +233,8 @@ class merakiDevice {
 
         const configuredHiddenSsidsCount = this.configuredHiddenSsidsCount;
         const wirelessSsidsCount = wirelessData.data.length;
+        const exposedSsidsCount = this.exposedSsidsName.length;
+
         for (let j = 0; j < configuredHiddenSsidsCount; j++) {
           const hiddenSsidName = this.hideSsidByName[j].name;
           const hiddenSsidEnabled = (this.hideSsidByName[j].mode == true);
@@ -254,7 +257,6 @@ class merakiDevice {
           }
         }
 
-        const exposedSsidsCount = this.exposedSsidsName.length;
         for (let i = 0; i < exposedSsidsCount; i++) {
           const ssidState = (this.exposedSsidsState[i] == true);
 
@@ -263,8 +265,8 @@ class merakiDevice {
               .updateCharacteristic(Characteristic.On, ssidState);
           }
         }
-        this.exposedSsidsCount = exposedSsidsCount;
         this.wirelessSsidsCount = wirelessSsidsCount;
+        this.exposedSsidsCount = exposedSsidsCount;
 
         const getDeviceInfo = this.checkDeviceInfo ? this.getDeviceInfo() : false;
       }
