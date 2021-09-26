@@ -17,7 +17,7 @@
               "title": "Name",
               "type": "string",
               "placeholder": "Network Name",
-              "description": "Here set the Name to be displayed in Homebridge/HomeKit for this accessory.",
+              "description": "Here set the Name to be displayed in Homebridge/HomeKit for this Accessory.",
               "required": true
             },
             "host": {
@@ -39,14 +39,14 @@
               "title": "Organization Id",
               "type": "string",
               "placeholder": "123456789",
-              "description": "Here set the Organization ID.",
+              "description": "Here set the Organization Id.",
               "required": true
             },
             "networkId": {
               "title": "Network Id",
               "type": "string",
               "placeholder": "L_0123456789",
-              "description": "Here set the Network ID.",
+              "description": "Here set the Network Id.",
               "required": true
             },
             "refreshInterval": {
@@ -55,14 +55,14 @@
               "default": 10,
               "minimum": 0,
               "maximum": 60,
-              "description": "Here set the data refresh time in seconds.",
+              "description": "Here set the data refresh time in (sec).",
               "required": true
             },
             "disableLogInfo": {
               "title": "Disable Log Info",
               "type": "boolean",
               "default": false,
-              "description": "This disable log info, all values and state will not be displayed in Homebridge log.",
+              "description": "This disable log info, all values and state will not be displayed in the Homebridge log.",
               "required": false
             },
             "dashboardClientsPolicy": {
@@ -88,7 +88,7 @@
                   "type": {
                     "title": "Policy",
                     "type": "string",
-                    "description": "Here choice the policy type to be appiled.",
+                    "description": "Here choice the Policy type to be appiled for this Client.",
                     "oneOf": [{
                       "title": "Normal",
                       "enum": [
@@ -110,7 +110,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for activate/deactivate this Client.",
+                    "description": "Here set ON/OFF for Activate/Deactivate this Client control.",
                     "required": false
                   }
                 }
@@ -120,7 +120,7 @@
               "title": "Enable Control",
               "type": "boolean",
               "default": false,
-              "description": "This option enable/disable control of Access Points.",
+              "description": "This option Enable/Disable control of Access Points.",
               "required": false
             },
             "hideUnconfiguredSsids": {
@@ -149,7 +149,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for activate/deactivate this SSID.",
+                    "description": "Here set ON/OFF for activate/deactivate this SSID control.",
                     "required": false
                   }
                 }
@@ -162,7 +162,7 @@
               "title": "Enable Control",
               "type": "boolean",
               "default": false,
-              "description": "This option enable/disable control of Switches.",
+              "description": "This option Enable/Disable control of Switches.",
               "required": false
             },
             "switches": {
@@ -188,7 +188,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for activate/deactivate this Switch.",
+                    "description": "Here set ON/OFF for Activate/Deactivate this Switch control.",
                     "required": false
                   }
                 }
