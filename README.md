@@ -29,10 +29,10 @@
 
 ## Features and How To Use Them
 * Switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
-* Hidde `Unconfigured SSIDs` networks, this option is available in plugin settings.
-* Hidde `SSIDs networks` by network name, this option is available in plugin settings.
-* Expose `Clients` filtered by *Mac Address* and change its policy `Normal, Whitelisted, Group Policy` / `Blocked`.
-* Switch `ON/OFF Ports` of switches (MS devices), this option is available in plugin settings, right now only one switch is supported.
+* Hide `Unconfigured SSIDs` networks, available in plugin settings.
+* Hide `SSIDs networks` filtered by network *Name*, available in plugin settings.
+* Expose `Clients` filtered by *Mac Address* and apply policy `Normal, Whitelisted, Group Policy` / `Blocked`.
+* Switch `ON/OFF Ports` on switch, available in plugin settings, right now only one switch is supported.
 * More comming soon...
 
 ## Configuration
