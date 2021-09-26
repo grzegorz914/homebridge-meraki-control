@@ -10,7 +10,7 @@
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/grzegorz914/homebridge-meraki-control.svg)](https://github.com/grzegorz914/homebridge-meraki-control/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/grzegorz914/homebridge-meraki-control.svg)](https://github.com/grzegorz914/homebridge-meraki-control/issues)
 
- homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
+ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
   
 </span>
 
