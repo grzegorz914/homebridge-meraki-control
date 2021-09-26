@@ -21,15 +21,11 @@
 * If use with Hoobs possible config incompatibilty.
 
 ## Package Requirements
-| Package Link | Required |
-| --- | --- |
-| [Homebridge](https://github.com/homebridge/homebridge) | Required | 
-| [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) | Highly Recommended |
-
-## Installation
-* Follow the step-by-step instructions on the [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) for how to install.
-* Follow the step-by-step instructions on the [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) for how to install.
-* Install homebridge-meraki-control using: `npm install -g homebridge-meraki-control` or search for `meraki` in Config UI X.
+| Package Link | Required | Installation |
+| --- | --- | --- |
+| [Homebridge](https://github.com/homebridge/homebridge) | Required | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) |
+| [Meraki Control](https://www.npmjs.com/package/homebridge-meraki-control) | Required | `npm install -g homebridge-meraki-control` |
+| [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) | Highly Recommended | [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) |
 
 ## Features and How To Use Them
 * Switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
