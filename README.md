@@ -24,7 +24,7 @@
 | Package Link | Installation | Role | Required |
 | --- | --- | --- | --- |
 | [Homebridge](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required |
-| [Homebridge Meraki Control](https://www.npmjs.com/package/homebridge-meraki-control) | `npm install -g homebridge-meraki-control` | Homebridge Plug-In | Required |
+| [Homebridge Meraki Control](https://www.npmjs.com/package/homebridge-meraki-control) | `npm install -g homebridge-meraki-control` | Plug-In | Required |
 | [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) | [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | Web UI Interface | Highly Recommended |
 
 ## Features and How To Use Them
