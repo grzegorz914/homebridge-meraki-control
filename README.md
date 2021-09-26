@@ -108,11 +108,11 @@ Each accessory needs to be manually paired.
 
 ## Limitations
 * Due to a HomeKit limitation, that maximum services for 1 accessory is 100. Acessory containing > 100 services will not respond.
-* The services in this accessory are:
-  * Information service.
-  * SSIDs service.
-  * Clients service.
-  * Switch Ports service.
+* The Services in this accessory are:
+  * Information.
+  * SSIDs.
+  * Clients.
+  * Switch Ports.
 
 ## Whats new:
 https://github.com/grzegorz914/homebridge-meraki-control/blob/master/CHANGELOG.md
