@@ -51,7 +51,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `refreshInterval` | Here set the data refresh time in seconds. |
 | `disableLogInfo` | If enabled, disable log info, all values and state will not be displayed in *Homebridge* log. |
 | `dashboardClientsPolicy.name` | Here set the *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
-| `dashboardClientsPolicy.mac` | Here set the *Client Mac Address from Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
+| `dashboardClientsPolicy.mac` | Here set the *Client Mac Address* which You want expose to the *Homebridge/HomeKit*. |
 | `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for this Client. |
 | `dashboardClientsPolicy.mode` | Here set the mode *ON/OFF* for this Client. |
 | `accessPointsControl` | This option *Enable/Disable* control of Access Points. |
