@@ -385,6 +385,7 @@ class merakiDevice {
     this.merakiDashboardClientPolicyServices = new Array();
     for (let i = 0; i < exposedAndExistingDaschboardClientsCount; i++) {
       const clientName = this.exposedAndExistongClientsOnDashboardName[i];
+
       const merakiDashboardClientPolicyService = new Service.Switch(clientName, 'merakiDashboardClientPolicyService' + i);
       merakiDashboardClientPolicyService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
@@ -454,15 +455,17 @@ class merakiDevice {
     this.merakiSwitchServices = new Array();
     for (let i = 0; i < switchPortsCount; i++) {
       const switchPortName = this.switchPortsName[i];
+      const switchPortId = this.switchPortsId[i];
+      const switchPortExposedName = switchPortId + '. ' + switchPortName;
       const switchSerialNumber = this.switches[0].serialNumber;
       const switchPortsUrl = '/devices/' + switchSerialNumber + '/switch/ports';
 
-      const merakiSwitchService = new Service.Switch(switchPortName, 'merakiSwitchService' + i);
+      const merakiSwitchService = new Service.Switch(switchPortExposedName, 'merakiSwitchService' + i);
       merakiSwitchService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
           const state = this.switchPortsState[i];
           if (!this.disableLogInfo) {
-            this.log('Network: %s, SSIDs: %s, get state: %s', accessoryName, switchPortName, state ? 'Enabled' : 'Disabled');
+            this.log('Network: %s, SSIDs: %s, get state: %s', accessoryName, switchPortExposedName, state ? 'Enabled' : 'Disabled');
           }
           return state;
         })
@@ -473,13 +476,13 @@ class merakiDevice {
             const setSwitchPort = await this.axiosInstance.put(switchPortsUrl + '/' + switchPortId, {
               'enabled': state
             });
-            this.log.debug('Network: %s, SSID: %s, debug setSsid: %s', accessoryName, switchPortName, setSsid.data);
+            this.log.debug('Network: %s, SSID: %s, debug setSsid: %s', accessoryName, switchPortExposedName, setSsid.data);
             if (!this.disableLogInfo) {
-              this.log('Network: %s, SSID: %s, set state: %s', accessoryName, switchPortName, state ? 'Enabled' : 'Disabled');
+              this.log('Network: %s, SSID: %s, set state: %s', accessoryName, switchPortExposedName, state ? 'Enabled' : 'Disabled');
             }
             this.updateDashboardClientsData();
           } catch (error) {
-            this.log.error(('Network: %s, SSID: %s, set  error: %s', accessoryName, switchPortName, error));
+            this.log.error(('Network: %s, SSID: %s, set  error: %s', accessoryName, switchPortExposedName, error));
           }
         });
 

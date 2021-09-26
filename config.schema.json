@@ -149,7 +149,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for activate/deactivate this SSID control.",
+                    "description": "Here set ON/OFF for Activate/Deactivate this SSID control.",
                     "required": false
                   }
                 }
