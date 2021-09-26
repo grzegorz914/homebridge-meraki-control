@@ -17,7 +17,7 @@
 ## Note
 1. Versin 0.6.0 and above need to be used with Homebridge min. v1.3.x.
 
-## Know issues
+## Know Issues
 1. If use with Hoobs possible config incompatibilty.
 
 ## Package Requirements
