@@ -84,8 +84,8 @@ class merakiDevice {
 
     //meraki dashboard
     this.dashboardClientsCount = 0;
-    this.configuredDashboardClientsCount = this.dashboardClientsPolicy.length;
-    this.exposedAndExistingDaschboardClientsCount = 0;
+    this.configuredClientsCount = this.dashboardClientsPolicy.length;
+    this.exposedAndExistingOnDaschboardClientsCount = 0;
 
     //meraki mr
     this.ssidsCount = 0;
@@ -94,6 +94,7 @@ class merakiDevice {
 
     //meraki mrs
     this.switchesCount = this.switchesControl ? this.switches.length : 0;
+    this.switchPortsCount = 0;
 
     //meraki url
     const BASE_API_URL = this.host + '/api/v1';
@@ -152,28 +153,29 @@ class merakiDevice {
         }
 
         //configured clients
-        this.exposedAndExistongClientsOnDashboardName = new Array();
-        this.exposedAndExistingClientsOnDashboardId = new Array();
-        this.exposedAndExistongClientsOnDashboardMac = new Array();
-        this.exposedAndExistongClientsOnDashboardType = new Array();
+        this.exposedAndExistongOnDashboardClientsName = new Array();
+        this.exposedAndExistingOnDashboardClientsId = new Array();
+        this.exposedAndExistongOnDashboardClientsMac = new Array();
+        this.exposedAndExistongOnDashboardClientsPolicy = new Array();
 
-        for (let j = 0; j < this.configuredDashboardClientsCount; j++) {
-          const clientName = this.dashboardClientsPolicy[j].name;
-          const clientMac = this.dashboardClientsPolicy[j].mac;
-          const clientPolicyType = this.dashboardClientsPolicy[j].type;
-          const clientEnabled = this.dashboardClientsPolicy[j].mode;
+        for (let j = 0; j < this.configuredClientsCount; j++) {
+          const configuredClientName = this.dashboardClientsPolicy[j].name;
+          const configuredClientMac = this.dashboardClientsPolicy[j].mac;
+          const configuredClientPolicyType = this.dashboardClientsPolicy[j].type;
+          const configuredClientEnabled = (this.dashboardClientsPolicy[j].mode == true);
 
-          const clientIndex = this.clientsMac.indexOf(clientMac);
+          const clientIndex = this.clientsMac.indexOf(configuredClientMac);
           const configuredClientId = this.clientsId[clientIndex];
 
           //check and push existed clients in dshboard
-          const exposedAndExistongClientsOnDashboardName = (this.clientsId.indexOf(configuredClientId) >= 0 && clientEnabled) ? this.exposedAndExistongClientsOnDashboardName.push(clientName) : false;
-          const exposedAndExistongClientsOnDashboardId = (this.clientsId.indexOf(configuredClientId) >= 0 && clientEnabled) ? this.exposedAndExistingClientsOnDashboardId.push(configuredClientId) : false;
-          const exposedAndExistongClientsOnDashboardMac = (this.clientsId.indexOf(configuredClientId) >= 0 && clientEnabled) ? this.exposedAndExistongClientsOnDashboardMac.push(clientMac) : false;
-          const exposedAndExistongClientsOnDashboardType = (this.clientsId.indexOf(configuredClientId) >= 0 && clientEnabled) ? this.exposedAndExistongClientsOnDashboardType.push(clientPolicyType) : false;
+          const exposeClient = (this.clientsId.indexOf(configuredClientId >= 0) && configuredClientEnabled);
+          const exposedAndExistongOnDashboardClientsName = exposeClient ? this.exposedAndExistongOnDashboardClientsName.push(configuredClientName) : false;
+          const exposedAndExistongClientsOnDashboardId = exposeClient ? this.exposedAndExistingOnDashboardClientsId.push(configuredClientId) : false;
+          const exposedAndExistongOnDashboardClientsMac = exposeClient ? this.exposedAndExistongOnDashboardClientsMac.push(configuredClientMac) : false;
+          const exposedAndExistongOnDashboardClientsPolicy = exposeClient ? this.exposedAndExistongOnDashboardClientsPolicy.push(configuredClientPolicyType) : false;
         }
         this.dashboardClientsCount = dashboardClientsCount;
-        this.exposedAndExistingDaschboardClientsCount = this.exposedAndExistingClientsOnDashboardId.length;
+        this.exposedAndExistingOnDaschboardClientsCount = this.exposedAndExistingOnDashboardClientsId.length;
         this.updateDashboardClientsPolicyData();
       }
     } catch (error) {
@@ -190,17 +192,16 @@ class merakiDevice {
       this.clientsPolicyPolicy = new Array();
       this.clientsPolicyState = new Array();
 
-      const exposedAndExistingDaschboardClientsCount = this.exposedAndExistingDaschboardClientsCount;
-      for (let i = 0; i < exposedAndExistingDaschboardClientsCount; i++) {
-        const configuredClientId = this.exposedAndExistingClientsOnDashboardId[i];
-        const configuredClientPolicyType = this.exposedAndExistongClientsOnDashboardType[i];
+      const exposedAndExistingOnDaschboardClientsCount = this.exposedAndExistingOnDaschboardClientsCount;
+      for (let i = 0; i < exposedAndExistingOnDaschboardClientsCount; i++) {
+        const configuredClientId = this.exposedAndExistingOnDashboardClientsId[i];
 
         const dashboardClientsPolicyData = await this.axiosInstance.get(this.dashboardClientsUrl + '/' + configuredClientId + '/policy');
         this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
 
         if (dashboardClientsPolicyData.status == 200) {
           const clientPolicyMac = dashboardClientsPolicyData.data.mac;
-          const clientPolicyPolicy = (dashboardClientsPolicyData.data.devicePolicy != undefined) ? (dashboardClientsPolicyData.data.devicePolicy) : undefined;
+          const clientPolicyPolicy = (dashboardClientsPolicyData.data.devicePolicy != undefined) ? (dashboardClientsPolicyData.data.devicePolicy) : 'undefined';
           const clientPolicyState = (clientPolicyPolicy != 'Blocked');
 
           if (this.merakiDashboardClientPolicyServices && clientPolicyPolicy != undefined) {
@@ -285,45 +286,52 @@ class merakiDevice {
     this.log.debug('Network: %s, requesting switchData.', this.name);
 
     try {
+      this.exposedSwitchesSerialNumber = new Array();
+
       this.switchPortsId = new Array();
       this.switchPortsName = new Array();
       this.switchPortsState = new Array();
       this.switchPortsPoeState = new Array();
 
-      this.exposedeSwitchPortsId = new Array();
-      this.exposedeSwitchPortsName = new Array();
-
-      const switchesCount = this.switchesCount;
-      const switchSerialNumber = this.switches[0].serialNumber;
-      const switchMode = this.switches[0].mode;
-      const switchPortsUrl = '/devices/' + switchSerialNumber + '/switch/ports';
-
-      const switchPortsData = switchMode ? await this.axiosInstance.get(switchPortsUrl) : false;
-      this.log.debug('Debug switchPortsData: %s', switchPortsData.data);
-
-      if (switchPortsData.status == 200) {
-        const switchPortsCount = switchPortsData.data.length;
-        for (let i = 0; i < switchPortsCount; i++) {
-          const switchPortId = switchPortsData.data[i].portId;
-          const switchPortName = switchPortsData.data[i].name;
-          const switchPortState = switchPortsData.data[i].enabled;
-          const switchPortPoeState = switchPortsData.data[i].poeEnabled;
-
-          if (this.merakiSwitchServices) {
-            this.merakiSwitchServices[i]
-              .updateCharacteristic(Characteristic.On, switchPortState);
-          }
-
-          this.switchPortsId.push(switchPortId);
-          this.switchPortsName.push(switchPortName);
-          this.switchPortsState.push(switchPortState);
-          this.switchPortsPoeState.push(switchPortPoeState);
-
-        }
-        this.switchPortsCount = switchPortsCount;
+      //get switches config
+      const configuredSwitchesCount = this.switchesCount;
+      if (configuredSwitchesCount > 0) {
+        const switchSerialNumber = this.switches[0].serialNumber;
+        const switchControlEnabled = (this.switches[0].mode == true);
+        const exposedSwitchSerialNumber = (switchControlEnabled && switchSerialNumber != undefined) ? this.exposedSwitchesSerialNumber.push(switchSerialNumber) : false;
       }
 
-      const getDeviceInfo = this.checkDeviceInfo ? this.getDeviceInfo() : false;
+      //get switch config
+      const exposedSwitchesCount = this.exposedSwitchesSerialNumber.length;
+      for (let i = 0; i < exposedSwitchesCount; i++) {
+        const switchPortsUrl = '/devices/' + this.exposedSwitchesSerialNumber[i] + '/switch/ports';
+        const switchPortsData = await this.axiosInstance.get(switchPortsUrl);
+        this.log.debug('Debug switchPortsData: %s', switchPortsData.data);
+
+        if (switchPortsData.status == 200) {
+          const switchPortsCount = switchPortsData.data.length;
+          for (let j = 0; j < switchPortsCount; j++) {
+            const switchPortId = switchPortsData.data[j].portId;
+            const switchPortName = switchPortsData.data[j].name;
+            const switchPortState = (switchPortsData.data[j].enabled == true);
+            const switchPortPoeState = (switchPortsData.data[j].poeEnabled == true);
+
+            if (this.merakiSwitchServices) {
+              this.merakiSwitchServices[j]
+                .updateCharacteristic(Characteristic.On, switchPortState);
+            }
+
+            this.switchPortsId.push(switchPortId);
+            this.switchPortsName.push(switchPortName);
+            this.switchPortsState.push(switchPortState);
+            this.switchPortsPoeState.push(switchPortPoeState);
+
+          }
+          this.switchPortsCount = switchPortsCount;
+        }
+      }
+      const getDeviceInfo = (this.checkDeviceInfo && exposedSwitchesCount == 0) ? this.getDeviceInfo() : (this.checkDeviceInfo && this.switchPortsCount > 0) ? this.getDeviceInfo() : false;
+
     } catch (error) {
       this.log.error('Network: %s, switchPortsData error: %s', this.name, error);
       this.checkDeviceInfo = true;
@@ -377,39 +385,39 @@ class merakiDevice {
     this.log.debug('prepareMerakiService');
 
     //get devices data variables
-    const exposedAndExistingDaschboardClientsCount = this.exposedAndExistingDaschboardClientsCount;
+    const exposedAndExistingOnDaschboardClientsCount = this.exposedAndExistingOnDaschboardClientsCount;
     const exposedSsidsCount = this.exposedSsidsCount;
-    const switchesCount = this.switchesCount;
     const switchPortsCount = this.switchPortsCount;
 
     this.merakiDashboardClientPolicyServices = new Array();
-    for (let i = 0; i < exposedAndExistingDaschboardClientsCount; i++) {
-      const clientName = this.exposedAndExistongClientsOnDashboardName[i];
+    for (let i = 0; i < exposedAndExistingOnDaschboardClientsCount; i++) {
+      const clientName = this.exposedAndExistongOnDashboardClientsName[i];
+      const exposedClientName = 'C. ' + clientName;
 
-      const merakiDashboardClientPolicyService = new Service.Switch(clientName, 'merakiDashboardClientPolicyService' + i);
+      const merakiDashboardClientPolicyService = new Service.Switch(exposedClientName, 'merakiDashboardClientPolicyService' + i);
       merakiDashboardClientPolicyService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
           const state = (this.clientsPolicyState[i] != undefined) ? this.clientsPolicyState[i] : true;
+          const policy = state ? this.clientsPolicyPolicy[i] : 'Blocked';
           if (!this.disableLogInfo) {
-            this.log('Network: %s, client: %s, get policy, state: %s', accessoryName, clientName, state ? 'Normal' : 'Blocked');
+            this.log('Network: %s, Client: %s, Policy: %s', accessoryName, clientName, policy);
           }
           return state;
         })
         .onSet(async (state) => {
           try {
-            const clientId = this.exposedAndExistingClientsOnDashboardId[i];
-            const clientPolicyType = this.exposedAndExistongClientsOnDashboardType[i];
-            const policy = state ? clientPolicyType : 'Blocked';
+            const clientId = this.exposedAndExistingOnDashboardClientsId[i];
+            const policy = state ? this.exposedAndExistongOnDashboardClientsPolicy[i] : 'Blocked';
             const setClientPolicy = await this.axiosInstance.put(this.dashboardClientsUrl + '/' + clientId + '/policy', {
               'devicePolicy': policy
             });
-            this.log.debug('Network: %s, client: %s, debug setClientPolicy: %s', accessoryName, clientName, setClientPolicy.data);
+            this.log.debug('Network: %s, Client: %s, debug setClientPolicy: %s', accessoryName, clientName, setClientPolicy.data);
             if (!this.disableLogInfo) {
-              this.log('Network: %s, client: %s, set policy, state: %s', accessoryName, clientName, policy);
+              this.log('Network: %s, Client: %s, set Policy: %s', accessoryName, clientName, policy);
             }
             this.updateDashboardClientsData();
           } catch (error) {
-            this.log.error(('Network: %s, client: %s, set policy, error: %s', accessoryName, clientName, error));
+            this.log.error(('Network: %s, Client: %s, set Policy error: %s', accessoryName, clientName, error));
           }
         });
 
@@ -420,13 +428,14 @@ class merakiDevice {
     this.merakiWirelessServices = new Array();
     for (let i = 0; i < exposedSsidsCount; i++) {
       const ssidName = this.exposedSsidsName[i];
+      const exposedSsidName = 'W. ' + ssidName;
 
-      const merakiWirelessService = new Service.Switch(ssidName, 'merakiWirelessService' + i);
+      const merakiWirelessService = new Service.Switch(exposedSsidName, 'merakiWirelessService' + i);
       merakiWirelessService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
           const state = this.exposedSsidsState[i];
           if (!this.disableLogInfo) {
-            this.log('Network: %s, SSIDs: %s, get state: %s', accessoryName, ssidName, state ? 'Enabled' : 'Disabled');
+            this.log('Network: %s, SSID: %s, state: %s', accessoryName, ssidName, state ? 'Enabled' : 'Disabled');
           }
           return state;
         })
@@ -441,9 +450,9 @@ class merakiDevice {
             if (!this.disableLogInfo) {
               this.log('Network: %s, SSID: %s, set state: %s', accessoryName, ssidName, state ? 'Enabled' : 'Disabled');
             }
-            this.updateDashboardClientsData();
+            this.updateWirelessData();
           } catch (error) {
-            this.log.error(('Network: %s, SSID: %s, set  error: %s', accessoryName, ssidName, error));
+            this.log.error(('Network: %s, SSID: %s, set state error: %s', accessoryName, ssidName, error));
           }
         });
 
@@ -456,16 +465,14 @@ class merakiDevice {
     for (let i = 0; i < switchPortsCount; i++) {
       const switchPortName = this.switchPortsName[i];
       const switchPortId = this.switchPortsId[i];
-      const switchPortExposedName = switchPortId + '. ' + switchPortName;
-      const switchSerialNumber = this.switches[0].serialNumber;
-      const switchPortsUrl = '/devices/' + switchSerialNumber + '/switch/ports';
+      const exposedSwitchPortName = switchPortId + '. ' + switchPortName;
 
-      const merakiSwitchService = new Service.Switch(switchPortExposedName, 'merakiSwitchService' + i);
+      const merakiSwitchService = new Service.Switch(exposedSwitchPortName, 'merakiSwitchService' + i);
       merakiSwitchService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
           const state = this.switchPortsState[i];
           if (!this.disableLogInfo) {
-            this.log('Network: %s, SSIDs: %s, get state: %s', accessoryName, switchPortExposedName, state ? 'Enabled' : 'Disabled');
+            this.log('Network: %s, Port: %s, Name: %s, state: %s', accessoryName, switchPortId, switchPortName, state ? 'Enabled' : 'Disabled');
           }
           return state;
         })
@@ -473,16 +480,17 @@ class merakiDevice {
           try {
             state = state ? true : false;
             const switchPortId = this.switchPortsId[i];
-            const setSwitchPort = await this.axiosInstance.put(switchPortsUrl + '/' + switchPortId, {
+            const switchPortUrl = '/devices/' + this.switches[0].serialNumber + '/switch/ports/' + switchPortId;
+            const setSwitchPort = await this.axiosInstance.put(switchPortUrl, {
               'enabled': state
             });
-            this.log.debug('Network: %s, SSID: %s, debug setSsid: %s', accessoryName, switchPortExposedName, setSsid.data);
+            this.log.debug('Network: %s, Port: %s, Name: %s, debug setSwitchPort: %s', accessoryName, switchPortId, switchPortName, setSwitchPort.data);
             if (!this.disableLogInfo) {
-              this.log('Network: %s, SSID: %s, set state: %s', accessoryName, switchPortExposedName, state ? 'Enabled' : 'Disabled');
+              this.log('Network: %s, Port: %s, Name: %s, set state: %s', accessoryName, switchPortId, switchPortName, state ? 'Enabled' : 'Disabled');
             }
-            this.updateDashboardClientsData();
+            this.updateSwitchData();
           } catch (error) {
-            this.log.error(('Network: %s, SSID: %s, set  error: %s', accessoryName, switchPortExposedName, error));
+            this.log.error(('Network: %s, Port: %s, Name: %s, set state error: %s', accessoryName, switchPortId, switchPortName, error));
           }
         });
 
