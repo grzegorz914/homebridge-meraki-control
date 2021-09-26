@@ -44,7 +44,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | Key | Description | 
 | --- | --- |
 | `name` | Here set the accessory *Name* to be displayed in *Homebridge/HomeKit*. |
-| `host` | Here set the *API Path* like `https://n123.meraki.com`, do not use `https://api.meraki.com` |
+| `host` | Here set the *API Path* like `https://n123.meraki.com`, do not use `https://api.meraki.com`. |
 | `apiKey` | Here set the *X-Cisco-Meraki-API-Key*. |
 | `organizationId` | Here set the *Organization Id*. |
 | `networkId` | Here set the *Network Id*. |
