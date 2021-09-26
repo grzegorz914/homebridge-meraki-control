@@ -33,7 +33,7 @@
 * Expose `Clients` filtered by *Mac Address* and apply policy `Normal, Whitelisted, Group Policy` / `Blocked`.
 * Switch `ON/OFF Ports` on switch, available in plugin settings, right now only one switch is supported.
 * Siri can be used to switch ON/OFF SSID, Policy, Port.
-* Home.app automations and shortcuts can be used for all functions.
+* Home automations and shortcuts can be used for all functions.
 * More comming soon...
 
 ## Configuration
