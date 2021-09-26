@@ -61,7 +61,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 
 
 <p align="left">
-  <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/master/graphics/ustawienia.png" height="170"></a>
+  <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/master/graphics/ustawienia.png" height="190"></a>
 </p>
 
 ```json
