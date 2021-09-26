@@ -107,7 +107,7 @@ Each accessory needs to be manually paired.
 5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.
 
 ## Limitations
-* Due to a HomeKit limitation, that maximum services for 1 accessory is 100. If Services > 100, accessory stop responding.
+* That maximum Services for 1 accessory is 100. If Services > 100, accessory stop responding.
 * The Services in this accessory are:
   * Information.
   * SSIDs.
