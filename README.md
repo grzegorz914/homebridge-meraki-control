@@ -15,10 +15,10 @@
 </span>
 
 ## Note
-1. Versin 0.6.0 and above need to be used with Homebridge min. v1.3.x.
+* Versin 0.6.0 and above need to be used with Homebridge min. v1.3.x.
 
 ## Know Issues
-1. If use with Hoobs possible config incompatibilty.
+* If use with Hoobs possible config incompatibilty.
 
 ## Package Requirements
 | Package Link | Required |
@@ -27,9 +27,9 @@
 | [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) | Highly Recommended |
 
 ## Installation
-1. Follow the step-by-step instructions on the [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) for how to install Homebridge.
-2. Follow the step-by-step instructions on the [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) for how to install Homebridge Config UI X.
-3. Install homebridge-meraki-control using: `npm install -g homebridge-meraki-control` or search for `meraki` in Config UI X.
+* Follow the step-by-step instructions on the [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) for how to install.
+* Follow the step-by-step instructions on the [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) for how to install.
+* Install homebridge-meraki-control using: `npm install -g homebridge-meraki-control` or search for `meraki` in Config UI X.
 
 ## Features and How To Use Them
 * Switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
