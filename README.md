@@ -50,24 +50,24 @@ Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
 Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x) plugin to configure this plugin (strongly recomended). The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
 | Key | Description | 
 | --- | --- |
-| `name` | Here set the name. |
-| `host` | Here set the *baseUrl* like `https://n123.meraki.com`, do not use `https://api.meraki.com` |
+| `name` | Here set the accessory *Name* to be displayed in *Homebridge/HomeKit*. |
+| `host` | Here set the *API Path* like `https://n123.meraki.com`, do not use `https://api.meraki.com` |
 | `apiKey` | Here set the *X-Cisco-Meraki-API-Key*. |
-| `organizationId` | Here set Your *Organization Id*. |
-| `networkId` | Here set Your *Network Id*. |
+| `organizationId` | Here set the *Organization Id*. |
+| `networkId` | Here set the *Network Id*. |
 | `refreshInterval` | Here set the data refresh time in seconds. |
 | `disableLogInfo` | If enabled, disable log info, all values and state will not be displayed in *Homebridge* log. |
-| `dashboardClientsPolicy.name` | Here set the own *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
+| `dashboardClientsPolicy.name` | Here set the *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
 | `dashboardClientsPolicy.mac` | Here set the client *Mac Address from Meraki Dashboard* which You want expose to the *Homebridge/HomeKit* and change its policy. |
-| `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for Client. |
-| `dashboardClientsPolicy.mode` | Here set the mode *ON/OFF* for Client. |
-| `accessPointsControl` | This option enable/disable control of Access Points. |
-| `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden. |
-| `hideSsids.name` | Here set SSIDs Name which You want hide and not expose to the *Homebridge/HomeKit*. |
+| `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for this Client. |
+| `dashboardClientsPolicy.mode` | Here set the mode *ON/OFF* for this Client. |
+| `accessPointsControl` | This option *Enable/Disable* control of Access Points. |
+| `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden and not exposed to the *Homebridge/HomeKit*. |
+| `hideSsids.name` | Here set *SSIDs Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `hideSsids.mode` | Here set mode *ON/OFF* for this SSID. |
-| `switchesControl` | This option enable/disable control of Switches. |
-| `switches.name` | Here set Switch Name. |
-| `switches.serialNumber` | Here set the Serial Number of this Switch. |
+| `switchesControl` | This option *Enable/Disable* control of Switches. |
+| `switches.name` | Here set the *Name* for this Switch. |
+| `switches.serialNumber` | Here set the *Serial Number* for this Switch. |
 | `switches.mode` | Here set mode *ON/OFF* for this Port. |
 
 
