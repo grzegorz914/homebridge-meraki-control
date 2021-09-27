@@ -145,7 +145,7 @@ class merakiDevice {
         const dashboardClientsCount = dashboardClientsData.data.length;
         for (let i = 0; i < dashboardClientsCount; i++) {
           const clientId = dashboardClientsData.data[i].id;
-          const clientMac = dashboardClientsData.data[i].mac;
+          const clientMac = (dashboardClientsData.data[i].mac).split(':').join('');
           const clientDescription = dashboardClientsData.data[i].description;
 
           this.clientsId.push(clientId);
@@ -161,23 +161,26 @@ class merakiDevice {
 
         for (let j = 0; j < this.configuredClientsCount; j++) {
           const configuredClientName = this.dashboardClientsPolicy[j].name;
-          const configuredClientMac = this.dashboardClientsPolicy[j].mac;
+          const configuredClientMac = (this.dashboardClientsPolicy[j].mac).split(':').join('');
           const configuredClientPolicyType = this.dashboardClientsPolicy[j].type;
           const configuredClientEnabled = (this.dashboardClientsPolicy[j].mode == true);
 
           const clientIndex = this.clientsMac.indexOf(configuredClientMac);
-          const configuredClientId = this.clientsId[clientIndex];
+          const configuredClientId = (this.clientsId[clientIndex] != undefined) ? this.clientsId[clientIndex] : -1;
 
           //check and push existed clients in dshboard
-          const exposeClient = (this.clientsId.indexOf(configuredClientId >= 0) && configuredClientEnabled);
+          const exposeClient = (configuredClientId != -1 && configuredClientEnabled);
           const exposedAndExistongOnDashboardClientsName = exposeClient ? this.exposedAndExistongOnDashboardClientsName.push(configuredClientName) : false;
           const exposedAndExistongClientsOnDashboardId = exposeClient ? this.exposedAndExistingOnDashboardClientsId.push(configuredClientId) : false;
           const exposedAndExistongOnDashboardClientsMac = exposeClient ? this.exposedAndExistongOnDashboardClientsMac.push(configuredClientMac) : false;
           const exposedAndExistongOnDashboardClientsPolicy = exposeClient ? this.exposedAndExistongOnDashboardClientsPolicy.push(configuredClientPolicyType) : false;
         }
+
+        const exposedAndExistingOnDaschboardClientsCount = this.exposedAndExistingOnDashboardClientsId.length;
+
         this.dashboardClientsCount = dashboardClientsCount;
-        this.exposedAndExistingOnDaschboardClientsCount = this.exposedAndExistingOnDashboardClientsId.length;
-        this.updateDashboardClientsPolicyData();
+        this.exposedAndExistingOnDaschboardClientsCount = exposedAndExistingOnDaschboardClientsCount;
+        const updateDashboardClientsPolicy = (exposedAndExistingOnDaschboardClientsCount > 0) ? this.updateDashboardClientsPolicyData() : this.accessPointsControl ? this.updateWirelessData() : this.switchesControl ? this.updateSwitchData() : this.checkDeviceInfo ? this.getDeviceInfo() : false;
       }
     } catch (error) {
       this.log.error('Network: %s, dashboardClientsData error: %s', this.name, error);
@@ -216,7 +219,7 @@ class merakiDevice {
         }
       }
 
-      const updateSwitchOrWirelessDataOrGetDeviceInfo = this.accessPointsControl ? this.updateWirelessData() : this.switchesControl ? this.updateSwitchData() : this.getDeviceInfo();
+      const updateSwitchOrWirelessDataOrGetDeviceInfo = this.accessPointsControl ? this.updateWirelessData() : this.switchesControl ? this.updateSwitchData() : this.checkDeviceInfo ? this.getDeviceInfo() : false;
     } catch (error) {
       this.log.error('Network: %s, dashboardClientsPolicyData error: %s', this.name, error);
       this.checkDeviceInfo = true;
@@ -275,7 +278,7 @@ class merakiDevice {
         this.ssidsCount = ssidsCount;
         this.exposedSsidsCount = exposedSsidsCount;
 
-        const updateSwitchDataOrGetDeviceInfo = this.switchesControl ? this.updateSwitchData() : this.getDeviceInfo();
+        const updateSwitchDataOrGetDeviceInfo = this.switchesControl ? this.updateSwitchData() : this.checkDeviceInfo ? this.getDeviceInfo() : false;
       }
     } catch (error) {
       this.log.error('Network: %s, ssidsData error: %s', this.name, error);
