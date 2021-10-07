@@ -465,7 +465,7 @@ class merakiDevice {
         });
 
       this.merakiWirelessServices.push(merakiWirelessService);
-      accessory.addService(this.merakiWirelessServices[i]);
+      accessory.addService(merakiWirelessService);
     }
 
     //meraki ms
