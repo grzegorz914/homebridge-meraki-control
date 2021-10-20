@@ -35,8 +35,7 @@
     },
     "keywords": [
         "homebridge",
-        "homebridge-plugin",
-        "homebridge-meraki-control",
+        "homekit",
         "meraki",
         "cisco"
     ],
