@@ -98,12 +98,12 @@ class merakiDevice {
     this.exposedSwitchesCount = 0;
 
     //meraki url
-    const BASE_API_URL = this.host + '/api/v1';
-    this.networkUrl = '/networks/' + this.networkId;
-    this.devicesUrl = '/organizations/' + this.organizationId + '/devices';
-    this.dashboardClientsUrl = '/networks/' + this.networkId + '/clients';
-    this.aplianceUrl = '/networks/' + this.networkId + '/appliance/ports';
-    this.wirelessUrl = '/networks/' + this.networkId + '/wireless/ssids';
+    const BASE_API_URL = `${this.host}/api/v1`;
+    this.networkUrl = `/networks/${this.networkId}`;
+    this.devicesUrl = `/organizations/${this.organizationId}/devices`;
+    this.dashboardClientsUrl = `/networks/${this.networkId}/clients`;
+    this.aplianceUrl = `/networks/${this.networkId}/appliance/ports`;
+    this.wirelessUrl = `/networks/${this.networkId}/wireless/ssids`;
 
     this.axiosInstance = axios.create({
       baseURL: BASE_API_URL,
@@ -134,7 +134,7 @@ class merakiDevice {
     this.log.debug('Network: %s, requesting dashboardClientsData.', this.name);
 
     try {
-      const dashboardClientsData = await this.axiosInstance.get(this.dashboardClientsUrl + '?perPage=255&timespan=2592000');
+      const dashboardClientsData = await this.axiosInstance.get(`${this.dashboardClientsUrl}?perPage=255&timespan=2592000`);
       this.log.debug('Debug dashboardClientsData: %s', dashboardClientsData.data[0]);
 
       if (dashboardClientsData.status == 200) {
@@ -201,7 +201,7 @@ class merakiDevice {
       for (let i = 0; i < exposedAndExistingOnDaschboardClientsCount; i++) {
         const configuredClientId = this.exposedAndExistingOnDashboardClientsId[i];
 
-        const dashboardClientsPolicyData = await this.axiosInstance.get(this.dashboardClientsUrl + '/' + configuredClientId + '/policy');
+        const dashboardClientsPolicyData = await this.axiosInstance.get(`${this.dashboardClientsUrl}/${configuredClientId}/policy`);
         this.log.debug('Debug dashboardClientsPolicyData: %s', dashboardClientsPolicyData.data);
 
         if (dashboardClientsPolicyData.status == 200) {
@@ -310,7 +310,7 @@ class merakiDevice {
       //get switch config
       const exposedSwitchesCount = this.exposedSwitchesSerialNumber.length;
       for (let i = 0; i < exposedSwitchesCount; i++) {
-        const switchPortsUrl = '/devices/' + this.exposedSwitchesSerialNumber[i] + '/switch/ports';
+        const switchPortsUrl = `/devices/${this.exposedSwitchesSerialNumber[i]}/switch/ports`;
         const switchPortsData = await this.axiosInstance.get(switchPortsUrl);
         this.log.debug('Debug switchPortsData: %s', switchPortsData.data);
 
@@ -400,9 +400,9 @@ class merakiDevice {
     this.merakiDashboardClientPolicyServices = new Array();
     for (let i = 0; i < exposedAndExistingOnDaschboardClientsCount; i++) {
       const clientName = this.exposedAndExistongOnDashboardClientsName[i];
-      const exposedClientName = 'C. ' + clientName;
+      const exposedClientName = `C. ${clientName}`;
 
-      const merakiDashboardClientPolicyService = new Service.Switch(exposedClientName, 'merakiDashboardClientPolicyService' + i);
+      const merakiDashboardClientPolicyService = new Service.Switch(exposedClientName, `merakiDashboardClientPolicyService${i}`);
       merakiDashboardClientPolicyService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
           const state = (this.clientsPolicyState[i] != undefined) ? this.clientsPolicyState[i] : true;
@@ -416,7 +416,7 @@ class merakiDevice {
           try {
             const clientId = this.exposedAndExistingOnDashboardClientsId[i];
             const policy = state ? this.exposedAndExistongOnDashboardClientsPolicy[i] : 'Blocked';
-            const setClientPolicy = await this.axiosInstance.put(this.dashboardClientsUrl + '/' + clientId + '/policy', {
+            const setClientPolicy = await this.axiosInstance.put(`${this.dashboardClientsUrl}/${clientId}/policy`, {
               'devicePolicy': policy
             });
             this.log.debug('Network: %s, Client: %s, debug setClientPolicy: %s', accessoryName, clientName, setClientPolicy.data);
@@ -436,9 +436,9 @@ class merakiDevice {
     this.merakiWirelessServices = new Array();
     for (let i = 0; i < exposedSsidsCount; i++) {
       const ssidName = this.exposedSsidsName[i];
-      const exposedSsidName = 'W. ' + ssidName;
+      const exposedSsidName = `W. ${ssidName}`;
 
-      const merakiWirelessService = new Service.Switch(exposedSsidName, 'merakiWirelessService' + i);
+      const merakiWirelessService = new Service.Switch(exposedSsidName, `merakiWirelessService${i}`);
       merakiWirelessService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
           const state = this.exposedSsidsState[i];
@@ -451,7 +451,7 @@ class merakiDevice {
           try {
             state = state ? true : false;
             const ssidIndex = this.ssidsName.indexOf(ssidName);
-            const setSsid = await this.axiosInstance.put(this.wirelessUrl + '/' + ssidIndex, {
+            const setSsid = await this.axiosInstance.put(`${this.wirelessUrl}/${ssidIndex}`, {
               'enabled': state
             });
             this.log.debug('Network: %s, SSID: %s, debug setSsid: %s', accessoryName, ssidName, setSsid.data);
@@ -474,9 +474,9 @@ class merakiDevice {
       for (let i = 0; i < switchPortsCount; i++) {
         const switchPortName = this.switchPortsName[i];
         const switchPortId = this.switchPortsId[i];
-        const exposedSwitchPortName = switchPortId + '. ' + switchPortName;
+        const exposedSwitchPortName = `${switchPortId}. ${switchPortName}`;
 
-        const merakiSwitchService = new Service.Switch(exposedSwitchPortName, 'merakiSwitchService' + i);
+        const merakiSwitchService = new Service.Switch(exposedSwitchPortName, `merakiSwitchService${i}`);
         merakiSwitchService.getCharacteristic(Characteristic.On)
           .onGet(async () => {
             const state = this.switchPortsState[i] != undefined ? this.switchPortsState[i] : false;
@@ -489,7 +489,7 @@ class merakiDevice {
             try {
               state = state ? true : false;
               const switchPortId = this.switchPortsId[i];
-              const switchPortUrl = '/devices/' + this.switches[0].serialNumber + '/switch/ports/' + switchPortId;
+              const switchPortUrl = `/devices/${this.switches[0].serialNumber}/switch/ports/${switchPortId}`;
               const setSwitchPort = await this.axiosInstance.put(switchPortUrl, {
                 'enabled': state
               });
