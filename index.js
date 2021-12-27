@@ -402,7 +402,7 @@ class merakiDevice {
       const clientName = this.exposedAndExistongOnDashboardClientsName[i];
       const exposedClientName = `C. ${clientName}`;
 
-      const merakiDashboardClientPolicyService = new Service.Switch(exposedClientName, `merakiDashboardClientPolicyService${i}`);
+      const merakiDashboardClientPolicyService = new Service.Outlet(exposedClientName, `merakiDashboardClientPolicyService${i}`);
       merakiDashboardClientPolicyService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
           const state = (this.clientsPolicyState[i] != undefined) ? this.clientsPolicyState[i] : true;
@@ -438,7 +438,7 @@ class merakiDevice {
       const ssidName = this.exposedSsidsName[i];
       const exposedSsidName = `W. ${ssidName}`;
 
-      const merakiWirelessService = new Service.Switch(exposedSsidName, `merakiWirelessService${i}`);
+      const merakiWirelessService = new Service.Outlet(exposedSsidName, `merakiWirelessService${i}`);
       merakiWirelessService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
           const state = this.exposedSsidsState[i];
@@ -476,7 +476,7 @@ class merakiDevice {
         const switchPortId = this.switchPortsId[i];
         const exposedSwitchPortName = `${switchPortId}. ${switchPortName}`;
 
-        const merakiSwitchService = new Service.Switch(exposedSwitchPortName, `merakiSwitchService${i}`);
+        const merakiSwitchService = new Service.Outlet(exposedSwitchPortName, `merakiSwitchService${i}`);
         merakiSwitchService.getCharacteristic(Characteristic.On)
           .onGet(async () => {
             const state = this.switchPortsState[i] != undefined ? this.switchPortsState[i] : false;
