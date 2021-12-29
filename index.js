@@ -3,7 +3,6 @@
 const path = require('path');
 const axios = require('axios');
 const fs = require('fs');
-const fsPromises = fs.promises;
 
 const PLUGIN_NAME = 'homebridge-meraki-control';
 const PLATFORM_NAME = 'Meraki';
@@ -119,7 +118,7 @@ class merakiDevice {
 
     //check if prefs directory exist
     if (!fs.existsSync(prefDir)) {
-      fsPromises.mkdir(prefDir);
+      fs.mkdirSync(prefDir);
     }
 
     //Check network state
