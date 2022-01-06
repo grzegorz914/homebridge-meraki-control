@@ -26,6 +26,13 @@
 ## Know Issues
 * If use with Hoobs possible config incompatibilty.
 
+## Troubleshoot
+* If for some reason the device will not be displayed in Home app try this procedure:
+   * Go to `./homebridge/persist`
+   * Open the file `AccessoryInfo.xxx` one by one and remove only this one which contain Your device data, something like this: `{"displayName":"Meraki","category":34}`
+   * Also remove the file `IdentifierCashe.xxx` with same name as `AccessoryInfo.xxx`
+   * Restart Homebridge and try add it to the Home app again.
+
 ## Features and How To Use Them
 * Switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
 * Hide `Unconfigured SSIDs` networks, available in plugin settings.
