@@ -369,7 +369,6 @@ class merakiDevice {
     const accessoryUUID = UUID.generate(this.networkId);
     const accessoryCategory = Categories.AIRPORT;
     const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
-    accessory.context.device = this.config.device;
 
     //Prepare information service
     this.log.debug('prepareInformationService');
