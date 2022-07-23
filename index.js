@@ -377,14 +377,11 @@ class merakiDevice {
     const serialNumber = this.networkId;
     const firmwareRevision = this.organizationId;
 
-    accessory.removeService(accessory.getService(Service.AccessoryInformation));
-    const informationService = new Service.AccessoryInformation();
-    informationService
+    accessory.getService(Service.AccessoryInformation)
       .setCharacteristic(Characteristic.Manufacturer, manufacturer)
       .setCharacteristic(Characteristic.Model, modelName)
       .setCharacteristic(Characteristic.SerialNumber, serialNumber)
       .setCharacteristic(Characteristic.FirmwareRevision, firmwareRevision);
-    accessory.addService(informationService);
 
     //Prepare service 
     this.log.debug('prepareMerakiService');
