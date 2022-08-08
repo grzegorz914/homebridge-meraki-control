@@ -1,12 +1,14 @@
 <p align="center">
-  <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/master/graphics/meraki.png" width="640"></a>
+  <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/main/graphics/meraki.png" width="640"></a>
 </p>
 
 <span align="center">
 
 # Homebridge Meraki Control  
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
-[![npm](https://badgen.net/npm/dt/homebridge-meraki-control?color=purple)](https://www.npmjs.com/package/homebridge-meraki-control) [![npm](https://badgen.net/npm/v/homebridge-meraki-control?color=purple)](https://www.npmjs.com/package/homebridge-meraki-control)
+[![npm](https://badgen.net/npm/dt/homebridge-meraki-control?color=purple)](https://www.npmjs.com/package/homebridge-meraki-control) 
+[![npm](https://badgen.net/npm/v/homebridge-meraki-control?color=purple)](https://www.npmjs.com/package/homebridge-meraki-control)
+[![npm](https://img.shields.io/npm/v/homebridge-meraki-control/beta.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-meraki-control)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/grzegorz914/homebridge-meraki-control.svg)](https://github.com/grzegorz914/homebridge-meraki-control/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/grzegorz914/homebridge-meraki-control.svg)](https://github.com/grzegorz914/homebridge-meraki-control/issues)
 
@@ -49,7 +51,7 @@
 * The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
 
 <p align="left">
-  <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/master/graphics/ustawienia.png" width="840"></a>
+  <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/main/graphics/ustawienia.png" width="840"></a>
 </p>
 
 | Key | Description | 
@@ -126,7 +128,7 @@ Each accessory needs to be manually paired.
   * Clients.
   * Switch Ports.
 
-## [What's New](https://github.com/grzegorz914/homebridge-meraki-control/blob/master/CHANGELOG.md)
+## [What's New](https://github.com/grzegorz914/homebridge-meraki-control/blob/main/CHANGELOG.md)
 
 ## Development
 - Pull request and help in development highly appreciated.
