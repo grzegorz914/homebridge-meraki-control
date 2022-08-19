@@ -265,7 +265,7 @@ class merakiDevice {
 
         const exposedSsidsCount = this.ssidsState.length;
         for (let i = 0; i < exposedSsidsCount; i++) {
-          const ssidState = (this.ssidsState[i] == true);
+          const ssidState = this.ssidsState[i];
 
           if (this.merakiWirelessServices) {
             this.merakiWirelessServices[i]
@@ -317,24 +317,22 @@ class merakiDevice {
             const switchPortState = (switchPortsData.data[j].enabled == true);
             const switchPortPoeState = (switchPortsData.data[j].poeEnabled == true);
 
-            const switchesHideUplinkPorts = this.switchesHideUplinkPorts ? (switchPortName.substr(0, 6) == 'Uplink') : false;
-            if (!switchesHideUplinkPorts) {
-              this.switchPortsId.push(switchPortId);
-              this.switchPortsName.push(switchPortName);
-              this.switchPortsState.push(switchPortState);
-              this.switchPortsPoeState.push(switchPortPoeState);
-            };
+            const switchesHideUplinkPorts = (this.switchesHideUplinkPorts && switchPortName.substr(0, 6) == 'Uplink') ? true : false;
+            const pushSwitchPortsId = switchesHideUplinkPorts ? false : this.switchPortsId.push(switchPortId);
+            const pushSwitchPortsName = switchesHideUplinkPorts ? false : this.switchPortsName.push(switchPortName);
+            const pushSwitchPortsState = switchesHideUplinkPorts ? false : this.switchPortsState.push(switchPortState);
+            const pushSwitchPortsPoeState = switchesHideUplinkPorts ? false : this.switchPortsPoeState.push(switchPortPoeState);
           };
         };
       };
 
       const exposedPortsCount = this.switchPortsState.length;
       for (let k = 0; k < exposedPortsCount; k++) {
-        const switchPortState = (this.switchPortsState[k] == true);
+        const portState = this.switchPortsState[k];
 
         if (this.merakiSwitchServices) {
           this.merakiSwitchServices[k]
-            .updateCharacteristic(Characteristic.On, switchPortState);
+            .updateCharacteristic(Characteristic.On, portState);
         };
       };
 
