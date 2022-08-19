@@ -39,6 +39,7 @@
 * Switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
 * Hide `Unconfigured SSIDs` networks, available in plugin settings.
 * Hide `SSIDs networks` filtered by network *Name*, available in plugin settings.
+* Hide `Uplink` ports, available in plugin settings.
 * Expose `Clients` filtered by *Mac Address* and apply policy `Normal, Whitelisted, Group Policy` / `Blocked`.
 * Switch `ON/OFF Ports` on switch, available in plugin settings, right now only one switch is supported.
 * Siri can be used to switch ON/OFF SSID, Policy, Port.
