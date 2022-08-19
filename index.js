@@ -100,6 +100,8 @@ class merakiDevice {
 
     //meraki url
     const BASE_API_URL = `${this.host}/api/v1`;
+    this.organizationsIdUrl = `/organizations`;
+    this.networksIdUrl = `/organizations/${this.organizationId}/networks`;
     this.networkUrl = `/networks/${this.networkId}`;
     this.devicesUrl = `/organizations/${this.organizationId}/devices`;
     this.dashboardClientsUrl = `/networks/${this.networkId}/clients`;
@@ -121,7 +123,7 @@ class merakiDevice {
     //check if prefs directory exist
     if (!fs.existsSync(prefDir)) {
       fs.mkdirSync(prefDir);
-    }
+    };
 
     this.updateDashboardClientsData();
   }
@@ -182,7 +184,7 @@ class merakiDevice {
       this.log.error(`Network: ${this.name}, dashboardClientsData error: ${error}. reconnect in 10s.`);
       this.reconnect();
     };
-  }
+  };
 
   async updateDashboardClientsPolicyData() {
     this.log.debug(`Network: ${this.name}, requesting dashboardClientsPolicyData.`);
@@ -213,14 +215,14 @@ class merakiDevice {
           this.clientsPolicyPolicy.push(clientPolicyPolicy);
           this.clientsPolicyState.push(clientPolicyState);
         }
-      }
+      };
 
       const updateSwitchOrWirelessOrGetDeviceInfo = this.accessPointsControl ? this.updateWirelessData() : this.switchesControl ? this.updateSwitchData() : this.getDeviceInfo();
     } catch (error) {
       this.log.error(`Network: ${this.name}, dashboardClientPolicyData error: ${error}. reconnect in 10s.`);
       this.reconnect();
     };
-  }
+  };
 
   async updateWirelessData() {
     this.log.debug(`Network: ${this.name}, requesting ssidsData.`);
@@ -231,10 +233,9 @@ class merakiDevice {
 
       if (ssidsData.status == 200) {
         this.hiddenSsidsName = new Array();
+        this.ssidsNumber = new Array();
         this.ssidsName = new Array();
         this.ssidsState = new Array();
-        this.exposedSsidsName = new Array();
-        this.exposedSsidsState = new Array();
 
         const configuredHiddenSsidsCount = this.configuredHiddenSsidsCount;
         const ssidsCount = ssidsData.data.length;
@@ -245,42 +246,41 @@ class merakiDevice {
 
           //push ssids
           const hiddenSsidsName = (hiddenSsidEnabled && hiddenSsidName != undefined) ? this.hiddenSsidsName.push(hiddenSsidName) : false;
-        }
+        };
 
         for (let i = 0; i < ssidsCount; i++) {
+          const ssidNumber = ssidsData.data[i].number;
           const ssidName = ssidsData.data[i].name;
           const ssidState = (ssidsData.data[i].enabled == true)
-          this.ssidsName.push(ssidName);
-          this.ssidsState.push(ssidState);
 
           //filter ssids
-          const hideUnconfiguredSsids = this.hideUnconfiguredSsids ? (ssidName.substr(0, 12) == 'Unconfigured') : false;
-          const hideSsid = hideUnconfiguredSsids ? true : (this.hiddenSsidsName.indexOf(ssidName) >= 0);
+          const hideUnconfiguredSsids = (this.hideUnconfiguredSsids && (ssidName.substr(0, 12) == 'Unconfigured')) ? true : false;
+          const hideSsid = (hideUnconfiguredSsids || this.hiddenSsidsName.indexOf(ssidName) >= 0) ? true : false;
 
           //push exposed ssids
-          const pushName = hideSsid ? false : this.exposedSsidsName.push(ssidName);
-          const pushState = hideSsid ? false : this.exposedSsidsState.push(ssidState);
-        }
+          const pushNumber = hideSsid ? false : this.ssidsNumber.push(ssidNumber);
+          const pushName = hideSsid ? false : this.ssidsName.push(ssidName);
+          const pushState = hideSsid ? false : this.ssidsState.push(ssidState);
+        };
 
-        const exposedSsidsCount = this.exposedSsidsName.length;
+        const exposedSsidsCount = this.ssidsState.length;
         for (let i = 0; i < exposedSsidsCount; i++) {
-          const ssidState = (this.exposedSsidsState[i] == true);
+          const ssidState = (this.ssidsState[i] == true);
 
-          if (this.merakiWirelessServices && (ssidState != undefined)) {
+          if (this.merakiWirelessServices) {
             this.merakiWirelessServices[i]
               .updateCharacteristic(Characteristic.On, ssidState);
-          }
-        }
-        this.ssidsCount = ssidsCount;
-        this.exposedSsidsCount = exposedSsidsCount;
+          };
+        };
 
+        this.exposedSsidsCount = exposedSsidsCount;
         const updateSwitchOrGetDeviceInfo = this.switchesControl ? this.updateSwitchData() : this.getDeviceInfo();
       }
     } catch (error) {
       this.log.error(`Network: ${this.name}, ssidsData error: ${error}. reconnect in 10s.`);
       this.reconnect();
     };
-  }
+  };
 
   async updateSwitchData() {
     this.log.debug(`Network: ${this.name}, requesting switchData.`);
@@ -295,7 +295,7 @@ class merakiDevice {
         const switchSerialNumber = this.switches[0].serialNumber;
         const switchControlEnabled = (this.switches[0].mode == true);
         const exposedSwitchSerialNumber = (switchControlEnabled && switchSerialNumber != undefined) ? this.exposedSwitchesSerialNumber.push(switchSerialNumber) : false;
-      }
+      };
 
       this.switchPortsId = new Array();
       this.switchPortsName = new Array();
@@ -328,7 +328,7 @@ class merakiDevice {
         };
       };
 
-      const exposedPortsCount = this.switchPortsId.length;
+      const exposedPortsCount = this.switchPortsState.length;
       for (let k = 0; k < exposedPortsCount; k++) {
         const switchPortState = (this.switchPortsState[k] == true);
 
@@ -336,7 +336,7 @@ class merakiDevice {
           this.merakiSwitchServices[k]
             .updateCharacteristic(Characteristic.On, switchPortState);
         };
-      }
+      };
 
       this.exposedSwitchesCount = exposedSwitchesCount;
       this.exposedPortsCount = exposedPortsCount;
@@ -345,18 +345,6 @@ class merakiDevice {
       this.log.error(`Network: ${this.name}, switchPortsData error: ${error}. reconnect in 10s.`);
       this.reconnect();
     };
-  };
-
-  updateData() {
-    setTimeout(() => {
-      this.updateDashboardClientsData();
-    }, this.refreshInterval * 1000);
-  };
-
-  reconnect() {
-    setTimeout(() => {
-      this.updateDashboardClientsData();
-    }, 10000);
   };
 
   getDeviceInfo() {
@@ -370,8 +358,20 @@ class merakiDevice {
       this.checkDeviceInfo = false;
     };
 
-    this.updateData();
     const startPrepareAccessory = this.startPrepareAccessory ? this.prepareAccessory() : false;
+    this.updateData();
+  };
+
+  updateData() {
+    setTimeout(() => {
+      this.updateDashboardClientsData();
+    }, this.refreshInterval * 1000);
+  };
+
+  reconnect() {
+    setTimeout(() => {
+      this.updateDashboardClientsData();
+    }, 10000);
   };
 
   //Prepare accessory
@@ -436,27 +436,28 @@ class merakiDevice {
       accessory.addService(this.merakiDashboardClientPolicyServices[i]);
     }
 
+    //meraki mr
     this.merakiWirelessServices = new Array();
     for (let i = 0; i < exposedSsidsCount; i++) {
-      const ssidName = this.exposedSsidsName[i];
+      const ssidName = this.ssidsName[i];
       const exposedSsidName = `W. ${ssidName}`;
 
       const merakiWirelessService = new Service.Outlet(exposedSsidName, `merakiWirelessService${i}`);
       merakiWirelessService.getCharacteristic(Characteristic.On)
         .onGet(async () => {
-          const state = this.exposedSsidsState[i];
+          const state = this.ssidsState[i];
           const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
           return state;
         })
         .onSet(async (state) => {
           try {
             state = state ? true : false;
-            const ssidIndex = this.ssidsName.indexOf(ssidName);
+            const ssidIndex = this.ssidsNumber[i];
             const setSsid = await this.axiosInstance.put(`${this.wirelessUrl}/${ssidIndex}`, {
               'enabled': state
             });
-            const debug = this.enableDebugMode ? this.log(`Network: ${accessoryNamee}, SSID: ${ssidName}, debug setSsid: ${setSsid.data}`) : false;
-            const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryNamee}, SSID: ${ssidName}, set state: ${state ? 'Enabled' : 'Disabled'}`);
+            const debug = this.enableDebugMode ? this.log(`Network: ${accessoryName}, SSID: ${ssidName}, debug setSsid: ${setSsid.data}`) : false;
+            const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, SSID: ${ssidName}, set state: ${state ? 'Enabled' : 'Disabled'}`);
             this.updateWirelessData();
           } catch (error) {
             this.log.error(`Network: ${accessoryName}, SSID: ${ssidName}, set state error: ${error}`);
