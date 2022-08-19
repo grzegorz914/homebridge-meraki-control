@@ -65,6 +65,20 @@
               "description": "This disable log info, all values and state will not be displayed in the Homebridge log.",
               "required": false
             },
+            "disableLogDeviceInfo": {
+              "title": "Disable Log Device Info",
+              "type": "boolean",
+              "default": false,
+              "description": "This disable display log device info on plugin start.",
+              "required": false
+            },
+            "enableDebugMode": {
+              "title": "Debug",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable debug mode.",
+              "required": false
+            },
             "dashboardClientsPolicy": {
               "title": "Clients",
               "type": "array",
@@ -120,7 +134,7 @@
               "title": "Enable Control",
               "type": "boolean",
               "default": false,
-              "description": "This option Enable/Disable control of Access Points.",
+              "description": "This option enable control of Access Points.",
               "required": false
             },
             "hideUnconfiguredSsids": {
@@ -162,8 +176,18 @@
               "title": "Enable Control",
               "type": "boolean",
               "default": false,
-              "description": "This option Enable/Disable control of Switches.",
+              "description": "This option enable control of Switches.",
               "required": false
+            },
+            "switchesHideUplinkPorts": {
+              "title": "Hide uplink ports",
+              "type": "boolean",
+              "default": false,
+              "description": "This option hide all uplink ports.",
+              "required": false,
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].switchesControl === true;"
+              }
             },
             "switches": {
               "title": "Switches",
@@ -261,6 +285,7 @@
         "expanded": false,
         "items": [
           "devices[].switchesControl",
+          "devices[].switchesHideUplinkPorts",
           {
             "key": "devices[].switches",
             "type": "tabarray",
@@ -279,14 +304,25 @@
       {
         "key": "devices[]",
         "type": "section",
-        "title": "Advanced Settings",
+        "title": "Authorization",
         "expandable": true,
         "expanded": false,
         "items": [
           "devices[].apiKey",
           "devices[].organizationId",
-          "devices[].networkId",
+          "devices[].networkId"
+        ]
+      },
+      {
+        "key": "devices[]",
+        "type": "section",
+        "title": "Advanced Settings",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "devices[].enableDebugMode",
           "devices[].disableLogInfo",
+          "devices[].disableLogDeviceInfo",
           "devices[].refreshInterval"
         ]
       }

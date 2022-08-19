@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.23] - (23.07.2022)
 ## Changes
+- refactor logs
+- added possibility enable debug mode in plugin settings
+- added possibility disable log device info on plugin start
+- added possiblity hide uplinks ports of switches
+- update config schema
+- rebuild data refresh and network reconnect if error
+
+## [0.10.23] - (23.07.2022)
+## Changes
 - refactor information service
 
 ## [0.10.21] - (25.04.2022)

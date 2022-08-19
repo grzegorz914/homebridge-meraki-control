@@ -24,19 +24,22 @@
             "networkId": "1234567",
             "refreshInterval": 10,
             "disableLogInfo": false,
+            "disableLogDeviceInfo": false,
+            "enableDebugMode": false,
             "dashboardClientsPolicy": [{
                 "name": "Own Name",
                 "mac": "Mac Address",
                 "type": "Policy type",
                 "mode": false
-           }],
-           "accessPointsControl": false,
-           "hideUnconfiguredSsids": false,
-           "hideSsids": [{
+            }],
+            "accessPointsControl": false,
+            "hideUnconfiguredSsids": false,
+            "hideSsids": [{
                 "name": "SSID Name",
                 "mode": false
             }],
             "switchesControl": false,
+            "switchesHideUplinkPorts": false,
             "switches": [{
                 "name": "Switch Name",
                 "serialNumber": "O1H1-GL5D-AXXX",

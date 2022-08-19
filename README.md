@@ -62,7 +62,9 @@
 | `organizationId` | Here set the *Organization Id*. |
 | `networkId` | Here set the *Network Id*. |
 | `refreshInterval` | Here set the data refresh time in seconds. |
-| `disableLogInfo` | If enabled, disable log info, all values and state will not be displayed in *Homebridge* log. |
+| `enableDebugMode` | This enable deep log in homebridge console. |
+| `disableLogInfo` | This disable display log values and states on every it change. |
+| `disableLogDeviceInfo` | This disable display log device info on plugin start. |
 | `dashboardClientsPolicy.name` | Here set the *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
 | `dashboardClientsPolicy.mac` | Here set the *Client Mac Address* which You want expose to the *Homebridge/HomeKit*. |
 | `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for this Client. |
@@ -72,6 +74,7 @@
 | `hideSsids.name` | Here set *SSID Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `hideSsids.mode` | Here set mode *ON/OFF* for this SSID. |
 | `switchesControl` | This option *Enable/Disable* control of Switches. |
+| `switchesHideUplinkPorts` | If enabled, all *Uplink* ports will be hidden and not exposed to the *Homebridge/HomeKit*. |
 | `switches.name` | Here set the *Name* for this Switch. |
 | `switches.serialNumber` | Here set the *Serial Number* for this Switch. |
 | `switches.mode` | Here set mode *ON/OFF* for this Port. |
@@ -88,6 +91,8 @@
                     "networkId": "L_0123456789",
                     "refreshInterval": 10,
                     "disableLogInfo": false,
+                    "disableLogDeviceInfo": false,
+                    "enableDebugMode": false,
                     "dashboardClientsPolicy": [{
                          "name": "Own Name",
                          "mac": "Mac Address",
@@ -101,6 +106,7 @@
                          "mode": false
                      }],
                      "switchesControl": false,
+                     "switchesHideUplinkPorts": false,
                      "switches": [{
                          "name": "Switch Name",
                          "serialNumber": "O1H1-GL5D-AXXX",
