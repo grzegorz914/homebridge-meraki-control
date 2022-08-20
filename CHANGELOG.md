@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.12.0] - (20.08.2022)
 ## Changes
-- added possiblity switch ports by port name
+- added possiblity hide switch ports by port name
 - code cleanup
 - config schema update
 
