@@ -69,16 +69,19 @@
 | `dashboardClientsPolicy.name` | Here set the *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
 | `dashboardClientsPolicy.mac` | Here set the *Client Mac Address* which You want expose to the *Homebridge/HomeKit*. |
 | `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for this Client. |
-| `dashboardClientsPolicy.mode` | Here set the mode *ON/OFF* for this Client. |
+| `dashboardClientsPolicy.mode` | Here *Activate/Deactivate* this Client control. |
 | `accessPointsControl` | This option *Enable/Disable* control of Access Points. |
 | `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden and not exposed to the *Homebridge/HomeKit*. |
 | `hideSsids.name` | Here set *SSID Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
-| `hideSsids.mode` | Here set mode *ON/OFF* for this SSID. |
+| `hideSsids.mode` | Here *Activate/Deactivate* this SSID control. |
 | `switchesControl` | This option *Enable/Disable* control of Switches. |
-| `switchesHideUplinkPorts` | If enabled, all *Uplink* ports will be hidden and not exposed to the *Homebridge/HomeKit*. |
 | `switches.name` | Here set the *Name* for this Switch. |
 | `switches.serialNumber` | Here set the *Serial Number* for this Switch. |
-| `switches.mode` | Here set mode *ON/OFF* for this Port. |
+| `switches.hideUplinkPorts` | If enabled, all *Uplink* ports will be hidden and not exposed to the *Homebridge/HomeKit*. |
+| `switches.mode` | Here *Activate/Deactivate* this Swich control. |
+| `switches.hidePorts` | Array of hidden Ports. |
+| `switches.hidePorts.name` | Here set *Port Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
+| `switches.hidePorts.mode` | Here *Activate/Deactivate* this Port control. |
 
 ```json
         {
@@ -107,11 +110,15 @@
                          "mode": false
                      }],
                      "switchesControl": false,
-                     "switchesHideUplinkPorts": false,
                      "switches": [{
                          "name": "Switch Name",
                          "serialNumber": "O1H1-GL5D-AXXX",
-                         "mode": false
+                         "hideUplinkPorts": false,
+                         "mode": false,
+                         "hidePorts": [{
+                              "name": "Port Name",
+                              "mode": true
+                         }]
                      }]
                 }
             ]

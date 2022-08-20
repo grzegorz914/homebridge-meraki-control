@@ -39,11 +39,15 @@
                 "mode": false
             }],
             "switchesControl": false,
-            "switchesHideUplinkPorts": false,
             "switches": [{
                 "name": "Switch Name",
                 "serialNumber": "O1H1-GL5D-AXXX",
-                "mode": false
+                "hideUplinkPorts": false,
+                "mode": false,
+                "hidePorts": [{
+                    "name": "Port Name",
+                    "mode": true
+                }]
             }]
         }]
     }]
