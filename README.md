@@ -40,7 +40,7 @@
   * Expose `Clients` filtered by *Mac Address*.
   * Apply policy `Normal, Whitelisted, Group Policy` / `Blocked` for clients.
 * Access Points:
-  * Switch `ON/OFF SSIDs` in Your organisation.
+  * Switch `ON/OFF SSIDs` in the organisation.
   * Hide `Unconfigured SSIDs` networks, if the name contain word *Unconfigured*.
   * Hide `SSIDs` filtered by network *Name*.
 * Switches:
