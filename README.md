@@ -36,13 +36,18 @@
    * Restart Homebridge and try add it to the Home app again.
 
 ## Features and How To Use Them
-* Switch `ON/OFF SSIDs networks` in Your organisation (MR devices).
-* Hide `Unconfigured SSIDs` networks, available in plugin settings.
-* Hide `SSIDs networks` filtered by network *Name*, available in plugin settings.
-* Hide `Uplink` ports, available in plugin settings.
-* Expose `Clients` filtered by *Mac Address* and apply policy `Normal, Whitelisted, Group Policy` / `Blocked`.
-* Switch `ON/OFF Ports` on switch, available in plugin settings, right now only one switch is supported.
-* Siri can be used to switch ON/OFF SSID, Policy, Port.
+* Dashboard:
+  * Expose `Clients` filtered by *Mac Address*.
+  * Apply policy `Normal, Whitelisted, Group Policy` / `Blocked` for clients.
+* Access Points:
+  * Switch `ON/OFF SSIDs` in Your organisation.
+  * Hide `Unconfigured SSIDs` networks, if the name contain word *Unconfigured*.
+  * Hide `SSIDs` filtered by network *Name*.
+* Switches:
+  * Switch `ON/OFF` ports.
+  * Hide `Uplink` ports, if the port name contain word *Uplink*.
+  * Hide `Ports` filtered by port *Name*.
+* Siri can be used to switch ON/OFF SSIDs, Policy, Ports.
 * Home automations and shortcuts can be used for all functions.
 * More comming soon...
 
