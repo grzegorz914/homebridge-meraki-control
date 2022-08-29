@@ -516,7 +516,6 @@ class merakiDevice {
           .onSet(async (state) => {
             try {
               state = state ? true : false;
-              const swPortId = swPortId;
               const switchPortUrl = `/devices/${this.switches[0].serialNumber}/switch/ports/${swPortId}`;
               const setSwitchPort = await this.axiosInstance.put(switchPortUrl, {
                 'enabled': state
