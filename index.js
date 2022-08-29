@@ -506,7 +506,7 @@ class merakiDevice {
         const swPortState = this.swPortsState[i];
         const swServiceName = `${swPortId}. ${swPortName}`;
 
-        const swService = new Service.Outlet(swServiceName, `swService${ii}`);
+        const swService = new Service.Outlet(swServiceName, `swService${i}`);
         swService.getCharacteristic(Characteristic.On)
           .onGet(async () => {
             const state = swPortState;
