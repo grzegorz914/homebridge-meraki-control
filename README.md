@@ -20,20 +20,8 @@
 | Package | Installation | Role | Required |
 | --- | --- | --- | --- |
 | [Homebridge](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required |
-| [Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | [Config UI X Wiki](https://github.com/oznu/homebridge-config-ui-x/wiki) | Web User Interface | Recommended |
-| [Meraki Control](https://www.npmjs.com/package/homebridge-meraki-control) | `npm install -g homebridge-meraki-control` | Plug-In | Required |
-## Note
-* Versin 0.6.0 and above need to be used with Homebridge min. v1.3.x.
-
-## Know Issues
-* If use with Hoobs possible config incompatibilty.
-
-## Troubleshooting
-* If for some reason the device is not displayed in HomeKit app try this procedure:
-   * Go to `./homebridge/persist` macOS or `/var/lib/homebridge/persist` for RPI.
-   * Remove `AccessoryInfo.xxx` file which contain Your device data: `{"displayName":"Meraki"}`.
-   * Next remove `IdentifierCashe.xxx` file with same name as `AccessoryInfo.xxx`.
-   * Restart Homebridge and try add it to the Home app again.
+| [Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | [Config UI X Wiki](https://github.com/oznu/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Recommended |
+| [Meraki Control](https://www.npmjs.com/package/homebridge-meraki-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-meraki-control/wiki) | Homebridge Plug-In | Required |
 
 ## Features and How To Use Them
 * Dashboard:
@@ -131,25 +119,3 @@
             ]
         }
 ```
-
-### Adding to HomeKit
-* Each accessory needs to be manually paired. 
-  * Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' width='16.42px'> app on your device. 
-  * Tap the Home tab, then tap <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' width='16.42px'>. 
-  * Tap *Add Accessory*, and select *I Don't Have a Code, Cannot Scan* or *More options*. 
-  * Select Your accessory and press add anyway. 
-  * Enter the PIN or scan the QR code, this can be found in Homebridge UI or Homebridge logs.
-  * Complete the accessory setup.
-
-## Limitations
-* That maximum Services for 1 accessory is 100. If Services > 100, accessory stop responding.
-* The Services in this accessory are:
-  * Information.
-  * SSIDs.
-  * Clients.
-  * Switch Ports.
-
-## [What's New](https://github.com/grzegorz914/homebridge-meraki-control/blob/main/CHANGELOG.md)
-
-## Development
-- Pull request and help in development highly appreciated.
