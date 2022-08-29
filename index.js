@@ -532,7 +532,7 @@ class merakiDevice {
             });
 
           this.swServices.push(swService);
-          accessory.addService(this.swServices[i]);
+          accessory.addService(this.swServices[j]);
         };
       };
     };
