@@ -23,7 +23,7 @@
 | [Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | [Config UI X Wiki](https://github.com/oznu/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Recommended |
 | [Meraki Control](https://www.npmjs.com/package/homebridge-meraki-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-meraki-control/wiki) | Homebridge Plug-In | Required |
 
-## Features and How To Use Them
+## About The Plugin
 * Dashboard:
   * Expose `Clients` filtered by *Mac Address*.
   * Apply policy `Normal, Whitelisted, Group Policy` / `Blocked` for clients.
