@@ -444,9 +444,8 @@ class merakiDevice {
         })
         .onSet(async (state) => {
           try {
-            const clientId = dbClientId;
             const policy = state ? this.dbExposedAndExistingClientsPolicy[i] : 'Blocked';
-            const setClientPolicy = await this.axiosInstance.put(`${this.dashboardClientsUrl}/${clientId}/policy`, {
+            const setClientPolicy = await this.axiosInstance.put(`${this.dashboardClientsUrl}/${dbClientId}/policy`, {
               'devicePolicy': policy
             });
             const debug = this.enableDebugMode ? this.log(`Network: ${accessoryName}, Client: ${dbClientName}, debug setClientPolicy: ${setClientPolicy.data}`) : false;
@@ -479,8 +478,7 @@ class merakiDevice {
         .onSet(async (state) => {
           try {
             state = state ? true : false;
-            const apSsidIndex = ssidNumber;
-            const apSetSsid = await this.axiosInstance.put(`${this.wirelessUrl}/${apSsidIndex}`, {
+            const apSetSsid = await this.axiosInstance.put(`${this.wirelessUrl}/${ssidNumber}`, {
               'enabled': state
             });
             const debug = this.enableDebugMode ? this.log(`Network: ${accessoryName}, SSID: ${ssidName}, debug apSetSsid: ${apSetSsid.data}`) : false;
