@@ -318,6 +318,7 @@ class merakiDevice {
       };
 
       //switches ports state
+      this.swPortsSn = new Array();
       this.swPortsId = new Array();
       this.swPortsName = new Array();
       this.swPortsState = new Array();
@@ -342,6 +343,7 @@ class merakiDevice {
 
             //push exposed ports
             const swHidePort = (hideUplinksPorts || this.swHiddenPortsByName.indexOf(portName) >= 0) ? true : false;
+            const pushSwitchSerialNumber = swHidePort ? false : this.swPortsSn.push(serialNumber);
             const pushSwitchPortId = swHidePort ? false : this.swPortsId.push(portId);
             const pushSwitchPortName = swHidePort ? false : this.swPortsName.push(portName);
             const pushSwitchPortState = swHidePort ? false : this.swPortsState.push(portState);
@@ -496,44 +498,38 @@ class merakiDevice {
     //meraki ms
     if (swExposedCount > 0 && swExposedPortsCount > 0) {
       this.swServices = new Array();
+      //ports
+      for (let i = 0; i < swExposedPortsCount; i++) {
+        const swSerialNumber = this.swPortsSn[i];
+        const swPortName = this.swPortsName[i];
+        const swPortId = this.swPortsId[i];
+        const swPortState = this.swPortsState[i];
+        const swServiceName = `${swPortId}. ${swPortName}`;
 
-      //switches
-      for (let i = 0; i < swExposedCount; i++) {
-        const sw = this.switches[i];
-        const swName = sw.name;
+        const swService = new Service.Outlet(swServiceName, `swService${ii}`);
+        swService.getCharacteristic(Characteristic.On)
+          .onGet(async () => {
+            const state = swPortState;
+            const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, state: ${state ? 'Enabled' : 'Disabled'}`);
+            return state;
+          })
+          .onSet(async (state) => {
+            try {
+              state = state ? true : false;
+              const switchPortUrl = `/devices/${swSerialNumber}/switch/ports/${swPortId}`;
+              const setSwitchPort = await this.axiosInstance.put(switchPortUrl, {
+                'enabled': state
+              });
+              const debug = this.enableDebugMode ? this.log(`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, debug set switch Port: ${setSwitchPort.data}`) : false;
+              const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+              this.updateSwitchesData();
+            } catch (error) {
+              this.log.error(`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, set state error: %${error}`);
+            }
+          });
 
-        //ports
-        for (let j = 0; j < swExposedPortsCount; j++) {
-          const swPortName = this.swPortsName[j];
-          const swPortId = this.swPortsId[j];
-          const swPortState = this.swPortsState[j];
-          const swServiceName = `${swPortId}. ${swPortName}`;
-
-          const swService = new Service.Outlet(swServiceName, `swService${j}`);
-          swService.getCharacteristic(Characteristic.On)
-            .onGet(async () => {
-              const state = swPortState;
-              const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, state: ${state ? 'Enabled' : 'Disabled'}`);
-              return state;
-            })
-            .onSet(async (state) => {
-              try {
-                state = state ? true : false;
-                const switchPortUrl = `/devices/${sw.serialNumber}/switch/ports/${swPortId}`;
-                const setSwitchPort = await this.axiosInstance.put(switchPortUrl, {
-                  'enabled': state
-                });
-                const debug = this.enableDebugMode ? this.log(`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, debug set switch Port: ${setSwitchPort.data}`) : false;
-                const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
-                this.updateSwitchesData();
-              } catch (error) {
-                this.log.error(`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, set state error: %${error}`);
-              }
-            });
-
-          this.swServices.push(swService);
-          accessory.addService(this.swServices[j]);
-        };
+        this.swServices.push(swService);
+        accessory.addService(this.swServices[i]);
       };
     };
 
