@@ -124,7 +124,19 @@ class merakiDevice {
     };
 
     this.updateDashboardClientsData();
-  }
+  };
+
+  updateData() {
+    setTimeout(() => {
+      this.updateDashboardClientsData();
+    }, this.refreshInterval * 1000);
+  };
+
+  reconnect() {
+    setTimeout(() => {
+      this.updateDashboardClientsData();
+    }, 15000);
+  };
 
   async updateDashboardClientsData() {
     this.log.debug(`Network: ${this.name}, requesting dashboard clients data.`);
@@ -180,7 +192,7 @@ class merakiDevice {
       }
     } catch (error) {
       this.checkDeviceInfo = true;
-      this.log.error(`Network: ${this.name}, dashboard clients data error: ${error}. reconnect in 10s.`);
+      this.log.error(`Network: ${this.name}, dashboard clients data error: ${error}. reconnect in 15s.`);
       this.reconnect();
     };
   };
@@ -213,13 +225,13 @@ class merakiDevice {
           this.clientsPolicyMac.push(clientPolicyMac);
           this.clientsPolicyPolicy.push(clientPolicyPolicy);
           this.clientsPolicyState.push(clientPolicyState);
-        }
+        };
       };
 
       const updateNextData = this.accessPointsControl ? this.updateAccessPointsData() : this.switchesControl ? this.updateSwitchesData() : this.getDeviceInfo();
     } catch (error) {
       this.checkDeviceInfo = true;
-      this.log.error(`Network: ${this.name}, dashboard client policy data error: ${error}. reconnect in 10s.`);
+      this.log.error(`Network: ${this.name}, dashboard client policy data error: ${error}. reconnect in 15s.`);
       this.reconnect();
     };
   };
@@ -278,7 +290,7 @@ class merakiDevice {
       }
     } catch (error) {
       this.checkDeviceInfo = true;
-      this.log.error(`Network: ${this.name}, access points data error: ${error}. reconnect in 10s.`);
+      this.log.error(`Network: ${this.name}, access points data error: ${error}. reconnect in 15s.`);
       this.reconnect();
     };
   };
@@ -367,7 +379,7 @@ class merakiDevice {
       this.getDeviceInfo();
     } catch (error) {
       this.checkDeviceInfo = true;
-      this.log.error(`Network: ${this.name}, switches data error: ${error}. reconnect in 10s.`);
+      this.log.error(`Network: ${this.name}, switches data error: ${error}. reconnect in 15s.`);
       this.reconnect();
     };
   };
@@ -385,18 +397,6 @@ class merakiDevice {
 
     const startPrepareAccessory = this.startPrepareAccessory ? this.prepareAccessory() : false;
     this.updateData();
-  };
-
-  updateData() {
-    setTimeout(() => {
-      this.updateDashboardClientsData();
-    }, this.refreshInterval * 1000);
-  };
-
-  reconnect() {
-    setTimeout(() => {
-      this.updateDashboardClientsData();
-    }, 10000);
   };
 
   //Prepare accessory
@@ -462,8 +462,8 @@ class merakiDevice {
 
         this.merakiDashboardClientPolicyServices.push(dbClientPolicyService);
         accessory.addService(this.merakiDashboardClientPolicyServices[i]);
-      }
-    }
+      };
+    };
 
     //meraki mr
     if (apExposedSsidsCount > 0) {
@@ -498,8 +498,8 @@ class merakiDevice {
 
         this.apServices.push(apService);
         accessory.addService(this.apServices[i]);
-      }
-    }
+      };
+    };
 
     //meraki ms
     if (swExposedPortsCount > 0) {
