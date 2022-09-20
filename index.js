@@ -279,7 +279,7 @@ class merakiDevice {
         for (let i = 0; i < apExposedSsidsCount; i++) {
           const ssidState = this.apSsidsState[i];
 
-          if (this.apServices && ssidState != null) {
+          if (this.apServices) {
             this.apServices[i]
               .updateCharacteristic(Characteristic.On, ssidState);
           };
@@ -368,7 +368,7 @@ class merakiDevice {
       for (let k = 0; k < swExposedPortsCount; k++) {
         const portState = this.swPortsState[k];
 
-        if (this.swServices && portState != null) {
+        if (this.swServices) {
           this.swServices[k]
             .updateCharacteristic(Characteristic.On, portState);
         };
@@ -376,7 +376,7 @@ class merakiDevice {
 
       this.swExposedCount = swExposedCount;
       this.swExposedPortsCount = swExposedPortsCount;
-      this.getDeviceInfo();
+      const updaeNext = this.checkDeviceInfo ? this.getDeviceInfo() : this.updateData();
     } catch (error) {
       this.checkDeviceInfo = true;
       this.log.error(`Network: ${this.name}, switches data error: ${error}. reconnect in 15s.`);
@@ -396,7 +396,6 @@ class merakiDevice {
     };
 
     const startPrepareAccessory = this.startPrepareAccessory ? this.prepareAccessory() : false;
-    this.updateData();
   };
 
   //Prepare accessory
