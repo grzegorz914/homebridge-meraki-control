@@ -433,14 +433,12 @@ class merakiDevice {
       //clients
       for (let i = 0; i < dbExposedAndExistingClientsCount; i++) {
         const dbClientName = this.dbExposedAndExistingClientsName[i];
-        const dbClientId = this.dbExposedAndExistingClientsId[i]
-        const dbClientPolicy = (this.clientsPolicyState[i] != undefined) ? this.clientsPolicyState[i] : true;
         const dbServiceName = `C. ${dbClientName}`;
 
         const dbClientPolicyService = new Service.Outlet(dbServiceName, `dbClientPolicyService${i}`);
         dbClientPolicyService.getCharacteristic(Characteristic.On)
           .onGet(async () => {
-            const state = dbClientPolicy;
+            const state = (this.clientsPolicyState[i] != undefined) ? this.clientsPolicyState[i] : true;
             const policy = state ? this.clientsPolicyPolicy[i] : 'Blocked';
             const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Client: % ${dbClientName}, Policy: ${policy}`);
             return state;
@@ -448,7 +446,7 @@ class merakiDevice {
           .onSet(async (state) => {
             try {
               const policy = state ? this.dbExposedAndExistingClientsPolicy[i] : 'Blocked';
-              const setClientPolicy = await this.axiosInstance.put(`${this.dashboardClientsUrl}/${dbClientId}/policy`, {
+              const setClientPolicy = await this.axiosInstance.put(`${this.dashboardClientsUrl}/${this.dbExposedAndExistingClientsId[i]}/policy`, {
                 'devicePolicy': policy
               });
               const debug = this.enableDebugMode ? this.log(`Network: ${accessoryName}, Client: ${dbClientName}, debug set client Policy: ${setClientPolicy.data}`) : false;
@@ -470,21 +468,19 @@ class merakiDevice {
       //ssids
       for (let i = 0; i < apExposedSsidsCount; i++) {
         const ssidName = this.apSsidsName[i];
-        const ssidNumber = this.apSsidsNumber[i];
-        const ssidState = this.apSsidsState[i];
         const apServiceName = `W. ${ssidName}`;
 
         const apService = new Service.Outlet(apServiceName, `apService${i}`);
         apService.getCharacteristic(Characteristic.On)
           .onGet(async () => {
-            const state = ssidState;
+            const state = this.apSsidsState[i];
             const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
             return state;
           })
           .onSet(async (state) => {
             try {
               state = state ? true : false;
-              const apSetSsid = await this.axiosInstance.put(`${this.wirelessUrl}/${ssidNumber}`, {
+              const apSetSsid = await this.axiosInstance.put(`${this.wirelessUrl}/${this.apSsidsNumber[i]}`, {
                 'enabled': state
               });
               const debug = this.enableDebugMode ? this.log(`Network: ${accessoryName}, SSID: ${ssidName}, debug ap set Ssid: ${apSetSsid.data}`) : false;
@@ -505,31 +501,28 @@ class merakiDevice {
       this.swServices = new Array();
       //ports
       for (let i = 0; i < swExposedPortsCount; i++) {
-        const swSerialNumber = this.swPortsSn[i];
         const swPortName = this.swPortsName[i];
-        const swPortId = this.swPortsId[i];
-        const swPortState = this.swPortsState[i];
-        const swServiceName = `${swPortId}. ${swPortName}`;
+        const swServiceName = `${this.swPortsId[i]}. ${swPortName}`;
 
         const swService = new Service.Outlet(swServiceName, `swService${i}`);
         swService.getCharacteristic(Characteristic.On)
           .onGet(async () => {
-            const state = swPortState;
-            const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, state: ${state ? 'Enabled' : 'Disabled'}`);
+            const state = this.swPortsState[i];
+            const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Port: ${this.swPortsId[i]}, Name: ${swPortName}, state: ${state ? 'Enabled' : 'Disabled'}`);
             return state;
           })
           .onSet(async (state) => {
             try {
               state = state ? true : false;
-              const switchPortUrl = `/devices/${swSerialNumber}/switch/ports/${swPortId}`;
+              const switchPortUrl = `/devices/${this.swPortsSn[i]}/switch/ports/${this.swPortsId[i]}`;
               const setSwitchPort = await this.axiosInstance.put(switchPortUrl, {
                 'enabled': state
               });
-              const debug = this.enableDebugMode ? this.log(`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, debug set switch Port: ${setSwitchPort.data}`) : false;
-              const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+              const debug = this.enableDebugMode ? this.log(`Network: ${accessoryName}, Port: ${this.swPortsId[i]}, Name: ${swPortName}, debug set switch Port: ${setSwitchPort.data}`) : false;
+              const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Port: ${this.swPortsId[i]}, Name: ${swPortName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
               this.updateSwitchesData();
             } catch (error) {
-              this.log.error(`Network: ${accessoryName}, Port: ${swPortId}, Name: ${swPortName}, set state error: %${error}`);
+              this.log.error(`Network: ${accessoryName}, Port: ${this.swPortsId[i]}, Name: ${swPortName}, set state error: %${error}`);
             }
           });
 
