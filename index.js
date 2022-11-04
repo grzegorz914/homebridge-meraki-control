@@ -279,7 +279,7 @@ class merakiDevice {
         for (let i = 0; i < apExposedSsidsCount; i++) {
           const ssidState = this.apSsidsState[i];
 
-          if (this.apServices) {
+          if (this.apServices && ssidState != undefined) {
             this.apServices[i]
               .updateCharacteristic(Characteristic.On, ssidState);
           };
@@ -368,7 +368,7 @@ class merakiDevice {
       for (let k = 0; k < swExposedPortsCount; k++) {
         const portState = this.swPortsState[k];
 
-        if (this.swServices) {
+        if (this.swServices && portState != undefined) {
           this.swServices[k]
             .updateCharacteristic(Characteristic.On, portState);
         };
