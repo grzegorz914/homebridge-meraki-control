@@ -146,9 +146,9 @@ class merakiDevice {
       const debug = this.enableDebugMode ? this.log(`Debug dashboard clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`) : false;
 
       if (dbClientsData.status == 200) {
-        this.dbClientsId = new Array();
-        this.dbClientsMac = new Array();
-        this.dbClientsDescription = new Array();
+        this.dbClientsId = [];
+        this.dbClientsMac = [];
+        this.dbClientsDescription = [];
 
         const dbClientsCount = dbClientsData.data.length;
         for (let i = 0; i < dbClientsCount; i++) {
@@ -163,10 +163,10 @@ class merakiDevice {
         }
 
         //configured clients
-        this.dbExposedAndExistingClientsName = new Array();
-        this.dbExposedAndExistingClientsId = new Array();
-        this.dbExposedAndExistingClientsMac = new Array();
-        this.dbExposedAndExistingClientsPolicy = new Array();
+        this.dbExposedAndExistingClientsName = [];
+        this.dbExposedAndExistingClientsId = [];
+        this.dbExposedAndExistingClientsMac = [];
+        this.dbExposedAndExistingClientsPolicy = [];
 
         for (let j = 0; j < this.confClientsCount; j++) {
           const client = this.clientsPolicy[j];
@@ -201,9 +201,9 @@ class merakiDevice {
     this.log.debug(`Network: ${this.name}, requesting dashboard clients policy data.`);
 
     try {
-      this.clientsPolicyMac = new Array();
-      this.clientsPolicyPolicy = new Array();
-      this.clientsPolicyState = new Array();
+      this.clientsPolicyMac = [];
+      this.clientsPolicyPolicy = [];
+      this.clientsPolicyState = [];
 
       const dbExposedAndExistingClientsCount = this.dbExposedAndExistingClientsCount;
       for (let i = 0; i < dbExposedAndExistingClientsCount; i++) {
@@ -244,10 +244,10 @@ class merakiDevice {
       const debug = this.enableDebugMode ? this.log(`Debug access points data: ${JSON.stringify(apData.data, null, 2)}`) : false;
 
       if (apData.status == 200) {
-        this.apHiddenSsidsName = new Array();
-        this.apSsidsNumber = new Array();
-        this.apSsidsName = new Array();
-        this.apSsidsState = new Array();
+        this.apHiddenSsidsName = [];
+        this.apSsidsNumber = [];
+        this.apSsidsName = [];
+        this.apSsidsState = [];
 
         //hidde ssid by name
         const apHideSsidsByNameCount = this.apHideSsidsByNameCount;
@@ -300,10 +300,10 @@ class merakiDevice {
 
     try {
       //switches cinfigured
-      this.swNames = new Array();
-      this.swSerialsNumber = new Array();
-      this.swHideUplinksPort = new Array();
-      this.swHiddenPortsByName = new Array();
+      this.swNames = [];
+      this.swSerialsNumber = [];
+      this.swHideUplinksPort = [];
+      this.swHiddenPortsByName = [];
 
       //switches configured
       const swCount = this.switchesControl ? this.switches.length : 0;
@@ -330,11 +330,11 @@ class merakiDevice {
       };
 
       //switches ports state
-      this.swPortsSn = new Array();
-      this.swPortsId = new Array();
-      this.swPortsName = new Array();
-      this.swPortsState = new Array();
-      this.swPortsPoeState = new Array();
+      this.swPortsSn = [];
+      this.swPortsId = [];
+      this.swPortsName = [];
+      this.swPortsState = [];
+      this.swPortsPoeState = [];
 
       const swExposedCount = this.swSerialsNumber.length;
       for (let i = 0; i < swExposedCount; i++) {
@@ -429,7 +429,7 @@ class merakiDevice {
     const swExposedPortsCount = this.swExposedPortsCount;
 
     if (dbExposedAndExistingClientsCount > 0) {
-      this.merakiDashboardClientPolicyServices = new Array();
+      this.merakiDashboardClientPolicyServices = [];
       //clients
       for (let i = 0; i < dbExposedAndExistingClientsCount; i++) {
         const dbClientName = this.dbExposedAndExistingClientsName[i];
@@ -464,7 +464,7 @@ class merakiDevice {
 
     //meraki mr
     if (apExposedSsidsCount > 0) {
-      this.apServices = new Array();
+      this.apServices = [];
       //ssids
       for (let i = 0; i < apExposedSsidsCount; i++) {
         const ssidName = this.apSsidsName[i];
@@ -498,7 +498,7 @@ class merakiDevice {
 
     //meraki ms
     if (swExposedPortsCount > 0) {
-      this.swServices = new Array();
+      this.swServices = [];
       //ports
       for (let i = 0; i < swExposedPortsCount; i++) {
         const swPortName = this.swPortsName[i];
