@@ -26,20 +26,18 @@ class merakiPlatform {
       return;
     }
     this.log = log;
-    this.config = config;
     this.api = api;
-    this.devices = config.devices || [];
     this.accessories = [];
+    const devices = config.devices;
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching');
-      for (let i = 0; i < this.devices.length; i++) {
-        const device = this.devices[i];
+      for (const device of devices) {
         if (!device.name || !device.apiKey || !device.organizationId || !device.networkId) {
           this.log.warn('Device name, api key, organization Id or network Id missing');
-        } else {
-          new merakiDevice(this.log, device, this.api);
+          return
         }
+        new merakiDevice(this.log, device, this.api);
       }
     });
   }
@@ -84,11 +82,9 @@ class merakiDevice {
     this.confClientsCount = this.clientsPolicy.length;
 
     //meraki dashboard
-    this.dbClientsCount = 0;
     this.dbExposedAndExistingClientsCount = 0;
 
     //meraki mr
-    this.apHideSsidsByNameCount = this.accessPointsControl ? this.accessPointsHideSsidsByName.length : 0;
     this.apExposedSsidsCount = 0;
 
     //meraki ms
@@ -145,14 +141,12 @@ class merakiDevice {
       const dbClientsData = await this.axiosInstance.get(`${this.dashboardClientsUrl}?perPage=255&timespan=2592000`);
       const debug = this.enableDebugMode ? this.log(`Debug dashboard clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`) : false;
 
-      if (dbClientsData.status == 200) {
+      if (dbClientsData.status === 200) {
         this.dbClientsId = [];
         this.dbClientsMac = [];
         this.dbClientsDescription = [];
 
-        const dbClientsCount = dbClientsData.data.length;
-        for (let i = 0; i < dbClientsCount; i++) {
-          const client = dbClientsData.data[i];
+        for (const client of dbClientsData.data) {
           const clientId = client.id;
           const clientMac = (client.mac).split(':').join('');
           const clientDescription = client.description;
@@ -173,20 +167,19 @@ class merakiDevice {
           const clientName = client.name;
           const clientMac = (client.mac).split(':').join('');
           const clientPolicyType = client.type;
-          const clientEnabled = (client.mode == true);
+          const clientEnabled = (client.mode === true);
 
           const clientIndex = clientEnabled ? this.dbClientsMac.indexOf(clientMac) : -1;
-          const clientId = (clientIndex != -1 && clientIndex != undefined) ? this.dbClientsId[clientIndex] : -1;
+          const clientId = (clientIndex !== -1 && clientIndex !== undefined) ? this.dbClientsId[clientIndex] : -1;
 
           //check and push existed clients in dshboard
-          const exposeClient = (clientId != -1);
+          const exposeClient = (clientId !== -1);
           const pushExposedAndExistingClientName = exposeClient ? this.dbExposedAndExistingClientsName.push(clientName) : false;
           const pushExposedAndExistongClientId = exposeClient ? this.dbExposedAndExistingClientsId.push(clientId) : false;
           const pushExposedAndExistongClientMac = exposeClient ? this.dbExposedAndExistingClientsMac.push(clientMac) : false;
           const pushExposedAndExistongClientPolicy = exposeClient ? this.dbExposedAndExistingClientsPolicy.push(clientPolicyType) : false;
         };
 
-        this.dbClientsCount = dbClientsCount;
         this.dbExposedAndExistingClientsCount = this.dbExposedAndExistingClientsId.length;
         const updateNextData = (this.dbExposedAndExistingClientsCount > 0) ? this.updateDashboardClientsPolicyData() : this.accessPointsControl ? this.updateAccessPointsData() : this.switchesControl ? this.updateSwitchesData() : this.getDeviceInfo();
       }
@@ -212,12 +205,12 @@ class merakiDevice {
         const dbClientsPolicyData = await this.axiosInstance.get(`${this.dashboardClientsUrl}/${clientId}/policy`);
         const debug = this.enableDebugMode ? this.log(`Debug dashboard client policy data: ${JSON.stringify(dbClientsPolicyData.data[0], null, 2)}`) : false;
 
-        if (dbClientsPolicyData.status == 200) {
+        if (dbClientsPolicyData.status === 200) {
           const clientPolicyMac = dbClientsPolicyData.data.mac;
-          const clientPolicyPolicy = (dbClientsPolicyData.data.devicePolicy != undefined) ? (dbClientsPolicyData.data.devicePolicy) : 'undefined';
-          const clientPolicyState = (clientPolicyPolicy != 'Blocked');
+          const clientPolicyPolicy = dbClientsPolicyData.data.devicePolicy || 'undefined';
+          const clientPolicyState = clientPolicyPolicy !== 'Blocked' || false;
 
-          if (this.merakiDashboardClientPolicyServices[i] && clientPolicyPolicy != undefined) {
+          if (this.merakiDashboardClientPolicyServices && (clientPolicyPolicy !== this.clientsPolicyState[i])) {
             this.merakiDashboardClientPolicyServices[i]
               .updateCharacteristic(Characteristic.On, clientPolicyState);
           }
@@ -243,30 +236,27 @@ class merakiDevice {
       const apData = await this.axiosInstance.get(this.wirelessUrl);
       const debug = this.enableDebugMode ? this.log(`Debug access points data: ${JSON.stringify(apData.data, null, 2)}`) : false;
 
-      if (apData.status == 200) {
+      if (apData.status === 200) {
         this.apHiddenSsidsName = [];
         this.apSsidsNumber = [];
         this.apSsidsName = [];
         this.apSsidsState = [];
+        this.apSsidsPreviousState = [];
 
         //hidde ssid by name
-        const apHideSsidsByNameCount = this.apHideSsidsByNameCount;
-        for (let i = 0; i < apHideSsidsByNameCount; i++) {
-          const hideSsid = this.accessPointsHideSsidsByName[i];
+        for (const hideSsid of this.accessPointsHideSsidsByName) {
           const hideSsidName = hideSsid.name;
           const hideSsidEnabled = hideSsid.mode;
-          const pushHideSsidsName = (hideSsidEnabled && hideSsidName != undefined) ? this.apHiddenSsidsName.push(hideSsidName) : false;
+          const pushHideSsidsName = (hideSsidEnabled && hideSsidName !== undefined) ? this.apHiddenSsidsName.push(hideSsidName) : false;
         };
 
-        const apSsidsCount = apData.data.length;
-        for (let i = 0; i < apSsidsCount; i++) {
-          const ssid = apData.data[i];
+        for (const ssid of apData.data) {
           const ssidNumber = ssid.number;
           const ssidName = ssid.name;
-          const ssidState = (ssid.enabled == true)
+          const ssidState = (ssid.enabled === true)
 
           //hidde unconfigured ssids
-          const hideUnconfiguredSsids = (this.accessPointsHideUnconfiguredSsids && (ssidName.substr(0, 12) == 'Unconfigured')) ? true : false;
+          const hideUnconfiguredSsids = (this.accessPointsHideUnconfiguredSsids && (ssidName.substr(0, 12) === 'Unconfigured')) ? true : false;
 
           //push exposed ssids
           const hidePort = (hideUnconfiguredSsids || this.apHiddenSsidsName.indexOf(ssidName) >= 0) ? true : false;
@@ -277,12 +267,13 @@ class merakiDevice {
 
         const apExposedSsidsCount = this.apSsidsState.length;
         for (let i = 0; i < apExposedSsidsCount; i++) {
-          const ssidState = this.apSsidsState[i];
+          const ssidState = this.apSsidsState[i] || false;
 
-          if (this.apServices && ssidState != undefined) {
+          if (this.apServices && (ssidState !== this.apSsidsPreviousState[i])) {
             this.apServices[i]
               .updateCharacteristic(Characteristic.On, ssidState);
           };
+          this.apSsidsPreviousState.push(ssidState);
         };
 
         this.apExposedSsidsCount = apExposedSsidsCount;
@@ -306,26 +297,21 @@ class merakiDevice {
       this.swHiddenPortsByName = [];
 
       //switches configured
-      const swCount = this.switchesControl ? this.switches.length : 0;
-      if (swCount > 0) {
-        for (let i = 0; i < swCount; i++) {
-          const sw = this.switches[i];
-          const name = sw.name;
-          const serialNumber = sw.serialNumber;
-          const hideUplinkPort = sw.hideUplinkPorts;
-          const controlEnabled = sw.mode;
-          const hidePortsByNameCount = sw.hidePorts.length || 0;
-          const pushName = (controlEnabled && name != undefined) ? this.swNames.push(name) : false;
-          const pushSerialNumber = (controlEnabled && serialNumber != undefined) ? this.swSerialsNumber.push(serialNumber) : false;
-          const pushHiddenUplinkPort = (controlEnabled && serialNumber != undefined) ? this.swHideUplinksPort.push(hideUplinkPort) : false;
+      for (const sw of this.switches) {
+        const name = sw.name;
+        const serialNumber = sw.serialNumber;
+        const hideUplinkPort = sw.hideUplinkPorts;
+        const controlEnabled = sw.mode;
+        const hidePortsByNameCount = sw.hidePorts.length || 0;
+        const pushName = (controlEnabled && name !== undefined) ? this.swNames.push(name) : false;
+        const pushSerialNumber = (controlEnabled && serialNumber !== undefined) ? this.swSerialsNumber.push(serialNumber) : false;
+        const pushHiddenUplinkPort = (controlEnabled && serialNumber !== undefined) ? this.swHideUplinksPort.push(hideUplinkPort) : false;
 
-          //hidde port by name
-          for (let j = 0; j < hidePortsByNameCount; j++) {
-            const hidePort = sw.hidePorts[j];
-            const hidePortName = hidePort.name;
-            const hidePortEnabled = (hidePort.mode == true);
-            const pushHiddenPortName = (hidePortEnabled && hidePortName != undefined) ? this.swHiddenPortsByName.push(hidePortName) : false;
-          };
+        //hidde port by name
+        for (const hidePort of sw.hidePorts) {
+          const hidePortName = hidePort.name;
+          const hidePortEnabled = (hidePort.mode === true);
+          const pushHiddenPortName = (hidePortEnabled && hidePortName !== undefined) ? this.swHiddenPortsByName.push(hidePortName) : false;
         };
       };
 
@@ -335,6 +321,7 @@ class merakiDevice {
       this.swPortsName = [];
       this.swPortsState = [];
       this.swPortsPoeState = [];
+      this.swPortsPreviousState = [];
 
       const swExposedCount = this.swSerialsNumber.length;
       for (let i = 0; i < swExposedCount; i++) {
@@ -343,15 +330,13 @@ class merakiDevice {
         const swData = await this.axiosInstance.get(portsUrl);
         const debug = this.enableDebugMode ? this.log(`Debug switches data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 
-        if (swData.status == 200) {
-          const swPortsCount = swData.data.length;
-          for (let j = 0; j < swPortsCount; j++) {
-            const port = swData.data[j];
+        if (swData.status === 200) {
+          for (const port of swData.data) {
             const portId = port.portId;
             const portName = port.name;
-            const portState = (port.enabled == true);
-            const portPoeState = (port.poeEnabled == true);
-            const hideUplinksPorts = (this.swHideUplinksPort[i] == true && portName.substr(0, 6) == 'Uplink');
+            const portState = (port.enabled === true);
+            const portPoeState = (port.poeEnabled === true);
+            const hideUplinksPorts = (this.swHideUplinksPort[i] === true && portName.substr(0, 6) === 'Uplink');
 
             //push exposed ports
             const swHidePort = (hideUplinksPorts || this.swHiddenPortsByName.indexOf(portName) >= 0) ? true : false;
@@ -366,12 +351,13 @@ class merakiDevice {
 
       const swExposedPortsCount = this.swPortsSn.length;
       for (let k = 0; k < swExposedPortsCount; k++) {
-        const portState = this.swPortsState[k];
+        const portState = this.swPortsState[k] || false;
 
-        if (this.swServices && portState != undefined) {
+        if (this.swServices && (portState !== this.swPortsPreviousState[k])) {
           this.swServices[k]
             .updateCharacteristic(Characteristic.On, portState);
         };
+        this.swPortsPreviousState.push(portState);
       };
 
       this.swExposedCount = swExposedCount;
@@ -438,7 +424,7 @@ class merakiDevice {
         const dbClientPolicyService = new Service.Outlet(dbServiceName, `dbClientPolicyService${i}`);
         dbClientPolicyService.getCharacteristic(Characteristic.On)
           .onGet(async () => {
-            const state = (this.clientsPolicyState[i] != undefined) ? this.clientsPolicyState[i] : true;
+            const state = this.clientsPolicyState[i] || true;
             const policy = state ? this.clientsPolicyPolicy[i] : 'Blocked';
             const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Client: % ${dbClientName}, Policy: ${policy}`);
             return state;
