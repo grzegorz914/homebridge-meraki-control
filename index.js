@@ -175,7 +175,7 @@ class merakiDevice {
           const clientPolicyType = client.type;
           const clientEnabled = (client.mode == true);
 
-          const clientIndex = clientEnabled ? this.dbClientsMac.indexOf(clientMac) : -1;
+          const clientIndex = clientEnabled ? this.dbClientsMac.findIndex(index => index === clientMac) : -1;
           const clientId = (clientIndex != -1 && clientIndex != undefined) ? this.dbClientsId[clientIndex] : -1;
 
           //check and push existed clients in dshboard
@@ -269,7 +269,7 @@ class merakiDevice {
           const hideUnconfiguredSsids = (this.accessPointsHideUnconfiguredSsids && (ssidName.substr(0, 12) == 'Unconfigured')) ? true : false;
 
           //push exposed ssids
-          const hidePort = (hideUnconfiguredSsids || this.apHiddenSsidsName.indexOf(ssidName) >= 0) ? true : false;
+          const hidePort = hideUnconfiguredSsids || this.apHiddenSsidsName.findIndex(index => index === ssidName) ? true : false;
           const pushNumber = hidePort ? false : this.apSsidsNumber.push(ssidNumber);
           const pushName = hidePort ? false : this.apSsidsName.push(ssidName);
           const pushState = hidePort ? false : this.apSsidsState.push(ssidState);
@@ -354,7 +354,7 @@ class merakiDevice {
             const hideUplinksPorts = (this.swHideUplinksPort[i] == true && portName.substr(0, 6) == 'Uplink');
 
             //push exposed ports
-            const swHidePort = (hideUplinksPorts || this.swHiddenPortsByName.indexOf(portName) >= 0) ? true : false;
+            const swHidePort = hideUplinksPorts || this.portName.findIndex(index => index === portName) ? true : false;
             const pushSwitchSerialNumber = swHidePort ? false : this.swPortsSn.push(serialNumber);
             const pushSwitchPortId = swHidePort ? false : this.swPortsId.push(portId);
             const pushSwitchPortName = swHidePort ? false : this.swPortsName.push(portName);
