@@ -354,7 +354,7 @@ class merakiDevice {
             const hideUplinksPorts = (this.swHideUplinksPort[i] == true && portName.substr(0, 6) == 'Uplink');
 
             //push exposed ports
-            const swHidePort = hideUplinksPorts || this.portName.findIndex(index => index === portName) ? true : false;
+            const swHidePort = hideUplinksPorts || this.swHiddenPortsByName.findIndex(index => index === portName) ? true : false;
             const pushSwitchSerialNumber = swHidePort ? false : this.swPortsSn.push(serialNumber);
             const pushSwitchPortId = swHidePort ? false : this.swPortsId.push(portId);
             const pushSwitchPortName = swHidePort ? false : this.swPortsName.push(portName);
