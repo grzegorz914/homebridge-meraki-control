@@ -82,12 +82,17 @@ class merakiDevice {
     this.confClientsCount = this.clientsPolicy.length;
 
     //meraki dashboard
+    this.clientsPolicyMac = [];
+    this.clientsPolicyPolicy = [];
+    this.clientsPolicyState = [];
     this.dbExposedAndExistingClientsCount = 0;
 
     //meraki mr
+    this.apSsidsStates = [];
     this.apExposedSsidsCount = 0;
 
     //meraki ms
+    this.swPortsStates = [];
     this.switchesCount = 0;
     this.swExposedCount = 0;
     this.swExposedPortsCount = 0;
@@ -194,10 +199,6 @@ class merakiDevice {
     this.log.debug(`Network: ${this.name}, requesting dashboard clients policy data.`);
 
     try {
-      this.clientsPolicyMac = [];
-      this.clientsPolicyPolicy = [];
-      this.clientsPolicyState = [];
-
       const dbExposedAndExistingClientsCount = this.dbExposedAndExistingClientsCount;
       for (let i = 0; i < dbExposedAndExistingClientsCount; i++) {
         const clientId = this.dbExposedAndExistingClientsId[i];
@@ -210,14 +211,14 @@ class merakiDevice {
           const clientPolicyPolicy = dbClientsPolicyData.data.devicePolicy || 'undefined';
           const clientPolicyState = clientPolicyPolicy !== 'Blocked' || false;
 
-          if (this.merakiDashboardClientPolicyServices && (clientPolicyPolicy !== this.clientsPolicyState[i])) {
+          if (this.merakiDashboardClientPolicyServices && (clientPolicyState !== this.clientsPolicyState[i])) {
             this.merakiDashboardClientPolicyServices[i]
               .updateCharacteristic(Characteristic.On, clientPolicyState);
           }
 
-          this.clientsPolicyMac.push(clientPolicyMac);
-          this.clientsPolicyPolicy.push(clientPolicyPolicy);
-          this.clientsPolicyState.push(clientPolicyState);
+          const pushReplace = this.clientsPolicyMac.length < dbExposedAndExistingClientsCount ? this.clientsPolicyMac.push(clientPolicyMac) : this.clientsPolicyMac[i] = clientPolicyMac;
+          const pushReplace1 = this.clientsPolicyPolicy.length < dbExposedAndExistingClientsCount ? this.clientsPolicyPolicy.push(clientPolicyPolicy) : this.clientsPolicyPolicy[i] = clientPolicyPolicy;
+          const pushReplace2 = this.clientsPolicyState.length < dbExposedAndExistingClientsCount ? this.clientsPolicyState.push(clientPolicyState) : this.clientsPolicyState[i] = clientPolicyState;
         };
       };
 
@@ -241,7 +242,6 @@ class merakiDevice {
         this.apSsidsNumber = [];
         this.apSsidsName = [];
         this.apSsidsState = [];
-        this.apSsidsPreviousState = [];
 
         //hidde ssid by name
         for (const hideSsid of this.accessPointsHideSsidsByName) {
@@ -269,11 +269,11 @@ class merakiDevice {
         for (let i = 0; i < apExposedSsidsCount; i++) {
           const ssidState = this.apSsidsState[i] || false;
 
-          if (this.apServices && (ssidState !== this.apSsidsPreviousState[i])) {
+          if (this.apServices && (ssidState !== this.apSsidsStates[i])) {
             this.apServices[i]
               .updateCharacteristic(Characteristic.On, ssidState);
           };
-          this.apSsidsPreviousState.push(ssidState);
+          const pushReplace = this.apSsidsStates.length < apExposedSsidsCount ? this.apSsidsStates.push(ssidState) : this.apSsidsStates[i] = ssidState;
         };
 
         this.apExposedSsidsCount = apExposedSsidsCount;
@@ -321,7 +321,6 @@ class merakiDevice {
       this.swPortsName = [];
       this.swPortsState = [];
       this.swPortsPoeState = [];
-      this.swPortsPreviousState = [];
 
       const swExposedCount = this.swSerialsNumber.length;
       for (let i = 0; i < swExposedCount; i++) {
@@ -350,14 +349,14 @@ class merakiDevice {
       };
 
       const swExposedPortsCount = this.swPortsSn.length;
-      for (let k = 0; k < swExposedPortsCount; k++) {
-        const portState = this.swPortsState[k] || false;
+      for (let i = 0; i < swExposedPortsCount; i++) {
+        const portState = this.swPortsState[i] || false;
 
-        if (this.swServices && (portState !== this.swPortsPreviousState[k])) {
-          this.swServices[k]
+        if (this.swServices && (portState !== this.swPortsStates[i])) {
+          this.swServices[i]
             .updateCharacteristic(Characteristic.On, portState);
         };
-        this.swPortsPreviousState.push(portState);
+        const pushReplace = this.swPortsStates.length < swExposedPortsCount ? this.swPortsStates.push(portState) : this.swPortsStates[i] = portState;
       };
 
       this.swExposedCount = swExposedCount;
