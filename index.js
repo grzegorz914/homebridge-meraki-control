@@ -260,9 +260,9 @@ class merakiDevice {
                 .updateCharacteristic(Characteristic.On, clientPolicyState);
             }
 
-            const pushReplace = this.clientsPolicyMac.length < dbExposedAndExistingClientsCount ? this.clientsPolicyMac.push(clientPolicyMac) : this.clientsPolicyMac[i] = clientPolicyMac;
-            const pushReplace1 = this.clientsPolicyPolicy.length < dbExposedAndExistingClientsCount ? this.clientsPolicyPolicy.push(clientPolicyPolicy) : this.clientsPolicyPolicy[i] = clientPolicyPolicy;
-            const pushReplace2 = this.clientsPolicyState.length < dbExposedAndExistingClientsCount ? this.clientsPolicyState.push(clientPolicyState) : this.clientsPolicyState[i] = clientPolicyState;
+            const pushReplace = this.checkDeviceInfo ? this.clientsPolicyMac.push(clientPolicyMac) : this.clientsPolicyMac[i] = clientPolicyMac;
+            const pushReplace1 = this.checkDeviceInfo ? this.clientsPolicyPolicy.push(clientPolicyPolicy) : this.clientsPolicyPolicy[i] = clientPolicyPolicy;
+            const pushReplace2 = this.checkDeviceInfo ? this.clientsPolicyState.push(clientPolicyState) : this.clientsPolicyState[i] = clientPolicyState;
           };
         };
 
@@ -321,7 +321,7 @@ class merakiDevice {
               this.apServices[i]
                 .updateCharacteristic(Characteristic.On, ssidState);
             };
-            const pushReplace = this.apSsidsStates.length < apExposedSsidsCount ? this.apSsidsStates.push(ssidState) : this.apSsidsStates[i] = ssidState;
+            const pushReplace = this.checkDeviceInfo ? this.apSsidsStates.push(ssidState) : this.apSsidsStates[i] = ssidState;
           };
 
           this.apExposedSsidsCount = apExposedSsidsCount;
@@ -409,7 +409,7 @@ class merakiDevice {
             this.swServices[i]
               .updateCharacteristic(Characteristic.On, portState);
           };
-          const pushReplace = this.swPortsStates.length < swExposedPortsCount ? this.swPortsStates.push(portState) : this.swPortsStates[i] = portState;
+          const pushReplace = this.checkDeviceInfo ? this.swPortsStates.push(portState) : this.swPortsStates[i] = portState;
         };
 
         this.swExposedCount = swExposedCount;
