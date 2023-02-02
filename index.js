@@ -124,263 +124,322 @@ class merakiDevice {
       fs.mkdirSync(prefDir);
     };
 
+    this.start();
+  };
+
+  async reconnect() {
+    await new Promise(resolve => setTimeout(resolve, 15000));
+    this.start();
+  };
+
+  async start() {
+    this.log.debug(`Device: ${this.host} ${this.name}, start.`);
+    this.checkDeviceInfo = true;
+
+    try {
+      const dbExposedAndExistingClientsCount = await this.updateDashboardClientsData();
+      const updateDashboardClientsPolicyData = dbExposedAndExistingClientsCount > 0 ? await this.updateDashboardClientsPolicyData() : false;
+      const updateAccessPointsData = this.accessPointsControl ? await this.updateAccessPointsData() : false;
+      const updateSwitchesData = this.switchesControl ? await this.updateSwitchesData() : false;
+      const getDeviceInfo = await this.getDeviceInfo();
+
+      //prepare accessory
+      const startPrepareAccessory = this.startPrepareAccessory ? this.prepareAccessory() : false;
+
+      //start update data
+      const startDashboardClientsUpdate = this.updateDashboardClients();
+      const startDashboardClientsPolicyUpdate = dbExposedAndExistingClientsCount > 0 ? this.updateDashboardClientsPolicy() : false;
+      const startAccessPointsUpdate = this.accessPointsControl ? this.updateAccessPoints() : false;
+      const startSwitchesUpdate = this.switchesControl ? this.updateSwitches() : false;
+    } catch (error) {
+      this.log.error(`Device: ${this.host} ${this.name}, ${error}, reconnect in 15s.`);
+      this.reconnect();
+    };
+  };
+
+  async updateDashboardClients() {
+    await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
     this.updateDashboardClientsData();
   };
 
-  updateData() {
-    setTimeout(() => {
-      this.updateDashboardClientsData();
-    }, this.refreshInterval * 1000);
+  async updateDashboardClientsPolicy() {
+    await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
+    this.updateDashboardClientsPolicyData();
   };
 
-  reconnect() {
-    setTimeout(() => {
-      this.updateDashboardClientsData();
-    }, 15000);
+  async updateAccessPoints() {
+    await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
+    this.updateAccessPointsData();
   };
 
-  async updateDashboardClientsData() {
-    this.log.debug(`Network: ${this.name}, requesting dashboard clients data.`);
-
-    try {
-      const dbClientsData = await this.axiosInstance.get(`${this.dashboardClientsUrl}?perPage=255&timespan=2592000`);
-      const debug = this.enableDebugMode ? this.log(`Debug dashboard clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`) : false;
-
-      if (dbClientsData.status === 200) {
-        this.dbClientsId = [];
-        this.dbClientsMac = [];
-        this.dbClientsDescription = [];
-
-        for (const client of dbClientsData.data) {
-          const clientId = client.id;
-          const clientMac = (client.mac).split(':').join('');
-          const clientDescription = client.description;
-
-          this.dbClientsId.push(clientId);
-          this.dbClientsMac.push(clientMac);
-          this.dbClientsDescription.push(clientDescription);
-        }
-
-        //configured clients
-        this.dbExposedAndExistingClientsName = [];
-        this.dbExposedAndExistingClientsId = [];
-        this.dbExposedAndExistingClientsMac = [];
-        this.dbExposedAndExistingClientsPolicy = [];
-
-        for (let j = 0; j < this.confClientsCount; j++) {
-          const client = this.clientsPolicy[j];
-          const clientName = client.name;
-          const clientMac = (client.mac).split(':').join('');
-          const clientPolicyType = client.type;
-          const clientEnabled = (client.mode === true);
-
-          const clientIndex = clientEnabled ? this.dbClientsMac.indexOf(clientMac) : -1;
-          const clientId = (clientIndex !== -1 && clientIndex !== undefined) ? this.dbClientsId[clientIndex] : -1;
-
-          //check and push existed clients in dshboard
-          const exposeClient = (clientId !== -1);
-          const pushExposedAndExistingClientName = exposeClient ? this.dbExposedAndExistingClientsName.push(clientName) : false;
-          const pushExposedAndExistongClientId = exposeClient ? this.dbExposedAndExistingClientsId.push(clientId) : false;
-          const pushExposedAndExistongClientMac = exposeClient ? this.dbExposedAndExistingClientsMac.push(clientMac) : false;
-          const pushExposedAndExistongClientPolicy = exposeClient ? this.dbExposedAndExistingClientsPolicy.push(clientPolicyType) : false;
-        };
-
-        this.dbExposedAndExistingClientsCount = this.dbExposedAndExistingClientsId.length;
-        const updateNextData = (this.dbExposedAndExistingClientsCount > 0) ? this.updateDashboardClientsPolicyData() : this.accessPointsControl ? this.updateAccessPointsData() : this.switchesControl ? this.updateSwitchesData() : this.getDeviceInfo();
-      }
-    } catch (error) {
-      this.checkDeviceInfo = true;
-      this.log.error(`Network: ${this.name}, dashboard clients data error: ${error}. reconnect in 15s.`);
-      this.reconnect();
-    };
+  async updateSwitches() {
+    await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
+    this.updateSwitchesData();
   };
 
-  async updateDashboardClientsPolicyData() {
-    this.log.debug(`Network: ${this.name}, requesting dashboard clients policy data.`);
+  updateDashboardClientsData() {
+    return new Promise(async (resolve, reject) => {
+      this.log.debug(`Network: ${this.name}, requesting dashboard clients data.`);
 
-    try {
-      const dbExposedAndExistingClientsCount = this.dbExposedAndExistingClientsCount;
-      for (let i = 0; i < dbExposedAndExistingClientsCount; i++) {
-        const clientId = this.dbExposedAndExistingClientsId[i];
+      try {
+        const dbClientsData = await this.axiosInstance.get(`${this.dashboardClientsUrl}?perPage=255&timespan=2592000`);
+        const debug = this.enableDebugMode ? this.log(`Debug dashboard clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`) : false;
 
-        const dbClientsPolicyData = await this.axiosInstance.get(`${this.dashboardClientsUrl}/${clientId}/policy`);
-        const debug = this.enableDebugMode ? this.log(`Debug dashboard client policy data: ${JSON.stringify(dbClientsPolicyData.data[0], null, 2)}`) : false;
+        if (dbClientsData.status === 200) {
+          this.dbClientsId = [];
+          this.dbClientsMac = [];
+          this.dbClientsDescription = [];
 
-        if (dbClientsPolicyData.status === 200) {
-          const clientPolicyMac = dbClientsPolicyData.data.mac;
-          const clientPolicyPolicy = dbClientsPolicyData.data.devicePolicy || 'undefined';
-          const clientPolicyState = clientPolicyPolicy !== 'Blocked' || false;
+          for (const client of dbClientsData.data) {
+            const clientId = client.id;
+            const clientMac = (client.mac).split(':').join('');
+            const clientDescription = client.description;
 
-          if (this.merakiDashboardClientPolicyServices && (clientPolicyState !== this.clientsPolicyState[i])) {
-            this.merakiDashboardClientPolicyServices[i]
-              .updateCharacteristic(Characteristic.On, clientPolicyState);
+            this.dbClientsId.push(clientId);
+            this.dbClientsMac.push(clientMac);
+            this.dbClientsDescription.push(clientDescription);
           }
 
-          const pushReplace = this.clientsPolicyMac.length < dbExposedAndExistingClientsCount ? this.clientsPolicyMac.push(clientPolicyMac) : this.clientsPolicyMac[i] = clientPolicyMac;
-          const pushReplace1 = this.clientsPolicyPolicy.length < dbExposedAndExistingClientsCount ? this.clientsPolicyPolicy.push(clientPolicyPolicy) : this.clientsPolicyPolicy[i] = clientPolicyPolicy;
-          const pushReplace2 = this.clientsPolicyState.length < dbExposedAndExistingClientsCount ? this.clientsPolicyState.push(clientPolicyState) : this.clientsPolicyState[i] = clientPolicyState;
-        };
-      };
+          //configured clients
+          this.dbExposedAndExistingClientsName = [];
+          this.dbExposedAndExistingClientsId = [];
+          this.dbExposedAndExistingClientsMac = [];
+          this.dbExposedAndExistingClientsPolicy = [];
 
-      const updateNextData = this.accessPointsControl ? this.updateAccessPointsData() : this.switchesControl ? this.updateSwitchesData() : this.getDeviceInfo();
-    } catch (error) {
-      this.checkDeviceInfo = true;
-      this.log.error(`Network: ${this.name}, dashboard client policy data error: ${error}. reconnect in 15s.`);
-      this.reconnect();
-    };
+          for (let j = 0; j < this.confClientsCount; j++) {
+            const client = this.clientsPolicy[j];
+            const clientName = client.name;
+            const clientMac = (client.mac).split(':').join('');
+            const clientPolicyType = client.type;
+            const clientEnabled = (client.mode === true);
+
+            const clientIndex = clientEnabled ? this.dbClientsMac.indexOf(clientMac) : -1;
+            const clientId = (clientIndex !== -1 && clientIndex !== undefined) ? this.dbClientsId[clientIndex] : -1;
+
+            //check and push existed clients in dshboard
+            const exposeClient = (clientId !== -1);
+            const pushExposedAndExistingClientName = exposeClient ? this.dbExposedAndExistingClientsName.push(clientName) : false;
+            const pushExposedAndExistongClientId = exposeClient ? this.dbExposedAndExistingClientsId.push(clientId) : false;
+            const pushExposedAndExistongClientMac = exposeClient ? this.dbExposedAndExistingClientsMac.push(clientMac) : false;
+            const pushExposedAndExistongClientPolicy = exposeClient ? this.dbExposedAndExistingClientsPolicy.push(clientPolicyType) : false;
+          };
+
+          this.dbExposedAndExistingClientsCount = this.dbExposedAndExistingClientsId.length;
+
+          if (!this.checkDeviceInfo) {
+            this.updateDashboardClients();
+            return;
+          }
+          resolve(this.dbExposedAndExistingClientsCount);
+        }
+      } catch (error) {
+        reject(`Network: ${this.name}, dashboard clients data error: ${error}. reconnect in 15s.`);
+      };
+    });
   };
 
-  async updateAccessPointsData() {
-    this.log.debug(`Network: ${this.name}, requesting access points data.`);
+  updateDashboardClientsPolicyData() {
+    return new Promise(async (resolve, reject) => {
+      this.log.debug(`Network: ${this.name}, requesting dashboard clients policy data.`);
 
-    try {
-      const apData = await this.axiosInstance.get(this.wirelessUrl);
-      const debug = this.enableDebugMode ? this.log(`Debug access points data: ${JSON.stringify(apData.data, null, 2)}`) : false;
+      try {
+        const dbExposedAndExistingClientsCount = this.dbExposedAndExistingClientsCount;
+        for (let i = 0; i < dbExposedAndExistingClientsCount; i++) {
+          const clientId = this.dbExposedAndExistingClientsId[i];
 
-      if (apData.status === 200) {
-        this.apHiddenSsidsName = [];
-        this.apSsidsNumber = [];
-        this.apSsidsName = [];
-        this.apSsidsState = [];
+          const dbClientsPolicyData = await this.axiosInstance.get(`${this.dashboardClientsUrl}/${clientId}/policy`);
+          const debug = this.enableDebugMode ? this.log(`Debug dashboard client policy data: ${JSON.stringify(dbClientsPolicyData.data[0], null, 2)}`) : false;
 
-        //hidde ssid by name
-        for (const hideSsid of this.accessPointsHideSsidsByName) {
-          const hideSsidName = hideSsid.name;
-          const hideSsidEnabled = hideSsid.mode;
-          const pushHideSsidsName = (hideSsidEnabled && hideSsidName !== undefined) ? this.apHiddenSsidsName.push(hideSsidName) : false;
-        };
+          if (dbClientsPolicyData.status === 200) {
+            const clientPolicyMac = dbClientsPolicyData.data.mac;
+            const clientPolicyPolicy = dbClientsPolicyData.data.devicePolicy || 'undefined';
+            const clientPolicyState = clientPolicyPolicy !== 'Blocked' || false;
 
-        for (const ssid of apData.data) {
-          const ssidNumber = ssid.number;
-          const ssidName = ssid.name;
-          const ssidState = (ssid.enabled === true)
+            if (this.merakiDashboardClientPolicyServices && (clientPolicyState !== this.clientsPolicyState[i])) {
+              this.merakiDashboardClientPolicyServices[i]
+                .updateCharacteristic(Characteristic.On, clientPolicyState);
+            }
 
-          //hidde unconfigured ssids
-          const hideUnconfiguredSsids = (this.accessPointsHideUnconfiguredSsids && (ssidName.substr(0, 12) === 'Unconfigured')) ? true : false;
-
-          //push exposed ssids
-          const hidePort = (hideUnconfiguredSsids || this.apHiddenSsidsName.indexOf(ssidName) >= 0) ? true : false;
-          const pushNumber = hidePort ? false : this.apSsidsNumber.push(ssidNumber);
-          const pushName = hidePort ? false : this.apSsidsName.push(ssidName);
-          const pushState = hidePort ? false : this.apSsidsState.push(ssidState);
-        };
-
-        const apExposedSsidsCount = this.apSsidsState.length;
-        for (let i = 0; i < apExposedSsidsCount; i++) {
-          const ssidState = this.apSsidsState[i] || false;
-
-          if (this.apServices && (ssidState !== this.apSsidsStates[i])) {
-            this.apServices[i]
-              .updateCharacteristic(Characteristic.On, ssidState);
+            const pushReplace = this.clientsPolicyMac.length < dbExposedAndExistingClientsCount ? this.clientsPolicyMac.push(clientPolicyMac) : this.clientsPolicyMac[i] = clientPolicyMac;
+            const pushReplace1 = this.clientsPolicyPolicy.length < dbExposedAndExistingClientsCount ? this.clientsPolicyPolicy.push(clientPolicyPolicy) : this.clientsPolicyPolicy[i] = clientPolicyPolicy;
+            const pushReplace2 = this.clientsPolicyState.length < dbExposedAndExistingClientsCount ? this.clientsPolicyState.push(clientPolicyState) : this.clientsPolicyState[i] = clientPolicyState;
           };
-          const pushReplace = this.apSsidsStates.length < apExposedSsidsCount ? this.apSsidsStates.push(ssidState) : this.apSsidsStates[i] = ssidState;
         };
 
-        this.apExposedSsidsCount = apExposedSsidsCount;
-        const updateNextData = this.switchesControl ? this.updateSwitchesData() : this.getDeviceInfo();
-      }
-    } catch (error) {
-      this.checkDeviceInfo = true;
-      this.log.error(`Network: ${this.name}, access points data error: ${error}. reconnect in 15s.`);
-      this.reconnect();
-    };
+        if (!this.checkDeviceInfo) {
+          this.updateDashboardClientsPolicy();
+          return;
+        }
+        resolve(true);
+      } catch (error) {
+        reject(`Network: ${this.name}, dashboard client policy data error: ${error}. reconnect in 15s.`);
+      };
+    });
   };
 
-  async updateSwitchesData() {
-    this.log.debug(`Network: ${this.name}, requesting switches data.`);
+  updateAccessPointsData() {
+    return new Promise(async (resolve, reject) => {
+      this.log.debug(`Network: ${this.name}, requesting access points data.`);
 
-    try {
-      //switches cinfigured
-      this.swNames = [];
-      this.swSerialsNumber = [];
-      this.swHideUplinksPort = [];
-      this.swHiddenPortsByName = [];
+      try {
+        const apData = await this.axiosInstance.get(this.wirelessUrl);
+        const debug = this.enableDebugMode ? this.log(`Debug access points data: ${JSON.stringify(apData.data, null, 2)}`) : false;
 
-      //switches configured
-      for (const sw of this.switches) {
-        const name = sw.name;
-        const serialNumber = sw.serialNumber;
-        const hideUplinkPort = sw.hideUplinkPorts;
-        const controlEnabled = sw.mode;
-        const hidePortsByNameCount = sw.hidePorts.length || 0;
-        const pushName = (controlEnabled && name !== undefined) ? this.swNames.push(name) : false;
-        const pushSerialNumber = (controlEnabled && serialNumber !== undefined) ? this.swSerialsNumber.push(serialNumber) : false;
-        const pushHiddenUplinkPort = (controlEnabled && serialNumber !== undefined) ? this.swHideUplinksPort.push(hideUplinkPort) : false;
+        if (apData.status === 200) {
+          this.apHiddenSsidsName = [];
+          this.apSsidsNumber = [];
+          this.apSsidsName = [];
+          this.apSsidsState = [];
 
-        //hidde port by name
-        for (const hidePort of sw.hidePorts) {
-          const hidePortName = hidePort.name;
-          const hidePortEnabled = (hidePort.mode === true);
-          const pushHiddenPortName = (hidePortEnabled && hidePortName !== undefined) ? this.swHiddenPortsByName.push(hidePortName) : false;
-        };
+          //hidde ssid by name
+          for (const hideSsid of this.accessPointsHideSsidsByName) {
+            const hideSsidName = hideSsid.name;
+            const hideSsidEnabled = hideSsid.mode;
+            const pushHideSsidsName = (hideSsidEnabled && hideSsidName !== undefined) ? this.apHiddenSsidsName.push(hideSsidName) : false;
+          };
+
+          for (const ssid of apData.data) {
+            const ssidNumber = ssid.number;
+            const ssidName = ssid.name;
+            const ssidState = (ssid.enabled === true)
+
+            //hidde unconfigured ssids
+            const hideUnconfiguredSsids = (this.accessPointsHideUnconfiguredSsids && (ssidName.substr(0, 12) === 'Unconfigured')) ? true : false;
+
+            //push exposed ssids
+            const hidePort = (hideUnconfiguredSsids || this.apHiddenSsidsName.indexOf(ssidName) >= 0) ? true : false;
+            const pushNumber = hidePort ? false : this.apSsidsNumber.push(ssidNumber);
+            const pushName = hidePort ? false : this.apSsidsName.push(ssidName);
+            const pushState = hidePort ? false : this.apSsidsState.push(ssidState);
+          };
+
+          const apExposedSsidsCount = this.apSsidsState.length;
+          for (let i = 0; i < apExposedSsidsCount; i++) {
+            const ssidState = this.apSsidsState[i] || false;
+
+            if (this.apServices && (ssidState !== this.apSsidsStates[i])) {
+              this.apServices[i]
+                .updateCharacteristic(Characteristic.On, ssidState);
+            };
+            const pushReplace = this.apSsidsStates.length < apExposedSsidsCount ? this.apSsidsStates.push(ssidState) : this.apSsidsStates[i] = ssidState;
+          };
+
+          this.apExposedSsidsCount = apExposedSsidsCount;
+
+          if (!this.checkDeviceInfo) {
+            this.updateAccessPoints();
+            return;
+          }
+          resolve(true);
+        }
+      } catch (error) {
+        reject(`Network: ${this.name}, access points data error: ${error}. reconnect in 15s.`);
       };
+    });
+  };
 
-      //switches ports state
-      this.swPortsSn = [];
-      this.swPortsId = [];
-      this.swPortsName = [];
-      this.swPortsState = [];
-      this.swPortsPoeState = [];
+  updateSwitchesData() {
+    return new Promise(async (resolve, reject) => {
+      this.log.debug(`Network: ${this.name}, requesting switches data.`);
 
-      const swExposedCount = this.swSerialsNumber.length;
-      for (let i = 0; i < swExposedCount; i++) {
-        const serialNumber = this.swSerialsNumber[i];
-        const portsUrl = `/devices/${serialNumber}/switch/ports`;
-        const swData = await this.axiosInstance.get(portsUrl);
-        const debug = this.enableDebugMode ? this.log(`Debug switches data: ${JSON.stringify(swData.data, null, 2)}`) : false;
+      try {
+        //switches cinfigured
+        this.swNames = [];
+        this.swSerialsNumber = [];
+        this.swHideUplinksPort = [];
+        this.swHiddenPortsByName = [];
 
-        if (swData.status === 200) {
-          for (const port of swData.data) {
-            const portId = port.portId;
-            const portName = port.name;
-            const portState = (port.enabled === true);
-            const portPoeState = (port.poeEnabled === true);
-            const hideUplinksPorts = (this.swHideUplinksPort[i] === true && portName.substr(0, 6) === 'Uplink');
+        //switches configured
+        for (const sw of this.switches) {
+          const name = sw.name;
+          const serialNumber = sw.serialNumber;
+          const hideUplinkPort = sw.hideUplinkPorts;
+          const controlEnabled = sw.mode;
+          const hidePortsByNameCount = sw.hidePorts.length || 0;
+          const pushName = (controlEnabled && name !== undefined) ? this.swNames.push(name) : false;
+          const pushSerialNumber = (controlEnabled && serialNumber !== undefined) ? this.swSerialsNumber.push(serialNumber) : false;
+          const pushHiddenUplinkPort = (controlEnabled && serialNumber !== undefined) ? this.swHideUplinksPort.push(hideUplinkPort) : false;
 
-            //push exposed ports
-            const swHidePort = (hideUplinksPorts || this.swHiddenPortsByName.indexOf(portName) >= 0) ? true : false;
-            const pushSwitchSerialNumber = swHidePort ? false : this.swPortsSn.push(serialNumber);
-            const pushSwitchPortId = swHidePort ? false : this.swPortsId.push(portId);
-            const pushSwitchPortName = swHidePort ? false : this.swPortsName.push(portName);
-            const pushSwitchPortState = swHidePort ? false : this.swPortsState.push(portState);
-            const pushSwitchPortPoeState = swHidePort ? false : this.swPortsPoeState.push(portPoeState);
+          //hidde port by name
+          for (const hidePort of sw.hidePorts) {
+            const hidePortName = hidePort.name;
+            const hidePortEnabled = (hidePort.mode === true);
+            const pushHiddenPortName = (hidePortEnabled && hidePortName !== undefined) ? this.swHiddenPortsByName.push(hidePortName) : false;
           };
         };
-      };
 
-      const swExposedPortsCount = this.swPortsSn.length;
-      for (let i = 0; i < swExposedPortsCount; i++) {
-        const portState = this.swPortsState[i] || false;
+        //switches ports state
+        this.swPortsSn = [];
+        this.swPortsId = [];
+        this.swPortsName = [];
+        this.swPortsState = [];
+        this.swPortsPoeState = [];
 
-        if (this.swServices && (portState !== this.swPortsStates[i])) {
-          this.swServices[i]
-            .updateCharacteristic(Characteristic.On, portState);
+        const swExposedCount = this.swSerialsNumber.length;
+        for (let i = 0; i < swExposedCount; i++) {
+          const serialNumber = this.swSerialsNumber[i];
+          const portsUrl = `/devices/${serialNumber}/switch/ports`;
+          const swData = await this.axiosInstance.get(portsUrl);
+          const debug = this.enableDebugMode ? this.log(`Debug switches data: ${JSON.stringify(swData.data, null, 2)}`) : false;
+
+          if (swData.status === 200) {
+            for (const port of swData.data) {
+              const portId = port.portId;
+              const portName = port.name;
+              const portState = (port.enabled === true);
+              const portPoeState = (port.poeEnabled === true);
+              const hideUplinksPorts = (this.swHideUplinksPort[i] === true && portName.substr(0, 6) === 'Uplink');
+
+              //push exposed ports
+              const swHidePort = (hideUplinksPorts || this.swHiddenPortsByName.indexOf(portName) >= 0) ? true : false;
+              const pushSwitchSerialNumber = swHidePort ? false : this.swPortsSn.push(serialNumber);
+              const pushSwitchPortId = swHidePort ? false : this.swPortsId.push(portId);
+              const pushSwitchPortName = swHidePort ? false : this.swPortsName.push(portName);
+              const pushSwitchPortState = swHidePort ? false : this.swPortsState.push(portState);
+              const pushSwitchPortPoeState = swHidePort ? false : this.swPortsPoeState.push(portPoeState);
+            };
+          };
         };
-        const pushReplace = this.swPortsStates.length < swExposedPortsCount ? this.swPortsStates.push(portState) : this.swPortsStates[i] = portState;
-      };
 
-      this.swExposedCount = swExposedCount;
-      this.swExposedPortsCount = swExposedPortsCount;
-      const updaeNext = this.checkDeviceInfo ? this.getDeviceInfo() : this.updateData();
-    } catch (error) {
-      this.checkDeviceInfo = true;
-      this.log.error(`Network: ${this.name}, switches data error: ${error}. reconnect in 15s.`);
-      this.reconnect();
-    };
+        const swExposedPortsCount = this.swPortsSn.length;
+        for (let i = 0; i < swExposedPortsCount; i++) {
+          const portState = this.swPortsState[i] || false;
+
+          if (this.swServices && (portState !== this.swPortsStates[i])) {
+            this.swServices[i]
+              .updateCharacteristic(Characteristic.On, portState);
+          };
+          const pushReplace = this.swPortsStates.length < swExposedPortsCount ? this.swPortsStates.push(portState) : this.swPortsStates[i] = portState;
+        };
+
+        this.swExposedCount = swExposedCount;
+        this.swExposedPortsCount = swExposedPortsCount;
+
+        if (!this.checkDeviceInfo) {
+          this.updateSwitches();
+          return;
+        }
+        resolve(true);
+      } catch (error) {
+        reject(`Network: ${this.name}, switches data error: ${error}. reconnect in 15s.`);
+      };
+    });
   };
 
   getDeviceInfo() {
-    if (!this.disableLogDeviceInfo && this.checkDeviceInfo) {
-      this.log(`-------- ${this.name} --------`);
-      this.log(`Manufacturer: Cisco/Meraki`);
-      this.log(`Network: ${this.name}`);
-      this.log(`Network Id: ${this.networkId}`);
-      this.log(`Organization Id: ${this.organizationId}`);
-      this.log(`----------------------------------`);
-      this.checkDeviceInfo = false;
-    };
+    return new Promise((resolve, reject) => {
+      if (!this.disableLogDeviceInfo && this.checkDeviceInfo) {
+        this.log(`-------- ${this.name} --------`);
+        this.log(`Manufacturer: Cisco/Meraki`);
+        this.log(`Network: ${this.name}`);
+        this.log(`Network Id: ${this.networkId}`);
+        this.log(`Organization Id: ${this.organizationId}`);
+        this.log(`----------------------------------`);
 
-    const startPrepareAccessory = this.startPrepareAccessory ? this.prepareAccessory() : false;
+        this.checkDeviceInfo = false;
+        resolve(true);
+      };
+    });
   };
 
   //Prepare accessory
