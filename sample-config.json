@@ -14,41 +14,55 @@
         "comment": "In this section set the port for Homebridge accessories."
     },
     "accessories": [],
-    "platforms": [{
-        "platform": "Meraki",
-        "devices": [{
-            "name": "Network Name",
-            "host": "https://123.meraki.com",
-            "apiKey": "01032453453421923",
-            "organizationId": "L_0123456789",
-            "networkId": "1234567",
-            "refreshInterval": 10,
-            "disableLogInfo": false,
-            "disableLogDeviceInfo": false,
-            "enableDebugMode": false,
-            "dashboardClientsPolicy": [{
-                "name": "Own Name",
-                "mac": "Mac Address",
-                "type": "Policy type",
-                "mode": false
-            }],
-            "accessPointsControl": false,
-            "hideUnconfiguredSsids": false,
-            "hideSsids": [{
-                "name": "SSID Name",
-                "mode": false
-            }],
-            "switchesControl": false,
-            "switches": [{
-                "name": "Switch Name",
-                "serialNumber": "O1H1-GL5D-AXXX",
-                "hideUplinkPorts": false,
-                "mode": false,
-                "hidePorts": [{
-                    "name": "Port Name",
-                    "mode": true
-                }]
-            }]
-        }]
-    }]
+    "platforms": [
+        {
+            "platform": "Meraki",
+            "devices": [
+                {
+                    "name": "Network Name",
+                    "host": "https://123.meraki.com",
+                    "apiKey": "01032453453421923",
+                    "organizationId": "L_0123456789",
+                    "networkId": "1234567",
+                    "refreshInterval": 10,
+                    "disableLogInfo": false,
+                    "disableLogDeviceInfo": false,
+                    "enableDebugMode": false,
+                    "dashboardClientsPolicy": [
+                        {
+                            "name": "Own Name",
+                            "mac": "Mac Address",
+                            "type": "Policy type",
+                            "mode": false
+                        }
+                    ],
+                    "accessPointsControl": false,
+                    "hideUnconfiguredSsids": false,
+                    "hideSsids": [
+                        {
+                            "name": "SSID Name",
+                            "mode": false
+                        }
+                    ],
+                    "enableSonsorSsids": false,
+                    "switchesControl": false,
+                    "switches": [
+                        {
+                            "name": "Switch Name",
+                            "serialNumber": "O1H1-GL5D-AXXX",
+                            "hideUplinkPorts": false,
+                            "mode": false,
+                            "enableSonsorPorts": false,
+                            "hidePorts": [
+                                {
+                                    "name": "Port Name",
+                                    "mode": true
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }

@@ -31,10 +31,12 @@
   * Switch `ON/OFF SSIDs` in the organisation.
   * Hide `Unconfigured SSIDs` networks, if the name contain word *Unconfigured*.
   * Hide `SSIDs` filtered by network *Name*.
+  * Expose Contact Sensors in HomeKit app for exposed `SSIDs`.
 * Switches:
   * Switch `ON/OFF` ports.
   * Hide `Uplink` ports, if the port name contain word *Uplink*.
   * Hide `Ports` filtered by port *Name*.
+  * Expose Contact Sensors in HomeKit app for exposed `Ports`.
 * Siri can be used to switch ON/OFF SSIDs, Policy, Ports.
 * Home automations and shortcuts can be used for all functions.
 * More comming soon...
@@ -69,10 +71,12 @@
 | `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden and not exposed to the *Homebridge/HomeKit*. |
 | `hideSsids.name` | Here set *SSID Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `hideSsids.mode` | Here *Activate/Deactivate* this SSID control. |
+| `enableSonsorSsids` | This option expose Contact Sensor in HomeKit app for all exposed SSIDs. |
 | `switchesControl` | This option *Enable/Disable* control of Switches. |
 | `switches.name` | Here set the *Name* for this Switch. |
 | `switches.serialNumber` | Here set the *Serial Number* for this Switch. |
 | `switches.hideUplinkPorts` | If enabled, all *Uplink* ports will be hidden and not exposed to the *Homebridge/HomeKit*. |
+| `switches.enableSonsorPorts` | This option expose Contact Sensor in HomeKit app for all exposed ports. |
 | `switches.mode` | Here *Activate/Deactivate* this Swich control. |
 | `switches.hidePorts` | Array of hidden Ports. |
 | `switches.hidePorts.name` | Here set *Port Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
@@ -100,6 +104,7 @@
                     }],
                     "accessPointsControl": false,
                     "hideUnconfiguredSsids": false,
+                    "enableSonsorSsids": false,
                     "hideSsids": [{
                          "name": "SSID Name",
                          "mode": false
@@ -110,6 +115,7 @@
                          "serialNumber": "O1H1-GL5D-AXXX",
                          "hideUplinkPorts": false,
                          "mode": false,
+                         "enableSonsorPorts": false,
                          "hidePorts": [{
                               "name": "Port Name",
                               "mode": true

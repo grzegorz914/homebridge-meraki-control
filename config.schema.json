@@ -52,7 +52,7 @@
             "refreshInterval": {
               "title": "Refresh Interval (sec)",
               "type": "integer",
-              "default": 10,
+              "default": 5,
               "minimum": 0,
               "maximum": 60,
               "description": "Here set the data refresh time in (sec).",
@@ -103,22 +103,26 @@
                     "title": "Policy",
                     "type": "string",
                     "description": "Here choice the Policy type to be appiled for this Client.",
-                    "oneOf": [{
-                      "title": "Normal",
-                      "enum": [
-                        "Normal"
-                      ]
-                    }, {
-                      "title": "Whitelisted",
-                      "enum": [
-                        "Whitelisted"
-                      ]
-                    }, {
-                      "title": "Group Policy",
-                      "enum": [
-                        "Group policy"
-                      ]
-                    }],
+                    "oneOf": [
+                      {
+                        "title": "Normal",
+                        "enum": [
+                          "Normal"
+                        ]
+                      },
+                      {
+                        "title": "Whitelisted",
+                        "enum": [
+                          "Whitelisted"
+                        ]
+                      },
+                      {
+                        "title": "Group Policy",
+                        "enum": [
+                          "Group policy"
+                        ]
+                      }
+                    ],
                     "required": true
                   },
                   "mode": {
@@ -172,6 +176,16 @@
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
               }
             },
+            "enableSonsorSsids": {
+              "title": "SSIDs Sensors",
+              "type": "boolean",
+              "default": false,
+              "description": "This option expose Contact Sensor in HomeKit app for all exposed SSIDs.",
+              "required": false,
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
+              }
+            },
             "switchesControl": {
               "title": "Switches Control",
               "type": "boolean",
@@ -212,6 +226,16 @@
                     "description": "Here set ON/OFF for Activate/Deactivate this Switch control.",
                     "required": false
                   },
+                  "enableSonsorPorts": {
+                    "title": "Ports Sensors",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This option expose Contact Sensor in HomeKit app for all exposed ports.",
+                    "required": false,
+                    "condition": {
+                      "functionBody": "return model.devices[arrayIndices].switches[arrayIndices].mode === true;"
+                    }
+                  },
                   "hidePorts": {
                     "title": "Ports",
                     "type": "array",
@@ -245,118 +269,124 @@
       }
     }
   },
-  "layout": [{
-    "key": "devices",
-    "type": "tabarray",
-    "title": "{{ value.name || 'new network' }}",
-    "items": [
-      "devices[].name",
-      "devices[].host",
-      {
-        "key": "devices[]",
-        "type": "section",
-        "title": "Dashboard Clients",
-        "expandable": true,
-        "expanded": false,
-        "items": [{
-          "key": "devices[].dashboardClientsPolicy",
-          "type": "tabarray",
-          "title": "{{ value.name || 'new Client' }}",
+  "layout": [
+    {
+      "key": "devices",
+      "type": "tabarray",
+      "title": "{{ value.name || 'new network' }}",
+      "items": [
+        "devices[].name",
+        "devices[].host",
+        {
+          "key": "devices[]",
+          "type": "section",
+          "title": "Dashboard Clients",
           "expandable": true,
-          "expanded": true,
-          "orderable": false,
+          "expanded": false,
           "items": [
-            "devices[].dashboardClientsPolicy[].name",
-            "devices[].dashboardClientsPolicy[].mac",
-            "devices[].dashboardClientsPolicy[].type",
-            "devices[].dashboardClientsPolicy[].mode"
+            {
+              "key": "devices[].dashboardClientsPolicy",
+              "type": "tabarray",
+              "title": "{{ value.name || 'new Client' }}",
+              "expandable": true,
+              "expanded": true,
+              "orderable": false,
+              "items": [
+                "devices[].dashboardClientsPolicy[].name",
+                "devices[].dashboardClientsPolicy[].mac",
+                "devices[].dashboardClientsPolicy[].type",
+                "devices[].dashboardClientsPolicy[].mode"
+              ]
+            }
           ]
-        }]
-      },
-      {
-        "key": "devices[]",
-        "type": "section",
-        "title": "Access Points",
-        "expandable": true,
-        "expanded": false,
-        "items": [
-          "devices[].accessPointsControl",
-          "devices[].hideUnconfiguredSsids",
-          {
-            "key": "devices[].hideSsids",
-            "type": "tabarray",
-            "title": "{{ value.name || 'new SSID' }}",
-            "expandable": true,
-            "expanded": true,
-            "orderable": false,
-            "items": [
-              "devices[].hideSsids[].name",
-              "devices[].hideSsids[].mode"
-            ]
-          }
-        ]
-      },
-      {
-        "key": "devices[]",
-        "type": "section",
-        "title": "Switches",
-        "expandable": true,
-        "expanded": false,
-        "items": [
-          "devices[].switchesControl",
-          {
-            "key": "devices[].switches",
-            "type": "tabarray",
-            "title": "{{ value.name || 'new Switch' }}",
-            "expandable": true,
-            "expanded": true,
-            "orderable": false,
-            "items": [
-              "devices[].switches[].name",
-              "devices[].switches[].serialNumber",
-              "devices[].switches[].hideUplinkPorts",
-              "devices[].switches[].mode",
-              {
-                "key": "devices[].switches[].hidePorts",
-                "type": "tabarray",
-                "title": "{{ value.name || 'new Port' }}",
-                "expandable": true,
-                "expanded": true,
-                "orderable": false,
-                "items": [
-                  "devices[].switches[].hidePorts[].name",
-                  "devices[].switches[].hidePorts[].mode"
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "key": "devices[]",
-        "type": "section",
-        "title": "Authorization",
-        "expandable": true,
-        "expanded": false,
-        "items": [
-          "devices[].apiKey",
-          "devices[].organizationId",
-          "devices[].networkId"
-        ]
-      },
-      {
-        "key": "devices[]",
-        "type": "section",
-        "title": "Advanced Settings",
-        "expandable": true,
-        "expanded": false,
-        "items": [
-          "devices[].enableDebugMode",
-          "devices[].disableLogInfo",
-          "devices[].disableLogDeviceInfo",
-          "devices[].refreshInterval"
-        ]
-      }
-    ]
-  }]
+        },
+        {
+          "key": "devices[]",
+          "type": "section",
+          "title": "Access Points",
+          "expandable": true,
+          "expanded": false,
+          "items": [
+            "devices[].accessPointsControl",
+            "devices[].hideUnconfiguredSsids",
+            "devices[].enableSonsorSsids",
+            {
+              "key": "devices[].hideSsids",
+              "type": "tabarray",
+              "title": "{{ value.name || 'new SSID' }}",
+              "expandable": true,
+              "expanded": true,
+              "orderable": false,
+              "items": [
+                "devices[].hideSsids[].name",
+                "devices[].hideSsids[].mode"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "devices[]",
+          "type": "section",
+          "title": "Switches",
+          "expandable": true,
+          "expanded": false,
+          "items": [
+            "devices[].switchesControl",
+            {
+              "key": "devices[].switches",
+              "type": "tabarray",
+              "title": "{{ value.name || 'new Switch' }}",
+              "expandable": true,
+              "expanded": true,
+              "orderable": false,
+              "items": [
+                "devices[].switches[].name",
+                "devices[].switches[].serialNumber",
+                "devices[].switches[].hideUplinkPorts",
+                "devices[].switches[].mode",
+                "devices[].switches[].enableSonsorPorts",
+                {
+                  "key": "devices[].switches[].hidePorts",
+                  "type": "tabarray",
+                  "title": "{{ value.name || 'new Port' }}",
+                  "expandable": true,
+                  "expanded": true,
+                  "orderable": false,
+                  "items": [
+                    "devices[].switches[].hidePorts[].name",
+                    "devices[].switches[].hidePorts[].mode"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "devices[]",
+          "type": "section",
+          "title": "Authorization",
+          "expandable": true,
+          "expanded": false,
+          "items": [
+            "devices[].apiKey",
+            "devices[].organizationId",
+            "devices[].networkId"
+          ]
+        },
+        {
+          "key": "devices[]",
+          "type": "section",
+          "title": "Advanced Settings",
+          "expandable": true,
+          "expanded": false,
+          "items": [
+            "devices[].enableDebugMode",
+            "devices[].disableLogInfo",
+            "devices[].disableLogDeviceInfo",
+            "devices[].refreshInterval"
+          ]
+        }
+      ]
+    }
+  ]
 }

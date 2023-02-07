@@ -73,6 +73,7 @@ class merakiDevice {
     this.accessPointsControl = config.accessPointsControl || false;
     this.accessPointsHideUnconfiguredSsids = config.hideUnconfiguredSsids || false;
     this.accessPointsHideSsidsByName = config.hideSsids || [];
+    this.accessPointsEnableSensorSsids = config.enableSonsorSsids || false;
     this.switchesControl = config.switchesControl || false;
     this.switches = config.switches || [];
 
@@ -148,7 +149,6 @@ class merakiDevice {
 
       //start update data
       const startDashboardClientsUpdate = this.updateDashboardClients();
-      const startDashboardClientsPolicyUpdate = dbExposedAndExistingClientsCount > 0 ? this.updateDashboardClientsPolicy() : false;
       const startAccessPointsUpdate = this.accessPointsControl ? this.updateAccessPoints() : false;
       const startSwitchesUpdate = this.switchesControl ? this.updateSwitches() : false;
     } catch (error) {
@@ -158,23 +158,31 @@ class merakiDevice {
   };
 
   async updateDashboardClients() {
-    await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-    this.updateDashboardClientsData();
-  };
-
-  async updateDashboardClientsPolicy() {
-    await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-    this.updateDashboardClientsPolicyData();
+    try {
+      await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
+      const dbExposedAndExistingClientsCount = await this.updateDashboardClientsData();
+      const updateDashboardClientsPolicyData = dbExposedAndExistingClientsCount > 0 ? await this.updateDashboardClientsPolicyData() : false;
+    } catch (error) {
+      this.log.error(`Device: ${this.host} ${this.name}, ${error}.`);
+    };
   };
 
   async updateAccessPoints() {
-    await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-    this.updateAccessPointsData();
+    try {
+      await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
+      await this.updateAccessPointsData();
+    } catch (error) {
+      this.log.error(`Device: ${this.host} ${this.name}, ${error}.`);
+    };
   };
 
   async updateSwitches() {
-    await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-    this.updateSwitchesData();
+    try {
+      await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
+      await this.updateSwitchesData();
+    } catch (error) {
+      this.log.error(`Device: ${this.host} ${this.name}, ${error}.`);
+    };
   };
 
   updateDashboardClientsData() {
@@ -226,11 +234,8 @@ class merakiDevice {
 
           this.dbExposedAndExistingClientsCount = this.dbExposedAndExistingClientsId.length;
 
-          if (!this.checkDeviceInfo) {
-            this.updateDashboardClients();
-            return;
-          }
           resolve(this.dbExposedAndExistingClientsCount);
+          const update = this.checkDeviceInfo ? false : this.updateDashboardClients();
         }
       } catch (error) {
         reject(`Network: ${this.name}, dashboard clients data error: ${error}. reconnect in 15s.`);
@@ -266,10 +271,6 @@ class merakiDevice {
           };
         };
 
-        if (!this.checkDeviceInfo) {
-          this.updateDashboardClientsPolicy();
-          return;
-        }
         resolve(true);
       } catch (error) {
         reject(`Network: ${this.name}, dashboard client policy data error: ${error}. reconnect in 15s.`);
@@ -315,22 +316,27 @@ class merakiDevice {
 
           const apExposedSsidsCount = this.apSsidsState.length;
           for (let i = 0; i < apExposedSsidsCount; i++) {
-            const ssidState = this.apSsidsState[i] || false;
+            const ssidState = this.apSsidsState[i];
+            const push = this.checkDeviceInfo && ssidState !== undefined ? this.apSsidsStates.push(ssidState) : false;
 
-            if (this.apServices && (ssidState !== this.apSsidsStates[i])) {
-              this.apServices[i]
-                .updateCharacteristic(Characteristic.On, ssidState);
+            if (ssidState !== undefined && ssidState !== this.apSsidsStates[i]) {
+              if (this.apServices) {
+                this.apServices[i]
+                  .updateCharacteristic(Characteristic.On, ssidState);
+                this.apSsidsStates[i] = ssidState;
+              };
+
+              if (this.apSensorServices) {
+                this.apSensorServices[i]
+                  .updateCharacteristic(Characteristic.ContactSensorState, ssidState)
+              };
             };
-            const pushReplace = this.checkDeviceInfo ? this.apSsidsStates.push(ssidState) : this.apSsidsStates[i] = ssidState;
           };
 
           this.apExposedSsidsCount = apExposedSsidsCount;
 
-          if (!this.checkDeviceInfo) {
-            this.updateAccessPoints();
-            return;
-          }
           resolve(true);
+          const update = this.checkDeviceInfo ? false : this.updateAccessPoints();
         }
       } catch (error) {
         reject(`Network: ${this.name}, access points data error: ${error}. reconnect in 15s.`);
@@ -347,6 +353,7 @@ class merakiDevice {
         this.swNames = [];
         this.swSerialsNumber = [];
         this.swHideUplinksPort = [];
+        this.swSonsorPorts = [];
         this.swHiddenPortsByName = [];
 
         //switches configured
@@ -355,9 +362,11 @@ class merakiDevice {
           const serialNumber = sw.serialNumber;
           const hideUplinkPort = sw.hideUplinkPorts;
           const controlEnabled = sw.mode;
+          const enableSonsorPorts = controlEnabled ? sw.enableSonsorPorts : false;
           const hidePortsByNameCount = sw.hidePorts.length || 0;
           const pushName = (controlEnabled && name !== undefined) ? this.swNames.push(name) : false;
           const pushSerialNumber = (controlEnabled && serialNumber !== undefined) ? this.swSerialsNumber.push(serialNumber) : false;
+          const pushControlEnabled = (controlEnabled && serialNumber !== undefined) ? this.swSonsorPorts.push(enableSonsorPorts) : false;
           const pushHiddenUplinkPort = (controlEnabled && serialNumber !== undefined) ? this.swHideUplinksPort.push(hideUplinkPort) : false;
 
           //hidde port by name
@@ -399,27 +408,31 @@ class merakiDevice {
               const pushSwitchPortPoeState = swHidePort ? false : this.swPortsPoeState.push(portPoeState);
             };
           };
-        };
 
-        const swExposedPortsCount = this.swPortsSn.length;
-        for (let i = 0; i < swExposedPortsCount; i++) {
-          const portState = this.swPortsState[i] || false;
+          const swExposedPortsCount = this.swPortsSn.length;
+          for (let i = 0; i < swExposedPortsCount; i++) {
+            const portState = this.swPortsState[i];
+            const pushReplace = this.checkDeviceInfo && portState !== undefined ? this.swPortsStates.push(portState) : false;
 
-          if (this.swServices && (portState !== this.swPortsStates[i])) {
-            this.swServices[i]
-              .updateCharacteristic(Characteristic.On, portState);
+            if (portState !== undefined && portState !== this.swPortsStates[i]) {
+              if (this.swServices) {
+                this.swServices[i]
+                  .updateCharacteristic(Characteristic.On, portState);
+                this.swPortsStates[i] = portState;
+              };
+
+              if (this.swSensorServices) {
+                this.swSensorServices[i]
+                  .updateCharacteristic(Characteristic.ContactSensorState, portState)
+              };
+            };
           };
-          const pushReplace = this.checkDeviceInfo ? this.swPortsStates.push(portState) : this.swPortsStates[i] = portState;
+          this.swExposedPortsCount = swExposedPortsCount;
         };
-
         this.swExposedCount = swExposedCount;
-        this.swExposedPortsCount = swExposedPortsCount;
 
-        if (!this.checkDeviceInfo) {
-          this.updateSwitches();
-          return;
-        }
         resolve(true);
+        const update = this.checkDeviceInfo ? false : this.updateSwitches();
       } catch (error) {
         reject(`Network: ${this.name}, switches data error: ${error}. reconnect in 15s.`);
       };
@@ -509,6 +522,7 @@ class merakiDevice {
     //meraki mr
     if (apExposedSsidsCount > 0) {
       this.apServices = [];
+      this.apSensorServices = [];
       //ssids
       for (let i = 0; i < apExposedSsidsCount; i++) {
         const ssidName = this.apSsidsName[i];
@@ -537,12 +551,26 @@ class merakiDevice {
 
         this.apServices.push(apService);
         accessory.addService(this.apServices[i]);
+
+        //prepare sensor service
+        if (this.accessPointsEnableSensorSsids) {
+          this.log.debug('prepareSensorSsidService')
+          const sensorSsid = new Service.ContactSensor(apServiceName, `Ssid Sensor${i}`);
+          sensorSsid.getCharacteristic(Characteristic.ContactSensorState)
+            .onGet(async () => {
+              const state = this.apSsidsState[i];
+              return state;
+            });
+          this.apSensorServices.push(sensorSsid);
+          accessory.addService(this.apSensorServices[i]);
+        };
       };
     };
 
     //meraki ms
     if (swExposedPortsCount > 0) {
       this.swServices = [];
+      this.swSensorServices = [];
       //ports
       for (let i = 0; i < swExposedPortsCount; i++) {
         const swPortName = this.swPortsName[i];
@@ -572,6 +600,19 @@ class merakiDevice {
 
         this.swServices.push(swService);
         accessory.addService(this.swServices[i]);
+
+        //prepare sensor service
+        if (this.swSonsorPorts[i]) {
+          this.log.debug('prepareSensorPortService')
+          const sensorPort = new Service.ContactSensor(swServiceName, `Port Sensor${i}`);
+          sensorPort.getCharacteristic(Characteristic.ContactSensorState)
+            .onGet(async () => {
+              const state = this.swPortsState[i];
+              return state;
+            });
+          this.swSensorServices.push(sensorPort);
+          accessory.addService(this.swSensorServices[i]);
+        };
       };
     };
 
