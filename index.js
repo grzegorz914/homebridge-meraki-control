@@ -358,22 +358,29 @@ class merakiDevice {
       this.log.debug(`Network: ${this.name}, requesting switches data.`);
 
       try {
-        //switches cinfigured
+        //configured switches
         this.swNames = [];
         this.swSerialsNumber = [];
         this.swHideUplinksPort = [];
         this.swSonsorPorts = [];
         this.swHiddenPortsByName = [];
 
+        //sports state
+        this.swPortsSn = [];
+        this.swPortsId = [];
+        this.swPortsName = [];
+        this.swPortsState = [];
+        this.swPortsPoeState = [];
+
         for (const sw of this.switches) {
           const name = sw.name || 'Not set';
           const serialNumber = sw.serialNumber;
-          const hideUplinkPort = sw.hideUplinkPorts || false;
           const controlEnabled = sw.mode || false;
+          const hideUplinkPort = sw.hideUplinkPorts || false;
           const enableSonsorPorts = sw.enableSonsorPorts || false;
 
           if (!serialNumber || !controlEnabled) {
-            reject(`Sitch serial number: ${serialNumber}, control state: ${controlEnabled}.`);
+            resolve(true);
             return;
           }
 
@@ -384,22 +391,11 @@ class merakiDevice {
 
           //hidde port by name
           for (const hidePort of sw.hidePorts) {
-            const hidePortName = hidePort.name;
+            const hidePortName = hidePort.name || 'Not set';
             const hidePortEnabled = hidePort.mode;
-            const pushHiddenPortName = (hidePortName && hidePortEnabled) ? this.swHiddenPortsByName.push(hidePortName) : false;
+            const pushHiddenPortName = hidePortEnabled ? this.swHiddenPortsByName.push(hidePortName) : false;
           };
-        };
 
-        //switches ports state
-        this.swPortsSn = [];
-        this.swPortsId = [];
-        this.swPortsName = [];
-        this.swPortsState = [];
-        this.swPortsPoeState = [];
-
-        const swExposedCount = this.swSerialsNumber.length;
-        for (let i = 0; i < swExposedCount; i++) {
-          const serialNumber = this.swSerialsNumber[i];
           const portsUrl = `/devices/${serialNumber}/switch/ports`;
           const swData = await this.axiosInstance.get(portsUrl);
           const debug = this.enableDebugMode ? this.log(`Debug switches data: ${JSON.stringify(swData.data, null, 2)}`) : false;
@@ -414,38 +410,39 @@ class merakiDevice {
             const portName = port.name;
             const portState = (port.enabled === true);
             const portPoeState = (port.poeEnabled === true);
-            const hideUplinksPorts = (this.swHideUplinksPort[i] === true && portName.substr(0, 6) === 'Uplink');
+            const hideUplinksPorts = (hideUplinkPort && portName.substr(0, 6) === 'Uplink');
 
             //push exposed ports
             const swHidePort = (hideUplinksPorts || this.swHiddenPortsByName.includes(portName));
-            const pushSwitchSerialNumber = swHidePort ? false : this.swPortsSn.push(serialNumber);
-            const pushSwitchPortId = swHidePort ? false : this.swPortsId.push(portId);
-            const pushSwitchPortName = swHidePort ? false : this.swPortsName.push(portName);
-            const pushSwitchPortState = swHidePort ? false : this.swPortsState.push(portState);
-            const pushSwitchPortPoeState = swHidePort ? false : this.swPortsPoeState.push(portPoeState);
+            if (!swHidePort) {
+              this.swPortsSn.push(serialNumber);
+              this.swPortsId.push(portId);
+              this.swPortsName.push(portName);
+              this.swPortsState.push(portState);
+              this.swPortsPoeState.push(portPoeState);
+            }
           };
+        };
 
-          const swExposedPortsCount = this.swPortsSn.length;
-          for (let i = 0; i < swExposedPortsCount; i++) {
-            const portState = this.swPortsState[i];
-            const pushReplace = this.checkDeviceInfo && portState !== undefined ? this.swPortsStates.push(portState) : false;
+        const swExposedPortsCount = this.swPortsSn.length;
+        for (let i = 0; i < swExposedPortsCount; i++) {
+          const portState = this.swPortsState[i];
+          const pushReplace = this.checkDeviceInfo && portState !== undefined ? this.swPortsStates.push(portState) : false;
 
-            if (portState !== undefined && portState !== this.swPortsStates[i]) {
-              if (this.swServices) {
-                this.swServices[i]
-                  .updateCharacteristic(Characteristic.On, portState);
-                this.swPortsStates[i] = portState;
-              };
+          if (portState !== undefined && portState !== this.swPortsStates[i]) {
+            if (this.swServices) {
+              this.swServices[i]
+                .updateCharacteristic(Characteristic.On, portState);
+              this.swPortsStates[i] = portState;
+            };
 
-              if (this.swSensorServices) {
-                this.swSensorServices[i]
-                  .updateCharacteristic(Characteristic.ContactSensorState, portState)
-              };
+            if (this.swSensorServices) {
+              this.swSensorServices[i]
+                .updateCharacteristic(Characteristic.ContactSensorState, portState)
             };
           };
-          this.swExposedPortsCount = swExposedPortsCount;
         };
-        this.swExposedCount = swExposedCount;
+        this.swExposedPortsCount = swExposedPortsCount;
 
         resolve(true);
         const update = this.checkDeviceInfo ? false : this.updateSwitches();
@@ -497,7 +494,6 @@ class merakiDevice {
     //get devices data variables
     const dbExposedAndExistingClientsCount = this.dasboardExposedAndExistingClientsCount;
     const apExposedSsidsCount = this.apExposedSsidsCount;
-    const swExposedCount = this.swExposedCount;
     const swExposedPortsCount = this.swExposedPortsCount;
 
     if (dbExposedAndExistingClientsCount > 0) {

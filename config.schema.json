@@ -142,10 +142,20 @@
               "required": false
             },
             "hideUnconfiguredSsids": {
-              "title": "Hide unconfigured SSIDs",
+              "title": "Hide Unconfigured SSIDs",
               "type": "boolean",
               "default": false,
               "description": "This option hide all unconfigured SSIDs.",
+              "required": false,
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
+              }
+            },
+            "enableSonsorSsids": {
+              "title": "SSIDs Sensors",
+              "type": "boolean",
+              "default": false,
+              "description": "This option expose Contact Sensor in HomeKit app for all exposed SSIDs.",
               "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
@@ -161,27 +171,17 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "SSID Name",
-                    "description": "Here set the SSID Name to be hidden and not exposed to the Homebridge/HomeKit.",
+                    "description": "Here set the SSID Name to be not exposed in Homebridge/HomeKit.",
                     "required": false
                   },
                   "mode": {
                     "title": "SSID Control",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for Activate/Deactivate this SSID control.",
+                    "description": "Here Activate/Deactivate this SSID control.",
                     "required": false
                   }
                 }
               },
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-              }
-            },
-            "enableSonsorSsids": {
-              "title": "SSIDs Sensors",
-              "type": "boolean",
-              "default": false,
-              "description": "This option expose Contact Sensor in HomeKit app for all exposed SSIDs.",
-              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
               }
@@ -210,20 +210,20 @@
                     "title": "Serial Number",
                     "type": "string",
                     "placeholder": "Serial Number",
-                    "description": "Here set the Serial Number of the Switch to be exposed to the Homebridge/HomeKit.",
-                    "required": false
-                  },
-                  "hideUplinkPorts": {
-                    "title": "Hide uplink ports",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This option hide all uplink ports.",
+                    "description": "Here set the Serial Number of the Switch to be exposed in Homebridge/HomeKit.",
                     "required": false
                   },
                   "mode": {
                     "title": "Switch Control",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for Activate/Deactivate this Switch control.",
+                    "description": "Here Activate/Deactivate this Switch control.",
+                    "required": false
+                  },
+                  "hideUplinkPorts": {
+                    "title": "Hide Uplink Ports",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This option hide all uplink ports.",
                     "required": false
                   },
                   "enableSonsorPorts": {
@@ -231,10 +231,7 @@
                     "type": "boolean",
                     "default": false,
                     "description": "This option expose Contact Sensor in HomeKit app for all exposed ports.",
-                    "required": false,
-                    "condition": {
-                      "functionBody": "return model.devices[arrayIndices].switches[arrayIndices].mode === true;"
-                    }
+                    "required": false
                   },
                   "hidePorts": {
                     "title": "Ports",
@@ -246,13 +243,13 @@
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Port Name",
-                          "description": "Here set the Port Name to be hidden and not exposed to the Homebridge/HomeKit.",
+                          "description": "Here set the Port Name to be not exposed in Homebridge/HomeKit.",
                           "required": false
                         },
                         "mode": {
                           "title": "Port Control",
                           "type": "boolean",
-                          "description": "Here set ON/OFF for Activate/Deactivate this Port control.",
+                          "description": "Here Activate/Deactivate this Port control.",
                           "required": false
                         }
                       }
@@ -342,8 +339,8 @@
               "items": [
                 "devices[].switches[].name",
                 "devices[].switches[].serialNumber",
-                "devices[].switches[].hideUplinkPorts",
                 "devices[].switches[].mode",
+                "devices[].switches[].hideUplinkPorts",
                 "devices[].switches[].enableSonsorPorts",
                 {
                   "key": "devices[].switches[].hidePorts",
