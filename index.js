@@ -387,7 +387,6 @@ class merakiDevice {
           this.swNames.push(name);
           this.swSerialsNumber.push(serialNumber);
           this.swHideUplinksPort.push(hideUplinkPort);
-          this.swSonsorPorts.push(enableSonsorPorts);
 
           //hidde port by name
           for (const hidePort of sw.hidePorts) {
@@ -415,6 +414,7 @@ class merakiDevice {
             //push exposed ports
             const swHidePort = (hideUplinksPorts || this.swHiddenPortsByName.includes(portName));
             if (!swHidePort) {
+              this.swSonsorPorts.push(enableSonsorPorts);
               this.swPortsSn.push(serialNumber);
               this.swPortsId.push(portId);
               this.swPortsName.push(portName);
