@@ -400,7 +400,6 @@ class merakiDevice {
         const portsCount = this.swPortsState.length;
         for (let i = 0; i < portsCount; i++) {
           const state = this.swPortsState[i] === true;
-          this.log(state)
           if (this.swServices) {
             this.swServices[i].updateCharacteristic(Characteristic.On, state);
           };
