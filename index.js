@@ -316,11 +316,11 @@ class merakiDevice {
         const ssidsCount = this.apSsidsState.length;
         for (let i = 0; i < ssidsCount; i++) {
           const state = this.apSsidsState[i];
-          if (this.apServices) {
+          if (this.apServices && state != undefined) {
             this.apServices[i].updateCharacteristic(Characteristic.On, state);
           };
 
-          if (this.apSensorServices && this.accessPointsEnableSensorSsids) {
+          if (this.apSensorServices && this.accessPointsEnableSensorSsids && state != undefined) {
             this.apSensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
           };
         }
@@ -399,12 +399,12 @@ class merakiDevice {
         //update characteristics of exposed ports
         const portsCount = this.swPortsState.length;
         for (let i = 0; i < portsCount; i++) {
-          const state = this.swPortsState[i] === true;
-          if (this.swServices) {
+          const state = this.swPortsState[i];
+          if (this.swServices && state != undefined) {
             this.swServices[i].updateCharacteristic(Characteristic.On, state);
           };
 
-          if (this.swSensorServices && this.swPortsSensorEnabled[i]) {
+          if (this.swSensorServices && this.swPortsSensorEnabled[i] && state != undefined) {
             this.swSensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
           };
         };
