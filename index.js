@@ -163,6 +163,7 @@ class merakiDevice {
 
       //prepare accessory
       const startPrepareAccessory = this.startPrepareAccessory ? await this.prepareAccessory() : false;
+      this.startPrepareAccessory = false;
 
       //start update data
       const startDashboardClientsUpdate = this.updateDashboardClients();
@@ -179,6 +180,7 @@ class merakiDevice {
       await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
       const dbExposedAndExistingClientsCount = await this.updateDashboardClientsData();
       const updateDashboardClientsPolicyData = dbExposedAndExistingClientsCount > 0 ? await this.updateDashboardClientsPolicyData() : false;
+      this.updateDashboardClients();
     } catch (error) {
       this.log.error(`Network: ${this.name}, ${error}, trying in ${this.refreshInterval} sec.`);
       this.updateDashboardClients();
@@ -189,6 +191,7 @@ class merakiDevice {
     try {
       await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
       await this.updateAccessPointsData();
+      this.updateAccessPoints();
     } catch (error) {
       this.log.error(`Network: ${this.name}, ${error}, trying in ${this.refreshInterval} sec.`);
       this.updateAccessPoints();
@@ -199,6 +202,7 @@ class merakiDevice {
     try {
       await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
       await this.updateSwitchesData();
+      this.updateSwitches();
     } catch (error) {
       this.log.error(`Network: ${this.name}, ${error}, trying in ${this.refreshInterval} sec.`);
       this.updateSwitches();
@@ -253,7 +257,6 @@ class merakiDevice {
         this.dbExposedAndExistingClientsCount = this.dbExposedAndExistingClientsId.length;
 
         resolve(this.dbExposedAndExistingClientsCount);
-        const update = this.checkDeviceInfo ? false : this.updateDashboardClients();
       } catch (error) {
         reject(`dashboard clients data error: ${error}.`);
       };
@@ -342,7 +345,6 @@ class merakiDevice {
         }
 
         resolve();
-        const update = this.checkDeviceInfo ? false : this.updateAccessPoints();
       } catch (error) {
         reject(`access points data error: ${error}.`);
       };
@@ -405,7 +407,6 @@ class merakiDevice {
         };
 
         resolve();
-        const update = this.checkDeviceInfo ? false : this.updateSwitches();
       } catch (error) {
         reject(`switch data error: ${error}.`);
       };
@@ -498,7 +499,7 @@ class merakiDevice {
           const apService = new Service.Outlet(apServiceName, `apService${i}`);
           apService.getCharacteristic(Characteristic.On)
             .onGet(async () => {
-              const state = this.apSsidsState[i];
+              const state = this.apSsidsState[i] ?? false;
               const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
               return state;
             })
@@ -541,7 +542,7 @@ class merakiDevice {
           const swService = new Service.Outlet(swServiceName, `swService${i}`);
           swService.getCharacteristic(Characteristic.On)
             .onGet(async () => {
-              const state = this.swPortsState[i];
+              const state = this.swPortsState[i] ?? false;
               const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Port: ${this.swPortsId[i]}, Name: ${swPortName}, state: ${state ? 'Enabled' : 'Disabled'}`);
               return state;
             })
@@ -577,7 +578,6 @@ class merakiDevice {
 
         this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
         this.log.debug(`Network: ${accessoryName}, published as external accessory.`);
-        this.startPrepareAccessory = false;
         resolve();
       } catch (error) {
         reject(`prepare accessory error: ${error}.`);
