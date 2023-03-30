@@ -119,8 +119,8 @@ class merakiDevice {
         for (let i = 0; i < clientsCount; i++) {
           const clientPolicyState = clientsPolicyState[i];
 
-          if (this.merakiDashboardClientPolicyServices) {
-            this.merakiDashboardClientPolicyServices[i].updateCharacteristic(Characteristic.On, clientPolicyState);
+          if (this.dbServices) {
+            this.dbServices[i].updateCharacteristic(Characteristic.On, clientPolicyState);
           }
 
           if (this.dbSensorServices) {
@@ -277,7 +277,7 @@ class merakiDevice {
 
         //meraki mx
         if (this.dashboardClientsControl && dbExposedClientsCount > 0) {
-          this.merakiDashboardClientPolicyServices = [];
+          this.dbServices = [];
           for (let i = 0; i < dbExposedClientsCount; i++) {
             const dbClientName = this.dbConfClientsPolicyName[i];
             const dbServiceName = `C. ${dbClientName}`;
@@ -303,8 +303,8 @@ class merakiDevice {
                 }
               });
 
-            this.merakiDashboardClientPolicyServices.push(dbClientPolicyService);
-            accessory.addService(this.merakiDashboardClientPolicyServices[i]);
+            this.dbServices.push(dbClientPolicyService);
+            accessory.addService(this.dbServices[i]);
           };
 
           if (this.dashboardClientsSensor) {
