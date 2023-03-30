@@ -22,12 +22,9 @@
                     "name": "Network Name",
                     "host": "https://123.meraki.com",
                     "apiKey": "01032453453421923",
-                    "organizationId": "L_0123456789",
-                    "networkId": "1234567",
-                    "refreshInterval": 10,
-                    "disableLogInfo": false,
-                    "disableLogDeviceInfo": false,
-                    "enableDebugMode": false,
+                    "organizationId": "123456789",
+                    "networkId": "L_0123456789",
+                    "dashboardClientsControl": false,
                     "dashboardClientsPolicy": [
                         {
                             "name": "Own Name",
@@ -38,13 +35,13 @@
                     ],
                     "accessPointsControl": false,
                     "hideUnconfiguredSsids": false,
+                    "enableSonsorSsids": false,
                     "hideSsids": [
                         {
                             "name": "SSID Name",
                             "mode": false
                         }
                     ],
-                    "enableSonsorSsids": false,
                     "switchesControl": false,
                     "switches": [
                         {
@@ -60,7 +57,11 @@
                                 }
                             ]
                         }
-                    ]
+                    ],
+                    "enableDebugMode": false,
+                    "disableLogInfo": false,
+                    "disableLogDeviceInfo": false,
+                    "refreshInterval": 10
                 }
             ]
         }

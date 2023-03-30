@@ -49,34 +49,11 @@
               "description": "Here set the Network Id.",
               "required": true
             },
-            "refreshInterval": {
-              "title": "Refresh Interval (sec)",
-              "type": "integer",
-              "default": 5,
-              "minimum": 0,
-              "maximum": 60,
-              "description": "Here set the data refresh time in (sec).",
-              "required": true
-            },
-            "disableLogInfo": {
-              "title": "Disable Log Info",
+            "dashboardClientsControl": {
+              "title": "Dashboard Clients Control",
               "type": "boolean",
               "default": false,
-              "description": "This disable log info, all values and state will not be displayed in the Homebridge log.",
-              "required": false
-            },
-            "disableLogDeviceInfo": {
-              "title": "Disable Log Device Info",
-              "type": "boolean",
-              "default": false,
-              "description": "This disable display log device info on plugin start.",
-              "required": false
-            },
-            "enableDebugMode": {
-              "title": "Debug",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable debug mode.",
+              "description": "This option enable control of dashboard clients.",
               "required": false
             },
             "dashboardClientsPolicy": {
@@ -132,6 +109,9 @@
                     "required": false
                   }
                 }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
               }
             },
             "accessPointsControl": {
@@ -260,6 +240,36 @@
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].switchesControl === true;"
               }
+            },
+            "enableDebugMode": {
+              "title": "Debug",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable debug mode.",
+              "required": false
+            },
+            "disableLogInfo": {
+              "title": "Disable Log Info",
+              "type": "boolean",
+              "default": false,
+              "description": "This disable log info, all values and state will not be displayed in the Homebridge log.",
+              "required": false
+            },
+            "disableLogDeviceInfo": {
+              "title": "Disable Log Device Info",
+              "type": "boolean",
+              "default": false,
+              "description": "This disable display log device info on plugin start.",
+              "required": false
+            },
+            "refreshInterval": {
+              "title": "Refresh Interval (sec)",
+              "type": "integer",
+              "default": 5,
+              "minimum": 0,
+              "maximum": 60,
+              "description": "Here set the data refresh time in (sec).",
+              "required": true
             }
           }
         }
@@ -281,6 +291,7 @@
           "expandable": true,
           "expanded": false,
           "items": [
+            "devices[].dashboardClientsControl",
             {
               "key": "devices[].dashboardClientsPolicy",
               "type": "tabarray",

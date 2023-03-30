@@ -56,17 +56,18 @@ class merakiDevice {
     this.apiKey = config.apiKey;
     this.organizationId = config.organizationId;
     this.networkId = config.networkId;
-    this.refreshInterval = config.refreshInterval || 5;
-    this.disableLogInfo = config.disableLogInfo || false;
-    this.disableLogDeviceInfo = config.disableLogDeviceInfo || false;
-    this.enableDebugMode = config.enableDebugMode || false;
-    this.clientsPolicy = config.dashboardClientsPolicy || [];
+    this.dashboardClientsControl = config.dashboardClientsControl || false;
+    this.dashboardClientsPolicy = config.dashboardClientsPolicy || [];
     this.accessPointsControl = config.accessPointsControl || false;
     this.accessPointsHideUnconfiguredSsids = config.hideUnconfiguredSsids || false;
     this.accessPointsHideSsidsByName = config.hideSsids || [];
     this.accessPointsEnableSensorSsids = config.enableSonsorSsids || false;
     this.switchesControl = config.switchesControl || false;
     this.switches = config.switches || [];
+    this.refreshInterval = config.refreshInterval || 5;
+    this.enableDebugMode = config.enableDebugMode || false;
+    this.disableLogInfo = config.disableLogInfo || false;
+    this.disableLogDeviceInfo = config.disableLogDeviceInfo || false;
 
     //meraki url
     this.organizationsIdUrl = `/organizations`;
@@ -80,9 +81,9 @@ class merakiDevice {
     //setup variables
     this.checkDeviceInfo = true;
     this.startPrepareAccessory = true;
-    this.dbExposedClientsCount = 0;
-    this.mrExposedSsidsCount = 0;
-    this.msExposedPortsCount = 0;
+    this.dbClientsCount = 0;
+    this.mrSsidsCount = 0;
+    this.msPortsCount = 0;
 
     //preferences directory
     const prefDir = path.join(api.user.storagePath(), 'meraki');
@@ -94,41 +95,44 @@ class merakiDevice {
     this.getDeviceInfo();
 
     //meraki dashboard
-    this.merakiDb = new MerakiDb({
-      host: this.host,
-      apiKey: this.apiKey,
-      networkId: this.networkId,
-      confClients: this.clientsPolicy,
-      debugLog: this.enableDebugMode,
-      refreshInterval: this.refreshInterval,
-    });
-
-    this.merakiDb.on('data', (clientsPolicyName, clientsPolicyId, clientsPolicyMac, clientsPolicyPolicy, clientsPolicyState, clientsCount) => {
-      this.clientsPolicyName = clientsPolicyName;
-      this.clientsPolicyId = clientsPolicyId;
-      this.clientsPolicyMac = clientsPolicyMac;
-      this.clientsPolicyPolicy = clientsPolicyPolicy;
-      this.clientsPolicyState = clientsPolicyState;
-      this.dbExposedClientsCount = clientsCount;
-
-      for (let i = 0; i < clientsCount; i++) {
-        const clientPolicyState = clientsPolicyState[i];
-
-        if (this.merakiDashboardClientPolicyServices) {
-          this.merakiDashboardClientPolicyServices[i].updateCharacteristic(Characteristic.On, clientPolicyState);
-        }
-      }
-    })
-      .on('error', (error) => {
-        this.log.error(`Network: ${this.name}, ${error}`);
-      })
-      .on('debug', (message) => {
-        this.log(`Network: ${this.name}, debug: ${message}`);
-      })
-      .on('message', (message) => {
-        this.log(`Network: ${this.name}, ${message}`);
+    if (this.dashboardClientsControl) {
+      this.merakiDb = new MerakiDb({
+        host: this.host,
+        apiKey: this.apiKey,
+        networkId: this.networkId,
+        clientsPolicy: this.dashboardClientsPolicy,
+        debugLog: this.enableDebugMode,
+        refreshInterval: this.refreshInterval,
       });
 
+      this.merakiDb.on('data', (confClientsPolicyName, confClientsPolicyType, clientsPolicyId, clientsPolicyMac, clientsPolicyPolicy, clientsPolicyState, clientsCount) => {
+        this.dbConfClientsPolicyName = confClientsPolicyName;
+        this.dbConfClientsPolicyType = confClientsPolicyType;
+
+        this.dbClientsPolicyId = clientsPolicyId;
+        this.dbClientsPolicyMac = clientsPolicyMac;
+        this.dbClientsPolicyPolicy = clientsPolicyPolicy;
+        this.dbClientsPolicyState = clientsPolicyState;
+        this.dbClientsCount = clientsCount;
+
+        for (let i = 0; i < clientsCount; i++) {
+          const clientPolicyState = clientsPolicyState[i];
+
+          if (this.merakiDashboardClientPolicyServices) {
+            this.merakiDashboardClientPolicyServices[i].updateCharacteristic(Characteristic.On, clientPolicyState);
+          }
+        }
+      })
+        .on('error', (error) => {
+          this.log.error(`Network: ${this.name}, ${error}`);
+        })
+        .on('debug', (message) => {
+          this.log(`Network: ${this.name}, debug: ${message}`);
+        })
+        .on('message', (message) => {
+          this.log(`Network: ${this.name}, ${message}`);
+        });
+    };
 
     //meraki mr
     if (this.accessPointsControl) {
@@ -146,7 +150,7 @@ class merakiDevice {
         this.mrSsidsNumber = mrSsidsNumber;
         this.mrSsidsName = mrSsidsName;
         this.mrSsidsState = mrSsidsState;
-        this.mrExposedSsidsCount = mrSsidsCount;
+        this.mrSsidsCount = mrSsidsCount;
 
         //update characteristics of exposed ssids
         for (let i = 0; i < mrSsidsCount; i++) {
@@ -188,7 +192,7 @@ class merakiDevice {
         this.msPortsState = msPortsState;
         this.msPortsPoeState = msPortsPoeState;
         this.msPortsSensorsEnable = msPortsSensorsEnable;
-        this.msExposedPortsCount = msPortsCount;
+        this.msPortsCount = msPortsCount;
 
         //update characteristics of exposed ports
         for (let i = 0; i < msPortsCount; i++) {
@@ -230,8 +234,8 @@ class merakiDevice {
 
   async start() {
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const prepareAccessory = this.dbExposedClientsCount > 0 || this.mrExposedSsidsCount > 0 || this.msExposedPortsCount > 0 ? await this.prepareAccessory() : this.log(`Network: ${this.name}, not found configured devices.`);
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      const prepareAccessory = this.dbClientsCount > 0 || this.mrSsidsCount > 0 || this.msPortsCount > 0 ? await this.prepareAccessory() : this.log(`Network: ${this.name}, not found configured devices.`);
     } catch (error) {
       this.log.error(`Network: ${this.name}, prepare accessory error: ${error}`);
     };
@@ -262,28 +266,28 @@ class merakiDevice {
 
         //Prepare service 
         this.log.debug('prepareMerakiService');
-        const dbExposedClientsCount = this.dbExposedClientsCount;
-        const mrExposedSsidsCount = this.mrExposedSsidsCount;
-        const msExposedPortsCount = this.msExposedPortsCount;
+        const dbExposedClientsCount = this.dbClientsCount;
+        const mrExposedSsidsCount = this.mrSsidsCount;
+        const msExposedPortsCount = this.msPortsCount;
 
         //meraki mx
-        if (dbExposedClientsCount > 0) {
+        if (this.dashboardClientsControl && dbExposedClientsCount > 0) {
           this.merakiDashboardClientPolicyServices = [];
           for (let i = 0; i < dbExposedClientsCount; i++) {
-            const dbClientName = this.clientsPolicyName[i];
+            const dbClientName = this.dbConfClientsPolicyName[i];
             const dbServiceName = `C. ${dbClientName}`;
             const dbClientPolicyService = new Service.Outlet(dbServiceName, `dbClientPolicyService${i}`);
             dbClientPolicyService.getCharacteristic(Characteristic.On)
               .onGet(async () => {
-                const state = this.clientsPolicyState[i];
-                const policy = state ? this.clientsPolicyPolicy[i] : 'Blocked';
+                const state = this.dbClientsPolicyState[i];
+                const policy = state ? this.dbClientsPolicyPolicy[i] : 'Blocked';
                 const logInfo = this.disableLogInfo ? false : (`Network: ${accessoryName}, Client: % ${dbClientName}, Policy: ${policy}`);
                 return state;
               })
               .onSet(async (state) => {
                 try {
-                  const policy = state ? this.clientsPolicyPolicy[i] : 'Blocked';
-                  const policyUrl = `${this.dashboardClientsUrl}/${this.clientsPolicyId[i]}/policy`;
+                  const policy = state ? this.dbConfClientsPolicyType[i] : 'Blocked';
+                  const policyUrl = `${this.dashboardClientsUrl}/${this.dbClientsPolicyId[i]}/policy`;
                   const policyData = {
                     'devicePolicy': policy
                   }
@@ -348,7 +352,7 @@ class merakiDevice {
         };
 
         //meraki ms
-        if (this.switchesControl && mrExposedSsidsCount > 0) {
+        if (this.switchesControl && msExposedPortsCount > 0) {
           this.msServices = [];
           for (let i = 0; i < msExposedPortsCount; i++) {
             const msPortName = this.msPortsName[i];

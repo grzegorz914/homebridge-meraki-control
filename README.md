@@ -43,10 +43,9 @@
 
 ## Configuration
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
-* Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). 
-* The sample configuration can be edited and used manually as an alternative. 
-* See the `sample-config.json` file example or copy the example below into your config.json file, making the apporpriate changes before saving it. 
-* Be sure to always make a backup copy of your config.json file before making any changes to it.saving it.
+* Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin. 
+* See the `sample-config.json` file or copy the example making the apporpriate changes before saving it. 
+* Be sure to always make a backup copy of your config.json file before making any changes to it.
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/main/graphics/ustawienia.png" width="840"></a>
@@ -59,10 +58,7 @@
 | `apiKey` | Here set the *X-Cisco-Meraki-API-Key*. |
 | `organizationId` | Here set the *Organization Id*. |
 | `networkId` | Here set the *Network Id*. |
-| `refreshInterval` | Here set the data refresh time in seconds. |
-| `enableDebugMode` | This enable deep log in homebridge console. |
-| `disableLogInfo` | This disable display log values and states on every it change. |
-| `disableLogDeviceInfo` | This disable display log device info on plugin start. |
+| `dashboardClientsControl` | This option *Enable/Disable* dashboard clients control. |
 | `dashboardClientsPolicy.name` | Here set the *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
 | `dashboardClientsPolicy.mac` | Here set the *Client Mac Address* which You want expose to the *Homebridge/HomeKit*. |
 | `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for this Client. |
@@ -81,47 +77,7 @@
 | `switches.hidePorts` | Array of hidden Ports. |
 | `switches.hidePorts.name` | Here set *Port Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `switches.hidePorts.mode` | Here *Activate/Deactivate* this Port control. |
-
-```json
-        {
-            "platform": "Meraki",
-            "devices": [
-                {
-                    "name": "Network Name",
-                    "host": "https://123.meraki.com",
-                    "apiKey": "01032453453421923",
-                    "organizationId": "123456789",
-                    "networkId": "L_0123456789",
-                    "refreshInterval": 10,
-                    "disableLogInfo": false,
-                    "disableLogDeviceInfo": false,
-                    "enableDebugMode": false,
-                    "dashboardClientsPolicy": [{
-                         "name": "Own Name",
-                         "mac": "Mac Address",
-                         "type": "Policy type",
-                         "mode": false
-                    }],
-                    "accessPointsControl": false,
-                    "hideUnconfiguredSsids": false,
-                    "enableSonsorSsids": false,
-                    "hideSsids": [{
-                         "name": "SSID Name",
-                         "mode": false
-                     }],
-                     "switchesControl": false,
-                     "switches": [{
-                         "name": "Switch Name",
-                         "serialNumber": "O1H1-GL5D-AXXX",
-                         "hideUplinkPorts": false,
-                         "mode": false,
-                         "enableSonsorPorts": false,
-                         "hidePorts": [{
-                              "name": "Port Name",
-                              "mode": true
-                         }]
-                     }]
-                }
-            ]
-        }
-```
+| `enableDebugMode` | This enable deep log in homebridge console. |
+| `disableLogInfo` | This disable display log values and states on every it change. |
+| `disableLogDeviceInfo` | This disable display log device info on plugin start. |
+| `refreshInterval` | Here set the data refresh time in seconds. |

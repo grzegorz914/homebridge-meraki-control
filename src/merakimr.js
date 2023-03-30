@@ -36,20 +36,20 @@ class MerakiMr extends EventEmitter {
         this.on('updateAccessPoints', async () => {
             const debug = debugLog ? this.emit('debug', `requesting switches data.`) : false;
             try {
-                const apSsidsNumber = [];
-                const apSsidsName = [];
-                const apSsidsState = [];
+                const ssidsNumber = [];
+                const ssidsName = [];
+                const ssidsState = [];
 
                 //ap ssids states
-                const apSsidsData = await this.axiosInstance.get(wirelessUrl);
-                const debug = debugLog ? this.emit('debug', `Debug access points data: ${JSON.stringify(apSsidsData.data, null, 2)}`) : false;
+                const ssidsData = await this.axiosInstance.get(wirelessUrl);
+                const debug = debugLog ? this.emit('debug', `Debug access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
-                if (apSsidsData.status !== 200) {
-                    this.emit('message', `Update access points data status: ${apSsidsData.status}.`);
+                if (ssidsData.status !== 200) {
+                    this.emit('message', `Update access points data status: ${ssidsData.status}.`);
                     return;
                 }
 
-                for (const ssid of apSsidsData.data) {
+                for (const ssid of ssidsData.data) {
                     const ssidNumber = ssid.number;
                     const ssidName = ssid.name;
                     const ssidState = ssid.enabled;
@@ -60,18 +60,18 @@ class MerakiMr extends EventEmitter {
 
                     //push exposed ssids to array
                     if (!hideUnconfiguredSsids1 && !hideSsidsByName) {
-                        apSsidsNumber.push(ssidNumber);
-                        apSsidsName.push(ssidName);
-                        apSsidsState.push(ssidState);
+                        ssidsNumber.push(ssidNumber);
+                        ssidsName.push(ssidName);
+                        ssidsState.push(ssidState);
                     };
                 };
 
-                const apSsidsCount = apSsidsState.length;
-                if (apSsidsCount === 0) {
+                const ssidsCount = ssidsState.length;
+                if (ssidsCount === 0) {
                     return;
                 }
 
-                this.emit('data', apSsidsNumber, apSsidsName, apSsidsState, apSsidsCount);
+                this.emit('data', ssidsNumber, ssidsName, ssidsState, ssidsCount);
                 this.updateAccessPoints();
             } catch (error) {
                 this.emit('error', `access points data errorr: ${error}.`);

@@ -22,10 +22,15 @@ class MerakiMs extends EventEmitter {
             }
         });
 
+        const swCount = switches.length;
+        if (swCount === 0) {
+            return;
+        }
+
         const swNames = [];
         const swSerialsNumber = [];
         const swHideUplinksPort = [];
-        const swHiddenPortsByName = [];
+        const swHidenPortsByName = [];
         const swPortsSensorEnabled = [];
 
         for (const sw of switches) {
@@ -45,7 +50,7 @@ class MerakiMs extends EventEmitter {
                 for (const hidePort of sw.hidePorts) {
                     const hidePortName = hidePort.name;
                     const hidePortEnabled = hidePort.mode || false;
-                    const pushHiddenPortName = hidePortName && hidePortEnabled ? swHiddenPortsByName.push(hidePortName) : false;
+                    const pushHiddenPortName = hidePortName && hidePortEnabled ? swHidenPortsByName.push(hidePortName) : false;
                 };
             };
         };
@@ -53,17 +58,12 @@ class MerakiMs extends EventEmitter {
         this.on('updateSwitches', async () => {
             const debug = debugLog ? this.emit('debug', `requesting switches data.`) : false;
             try {
-                const swCount = switches.length;
-                if (swCount === 0) {
-                    return;
-                }
-
-                const swPortsSn = [];
-                const swPortsId = [];
-                const swPortsName = [];
-                const swPortsState = [];
-                const swPortsPoeState = [];
-                const swPortsSensorsEnable = [];
+                const portsSn = [];
+                const portsId = [];
+                const portsName = [];
+                const portsState = [];
+                const portsPoeState = [];
+                const portsSensorsEnable = [];
 
                 for (let i = 0; i < swCount; i++) {
                     const serialNumber = swSerialsNumber[i];
@@ -85,26 +85,26 @@ class MerakiMs extends EventEmitter {
                         const portState = port.enabled;
                         const portPoeState = port.poeEnabled;
                         const hideUplinksPorts = hideUplinks && portName.substr(0, 6) === 'Uplink';
-                        const hidePortByName = swHiddenPortsByName.includes(portName);
+                        const hidePortByName = swHidenPortsByName.includes(portName);
 
                         //push exposed ports to array
                         if (!hideUplinksPorts && !hidePortByName) {
-                            swPortsSn.push(serialNumber);
-                            swPortsId.push(portId);
-                            swPortsName.push(portName);
-                            swPortsState.push(portState);
-                            swPortsPoeState.push(portPoeState);
-                            swPortsSensorsEnable.push(enableSonsorPorts);
+                            portsSn.push(serialNumber);
+                            portsId.push(portId);
+                            portsName.push(portName);
+                            portsState.push(portState);
+                            portsPoeState.push(portPoeState);
+                            portsSensorsEnable.push(enableSonsorPorts);
                         }
                     };
                 };
 
-                const swPortsCount = swPortsState.length;
-                if (swPortsCount === 0) {
+                const portsCount = portsState.length;
+                if (portsCount === 0) {
                     return;
                 }
 
-                this.emit('data', swPortsSn, swPortsId, swPortsName, swPortsState, swPortsPoeState, swPortsSensorsEnable, swPortsCount);
+                this.emit('data', portsSn, portsId, portsName, portsState, portsPoeState, portsSensorsEnable, portsCount);
                 this.updateSwitches()
             } catch (error) {
                 this.emit('error', `switches data errorr: ${error}.`);
