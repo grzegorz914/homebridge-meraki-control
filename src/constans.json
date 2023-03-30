@@ -1,0 +1,7 @@
+{
+    "PlatformName": "Meraki",
+    "PluginName": "homebridge-meraki-control",
+    "ApiUrls": {
+        "BaseUrl": "/api/v1"
+    }
+}
