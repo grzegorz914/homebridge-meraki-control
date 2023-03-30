@@ -27,6 +27,7 @@
 * Dashboard:
   * Expose `Clients` filtered by *Mac Address*.
   * Apply policy `Normal, Whitelisted, Group Policy` / `Blocked` for clients.
+  * Expose Contact Sensors in HomeKit app for exposed `Clients`.
 * Access Points:
   * Switch `ON/OFF SSIDs` in the organisation.
   * Hide `Unconfigured SSIDs` networks, if the name contain word *Unconfigured*.
@@ -59,6 +60,7 @@
 | `organizationId` | Here set the *Organization Id*. |
 | `networkId` | Here set the *Network Id*. |
 | `dashboardClientsControl` | This option *Enable/Disable* dashboard clients control. |
+| `enableSonsorClients` | This option expose Contact Sensor in HomeKit app for all exposed Clients. |
 | `dashboardClientsPolicy.name` | Here set the *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
 | `dashboardClientsPolicy.mac` | Here set the *Client Mac Address* which You want expose to the *Homebridge/HomeKit*. |
 | `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for this Client. |

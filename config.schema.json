@@ -56,6 +56,16 @@
               "description": "This option enable control of dashboard clients.",
               "required": false
             },
+            "enableSonsorClients": {
+              "title": "Clients Sensors",
+              "type": "boolean",
+              "default": false,
+              "description": "This option expose Contact Sensor in HomeKit app for all exposed Clients.",
+              "required": false,
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
+              }
+            },
             "dashboardClientsPolicy": {
               "title": "Clients",
               "type": "array",
@@ -292,6 +302,7 @@
           "expanded": false,
           "items": [
             "devices[].dashboardClientsControl",
+            "devices[].enableSonsorClients",
             {
               "key": "devices[].dashboardClientsPolicy",
               "type": "tabarray",

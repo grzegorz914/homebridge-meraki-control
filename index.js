@@ -57,11 +57,12 @@ class merakiDevice {
     this.organizationId = config.organizationId;
     this.networkId = config.networkId;
     this.dashboardClientsControl = config.dashboardClientsControl || false;
+    this.dashboardClientsSensor = config.enableSonsorClients || false;
     this.dashboardClientsPolicy = config.dashboardClientsPolicy || [];
     this.accessPointsControl = config.accessPointsControl || false;
     this.accessPointsHideUnconfiguredSsids = config.hideUnconfiguredSsids || false;
     this.accessPointsHideSsidsByName = config.hideSsids || [];
-    this.accessPointsEnableSensorSsids = config.enableSonsorSsids || false;
+    this.accessPointsSsidsSensor = config.enableSonsorSsids || false;
     this.switchesControl = config.switchesControl || false;
     this.switches = config.switches || [];
     this.refreshInterval = config.refreshInterval || 5;
@@ -84,6 +85,7 @@ class merakiDevice {
     this.dbClientsCount = 0;
     this.mrSsidsCount = 0;
     this.msPortsCount = 0;
+    this.dbSensorsState = [];
 
     //preferences directory
     const prefDir = path.join(api.user.storagePath(), 'meraki');
@@ -121,6 +123,13 @@ class merakiDevice {
           if (this.merakiDashboardClientPolicyServices) {
             this.merakiDashboardClientPolicyServices[i].updateCharacteristic(Characteristic.On, clientPolicyState);
           }
+
+          if (this.dbSensorServices) {
+            const state = this.dbSensorsState[i] !== clientPolicyState;
+            this.dbSensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
+            this.dbSensorsState[i] = clientPolicyState;
+          };
+
         }
       })
         .on('error', (error) => {
@@ -301,6 +310,26 @@ class merakiDevice {
             this.merakiDashboardClientPolicyServices.push(dbClientPolicyService);
             accessory.addService(this.merakiDashboardClientPolicyServices[i]);
           };
+
+          if (this.dashboardClientsSensor) {
+            this.dbSensorServices = [];
+            for (let i = 0; i < mrExposedSsidsCount; i++) {
+              const dbClientName = this.dbConfClientsPolicyName[i];
+              const dbSensorServiceName = `C. Sensor ${dbClientName}`;
+              const dbSensorState = this.clientPolicyState[i];
+
+              const dbSensorService = new Service.ContactSensor(dbSensorServiceName, `Client Policy Sensor${i}`);
+              dbSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                .onGet(async () => {
+                  const state = dbSensorState;
+                  return state;
+                });
+
+              this.dbSensorsState.push(dbSensorState);
+              this.dbSensorServices.push(dbSensorService);
+              accessory.addService(this.dbSensorServices[i]);
+            };
+          };
         };
 
         //meraki mr
@@ -334,7 +363,7 @@ class merakiDevice {
             accessory.addService(this.mrServices[i]);
           };
 
-          if (this.accessPointsEnableSensorSsids) {
+          if (this.accessPointsSsidsSensor) {
             this.mrSensorServices = [];
             for (let i = 0; i < mrExposedSsidsCount; i++) {
               const ssidName = this.mrSsidsName[i];

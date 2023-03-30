@@ -25,6 +25,7 @@
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",
                     "dashboardClientsControl": false,
+                    "enableSonsorClients": false,
                     "dashboardClientsPolicy": [
                         {
                             "name": "Own Name",
