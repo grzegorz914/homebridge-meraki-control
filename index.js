@@ -129,7 +129,6 @@ class merakiDevice {
             this.dbSensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
             this.dbSensorsState[i] = clientPolicyState;
           };
-
         }
       })
         .on('error', (error) => {
