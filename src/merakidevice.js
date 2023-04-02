@@ -1,6 +1,4 @@
 'use strict';
-const path = require('path');
-const fs = require('fs');
 const MerakiDb = require('./merakidb.js');
 const MerakiMr = require('./merakimr.js');
 const MerakiMs = require('./merakims.js');
@@ -8,7 +6,7 @@ const EventEmitter = require('events');
 let Accessory, Characteristic, Service, Categories, UUID;
 
 class MerakiDevice extends EventEmitter {
-    constructor(api, config) {
+    constructor(api, prefDir, config) {
         super();
 
         Accessory = api.platformAccessory;
@@ -50,12 +48,6 @@ class MerakiDevice extends EventEmitter {
         this.dbClientsCount = 0;
         this.mrSsidsCount = 0;
         this.msPortsCount = 0;
-
-        //check if prefs directory exist
-        const prefDir = path.join(api.user.storagePath(), 'meraki');
-        if (!fs.existsSync(prefDir)) {
-            fs.mkdirSync(prefDir);
-        };
 
         //meraki dashboard
         if (this.dashboardClientsControl) {
