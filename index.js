@@ -19,31 +19,20 @@ class MerakiPlatform {
           return
         }
 
-        //meraki info
-        if (!device.disableLogDeviceInfo) {
-          log(`-------- ${device.name} --------`);
-          log(`Manufacturer: Cisco/Meraki`);
-          log(`Network: ${device.name}`);
-          log(`Network Id: ${device.networkId}`);
-          log(`Organization Id: ${device.organizationId}`);
-          log(`----------------------------------`)
-        };
-
         //meraki device
         const merakiDevice = new MerakiDevice(api, device);
         merakiDevice.on('publishAccessory', (accessory) => {
           api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
           const debug = device.enableDebugMode ? log(`Network: ${device.name}, published as external accessory.`) : false;
         })
-          .on('removeAccessory', (accessory) => {
-            api.unregisterPlatformAccessories(CONSTANS.PluginName, CONSTANS.PlatformName, [accessory]);
-            const debug = device.enableDebugMode ? log(`Accessory: ${accessory}, removed.`) : false;
+          .on('devInfo', (devInfo) => {
+            log(devInfo);
           })
           .on('message', (message) => {
             log(`Network: ${device.name}, ${message}`);
           })
           .on('debug', (debug) => {
-            log(`Network: ${device.name}, ${debug}`);
+            log(`Network: ${device.name}, debug: ${debug}`);
           })
           .on('error', (error) => {
             log.error(`Network: ${device.name}, ${error}`);

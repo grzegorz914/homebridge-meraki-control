@@ -35,6 +35,7 @@ class MerakiDevice extends EventEmitter {
         this.refreshInterval = config.refreshInterval || 5;
         this.enableDebugMode = config.enableDebugMode || false;
         this.disableLogInfo = config.disableLogInfo || false;
+        this.disableLogDeviceInfo = config.disableLogDeviceInfo || false;
 
         //meraki url
         this.organizationsIdUrl = `/organizations`;
@@ -92,7 +93,7 @@ class MerakiDevice extends EventEmitter {
                     this.emit('message', message);
                 })
                 .on('debug', (debug) => {
-                    this.emit('debug', `debug: ${debug}`);
+                    this.emit('debug', debug);
                 })
                 .on('error', (error) => {
                     this.emit('error', error);
@@ -133,7 +134,7 @@ class MerakiDevice extends EventEmitter {
                     this.emit('message', message);
                 })
                 .on('debug', (debug) => {
-                    this.emit('debug', `debug: ${debug}`);
+                    this.emit('debug', debug);
                 })
                 .on('error', (error) => {
                     this.emit('error', error);
@@ -175,7 +176,7 @@ class MerakiDevice extends EventEmitter {
                     this.emit('message', message);
                 })
                 .on('debug', (debug) => {
-                    this.emit('debug', `debug: ${debug}`);
+                    this.emit('debug', debug);
                 })
                 .on('error', (error) => {
                     this.emit('error', error);
@@ -188,26 +189,42 @@ class MerakiDevice extends EventEmitter {
     async start() {
         try {
             await new Promise(resolve => setTimeout(resolve, 2500));
-            const prepareAccessory = this.dbClientsCount > 0 || this.mrSsidsCount > 0 || this.msPortsCount > 0 ? await this.prepareAccessory() : this.emit('message', `not found configured devices.`);
+            if (this.dbClientsCount === 0 && this.mrSsidsCount == 0 && this.msPortsCount === 0) {
+                this.emit('message', `not found configured devices.`)
+                return;
+            };
+
+            //meraki info
+            if (!this.disableLogDeviceInfo) {
+                this.emit('devInfo', `-------- ${this.name} --------`);
+                this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
+                this.emit('devInfo', `Network: ${this.name}`);
+                this.emit('devInfo', `Network Id: ${this.networkId}`);
+                this.emit('devInfo', `Organization Id: ${this.organizationId}`);
+                this.emit('devInfo', `----------------------------------`)
+            };
+
+            //prepare accessory
+            const accessory = await this.prepareAccessory();
+            this.emit('publishAccessory', accessory)
         } catch (error) {
-            this.emit('error', error);
+            this.emit('error', `prepare accessory error: ${error}.`);
         };
     };
 
     //Prepare accessory
     prepareAccessory() {
         return new Promise((resolve, reject) => {
-            const debug = !this.debugLog ? false : this.emit('debug', `prepare accessory`);
-            
             try {
                 //prepare accessory
+                const debug = !this.debugLog ? false : this.emit('debug', `Prepare accessory`);
                 const accessoryName = this.name;
                 const accessoryUUID = UUID.generate(this.networkId);
                 const accessoryCategory = Categories.AIRPORT;
                 const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
                 //prepare information service
-                const debug1 = !this.debugLog ? false : this.emit('debug', `prepare information service`);
+                const debug1 = !this.debugLog ? false : this.emit('debug', `Prepare information service`);
                 accessory.getService(Service.AccessoryInformation)
                     .setCharacteristic(Characteristic.Manufacturer, 'Cisco/Meraki')
                     .setCharacteristic(Characteristic.Model, accessoryName)
@@ -221,7 +238,7 @@ class MerakiDevice extends EventEmitter {
 
                 //meraki db
                 if (this.dashboardClientsControl && dbExposedClientsCount > 0) {
-                    const debug2 = !this.debugLog ? false : this.emit('debug', `prepare meraki db service`);
+                    const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki db service`);
 
                     this.dbServices = [];
                     for (let i = 0; i < dbExposedClientsCount; i++) {
@@ -254,6 +271,8 @@ class MerakiDevice extends EventEmitter {
                     };
 
                     if (this.dashboardClientsSensor) {
+                        const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki db sensor service`);
+
                         this.dbSensorServices = [];
                         for (let i = 0; i < mrExposedSsidsCount; i++) {
                             const dbClientName = this.dbConfClientsPolicyName[i];
@@ -273,7 +292,7 @@ class MerakiDevice extends EventEmitter {
 
                 //meraki mr
                 if (this.accessPointsControl && mrExposedSsidsCount > 0) {
-                    const debug2 = !this.debugLog ? false : this.emit('debug', `prepare meraki mr service`);
+                    const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki mr service`);
 
                     this.mrServices = [];
                     for (let i = 0; i < mrExposedSsidsCount; i++) {
@@ -305,6 +324,8 @@ class MerakiDevice extends EventEmitter {
                     };
 
                     if (this.accessPointsSsidsSensor) {
+                        const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki mr sensor service`);
+
                         this.mrSensorServices = [];
                         for (let i = 0; i < mrExposedSsidsCount; i++) {
                             const ssidName = this.mrSsidsName[i];
@@ -323,7 +344,7 @@ class MerakiDevice extends EventEmitter {
 
                 //meraki ms
                 if (this.switchesControl && msExposedPortsCount > 0) {
-                    const debug2 = !this.debugLog ? false : this.emit('debug', `prepare meraki ms service`);
+                    const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki ms service`);
 
                     this.msServices = [];
                     for (let i = 0; i < msExposedPortsCount; i++) {
@@ -356,6 +377,8 @@ class MerakiDevice extends EventEmitter {
 
                     const sensorEnabled = this.msPortsSensorsEnable.includes(true);
                     if (sensorEnabled) {
+                        const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki ms sensor service`);
+
                         this.msSensorServices = [];
                         for (let i = 0; i < msExposedPortsCount; i++) {
                             if (this.msPortsSensorsEnable[i]) {
@@ -374,10 +397,9 @@ class MerakiDevice extends EventEmitter {
                     };
                 };
 
-                this.emit('publishAccessory', accessory)
-                resolve();
+                resolve(accessory);
             } catch (error) {
-                reject(`prepare accessory error: ${error}.`);
+                reject(error);
             };
         });
     };
