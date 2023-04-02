@@ -217,14 +217,14 @@ class MerakiDevice extends EventEmitter {
         return new Promise((resolve, reject) => {
             try {
                 //prepare accessory
-                const debug = !this.debugLog ? false : this.emit('debug', `Prepare accessory`);
+                const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare accessory`);
                 const accessoryName = this.name;
                 const accessoryUUID = UUID.generate(this.networkId);
                 const accessoryCategory = Categories.AIRPORT;
                 const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
                 //prepare information service
-                const debug1 = !this.debugLog ? false : this.emit('debug', `Prepare information service`);
+                const debug1 = !this.enableDebugMode ? false : this.emit('debug', `Prepare information service`);
                 accessory.getService(Service.AccessoryInformation)
                     .setCharacteristic(Characteristic.Manufacturer, 'Cisco/Meraki')
                     .setCharacteristic(Characteristic.Model, accessoryName)
@@ -238,7 +238,7 @@ class MerakiDevice extends EventEmitter {
 
                 //meraki db
                 if (this.dashboardClientsControl && dbExposedClientsCount > 0) {
-                    const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki db service`);
+                    const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki db service`);
 
                     this.dbServices = [];
                     for (let i = 0; i < dbExposedClientsCount; i++) {
@@ -271,7 +271,7 @@ class MerakiDevice extends EventEmitter {
                     };
 
                     if (this.dashboardClientsSensor) {
-                        const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki db sensor service`);
+                        const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki db sensor service`);
 
                         this.dbSensorServices = [];
                         for (let i = 0; i < mrExposedSsidsCount; i++) {
@@ -292,7 +292,7 @@ class MerakiDevice extends EventEmitter {
 
                 //meraki mr
                 if (this.accessPointsControl && mrExposedSsidsCount > 0) {
-                    const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki mr service`);
+                    const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki mr service`);
 
                     this.mrServices = [];
                     for (let i = 0; i < mrExposedSsidsCount; i++) {
@@ -324,7 +324,7 @@ class MerakiDevice extends EventEmitter {
                     };
 
                     if (this.accessPointsSsidsSensor) {
-                        const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki mr sensor service`);
+                        const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki mr sensor service`);
 
                         this.mrSensorServices = [];
                         for (let i = 0; i < mrExposedSsidsCount; i++) {
@@ -344,7 +344,7 @@ class MerakiDevice extends EventEmitter {
 
                 //meraki ms
                 if (this.switchesControl && msExposedPortsCount > 0) {
-                    const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki ms service`);
+                    const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki ms service`);
 
                     this.msServices = [];
                     for (let i = 0; i < msExposedPortsCount; i++) {
@@ -377,7 +377,7 @@ class MerakiDevice extends EventEmitter {
 
                     const sensorEnabled = this.msPortsSensorsEnable.includes(true);
                     if (sensorEnabled) {
-                        const debug = !this.debugLog ? false : this.emit('debug', `Prepare meraki ms sensor service`);
+                        const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki ms sensor service`);
 
                         this.msSensorServices = [];
                         for (let i = 0; i < msExposedPortsCount; i++) {
