@@ -237,6 +237,8 @@ class MerakiDevice extends EventEmitter {
                         const dbClientName = this.dbConfClientsPolicyName[i];
                         const dbServiceName = `C. ${dbClientName}`;
                         const dbClientPolicyService = new Service.Outlet(dbServiceName, `dbClientPolicyService${i}`);
+                        dbClientPolicyService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        dbClientPolicyService.setCharacteristic(Characteristic.ConfiguredName, `${dbServiceName}`);
                         dbClientPolicyService.getCharacteristic(Characteristic.On)
                             .onGet(async () => {
                                 const state = this.dbClientsPolicyState[i];
@@ -270,6 +272,8 @@ class MerakiDevice extends EventEmitter {
                             const dbClientName = this.dbConfClientsPolicyName[i];
                             const dbSensorServiceName = `C. Sensor ${dbClientName}`;
                             const dbSensorService = new Service.ContactSensor(dbSensorServiceName, `Client Sensor${i}`);
+                            dbSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                            dbSensorService.setCharacteristic(Characteristic.ConfiguredName, `${dbSensorServiceName}`);
                             dbSensorService.getCharacteristic(Characteristic.ContactSensorState)
                                 .onGet(async () => {
                                     const state = this.dbClientsPolicyState[i];
@@ -291,6 +295,8 @@ class MerakiDevice extends EventEmitter {
                         const ssidName = this.mrSsidsName[i];
                         const mrServiceName = `W. ${ssidName}`;
                         const mrService = new Service.Outlet(mrServiceName, `mrService${i}`);
+                        mrService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        mrService.setCharacteristic(Characteristic.ConfiguredName, `${mrServiceName}`);
                         mrService.getCharacteristic(Characteristic.On)
                             .onGet(async () => {
                                 const state = this.mrSsidsState[i] ?? false;
@@ -323,6 +329,8 @@ class MerakiDevice extends EventEmitter {
                             const ssidName = this.mrSsidsName[i];
                             const mrSensorServiceName = `W. Sensor ${ssidName}`;
                             const mrSensorService = new Service.ContactSensor(mrSensorServiceName, `Ssid Sensor${i}`);
+                            mrSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                            mrSensorService.setCharacteristic(Characteristic.ConfiguredName, `${mrSensorServiceName}`);
                             mrSensorService.getCharacteristic(Characteristic.ContactSensorState)
                                 .onGet(async () => {
                                     const state = this.mrSsidsState[i];
@@ -343,6 +351,8 @@ class MerakiDevice extends EventEmitter {
                         const msPortName = this.msPortsName[i];
                         const msServiceName = `${this.msPortsId[i]}. ${msPortName}`;
                         const msService = new Service.Outlet(msServiceName, `msService${i}`);
+                        msService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        msService.setCharacteristic(Characteristic.ConfiguredName, `${msServiceName}`);
                         msService.getCharacteristic(Characteristic.On)
                             .onGet(async () => {
                                 const state = this.msPortsState[i] ?? false;
@@ -377,6 +387,8 @@ class MerakiDevice extends EventEmitter {
                                 const msPortName = this.msPortsName[i];
                                 const msSensorServiceName = `${this.msPortsId[i]}. Sensor ${msPortName}`;
                                 const msSensorService = new Service.ContactSensor(msSensorServiceName, `Port Sensor${i}`);
+                                msSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                msSensorService.setCharacteristic(Characteristic.ConfiguredName, `${msSensorServiceName}`);
                                 msSensorService.getCharacteristic(Characteristic.ContactSensorState)
                                     .onGet(async () => {
                                         const state = this.msPortsState[i];
