@@ -22,10 +22,12 @@ class MerakiDevice extends EventEmitter {
         this.organizationId = config.organizationId;
         this.networkId = config.networkId;
         this.dashboardClientsControl = config.dashboardClientsControl || false;
+        this.dashboardClientsPrefixForClientName = config.enablePrefixForClientName || false;
         this.dashboardClientsSensor = config.enableSonsorClients || false;
         this.dashboardClientsPolicy = config.dashboardClientsPolicy || [];
         this.accessPointsControl = config.accessPointsControl || false;
         this.accessPointsHideUnconfiguredSsids = config.hideUnconfiguredSsids || false;
+        this.accessPointsPrefixForSsidsName = config.enablePrefixForSsidsName || false;
         this.accessPointsHideSsidsByName = config.hideSsids || [];
         this.accessPointsSsidsSensor = config.enableSonsorSsids || false;
         this.switchesControl = config.switchesControl || false;
@@ -143,10 +145,11 @@ class MerakiDevice extends EventEmitter {
                 refreshInterval: this.refreshInterval,
             });
 
-            this.merakiMs.on('data', (msPortsSn, msPortsId, msPortsName, msPortsState, msPortsPoeState, msPortsSensorsEnable, msPortsCount) => {
+            this.merakiMs.on('data', (msPortsSn, msPortsId, msPortsName, msPortsPrefix, msPortsState, msPortsPoeState, msPortsSensorsEnable, msPortsCount) => {
                 this.msPortsSn = msPortsSn;
                 this.msPortsId = msPortsId;
                 this.msPortsName = msPortsName;
+                this.msPortsPrefix = msPortsPrefix;
                 this.msPortsState = msPortsState;
                 this.msPortsPoeState = msPortsPoeState;
                 this.msPortsSensorsEnable = msPortsSensorsEnable;
@@ -235,7 +238,7 @@ class MerakiDevice extends EventEmitter {
                     this.dbServices = [];
                     for (let i = 0; i < dbExposedClientsCount; i++) {
                         const dbClientName = this.dbConfClientsPolicyName[i];
-                        const dbServiceName = `C. ${dbClientName}`;
+                        const dbServiceName = this.dashboardClientsPrefixForClientName ? `C.${dbClientName}` : dbClientName;
                         const dbClientPolicyService = new Service.Outlet(dbServiceName, `dbClientPolicyService${i}`);
                         dbClientPolicyService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         dbClientPolicyService.setCharacteristic(Characteristic.ConfiguredName, `${dbServiceName}`);
@@ -270,7 +273,7 @@ class MerakiDevice extends EventEmitter {
                         this.dbSensorServices = [];
                         for (let i = 0; i < mrExposedSsidsCount; i++) {
                             const dbClientName = this.dbConfClientsPolicyName[i];
-                            const dbSensorServiceName = `C. Sensor ${dbClientName}`;
+                            const dbSensorServiceName = this.dashboardClientsPrefixForClientName ? `Sensor C.${dbClientName}` : `Sensor ${dbClientName}`;
                             const dbSensorService = new Service.ContactSensor(dbSensorServiceName, `Client Sensor${i}`);
                             dbSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             dbSensorService.setCharacteristic(Characteristic.ConfiguredName, `${dbSensorServiceName}`);
@@ -293,7 +296,7 @@ class MerakiDevice extends EventEmitter {
                     this.mrServices = [];
                     for (let i = 0; i < mrExposedSsidsCount; i++) {
                         const ssidName = this.mrSsidsName[i];
-                        const mrServiceName = `W. ${ssidName}`;
+                        const mrServiceName = this.accessPointsPrefixForSsidsName ? `W.${ssidName}` : ssidName;
                         const mrService = new Service.Outlet(mrServiceName, `mrService${i}`);
                         mrService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         mrService.setCharacteristic(Characteristic.ConfiguredName, `${mrServiceName}`);
@@ -327,7 +330,7 @@ class MerakiDevice extends EventEmitter {
                         this.mrSensorServices = [];
                         for (let i = 0; i < mrExposedSsidsCount; i++) {
                             const ssidName = this.mrSsidsName[i];
-                            const mrSensorServiceName = `W. Sensor ${ssidName}`;
+                            const mrSensorServiceName = this.accessPointsPrefixForSsidsName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
                             const mrSensorService = new Service.ContactSensor(mrSensorServiceName, `Ssid Sensor${i}`);
                             mrSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             mrSensorService.setCharacteristic(Characteristic.ConfiguredName, `${mrSensorServiceName}`);
@@ -349,7 +352,7 @@ class MerakiDevice extends EventEmitter {
                     this.msServices = [];
                     for (let i = 0; i < msExposedPortsCount; i++) {
                         const msPortName = this.msPortsName[i];
-                        const msServiceName = `${this.msPortsId[i]}. ${msPortName}`;
+                        const msServiceName = this.msPortsPrefix ? `${this.msPortsId[i]}.${msPortName}` : msPortName;
                         const msService = new Service.Outlet(msServiceName, `msService${i}`);
                         msService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         msService.setCharacteristic(Characteristic.ConfiguredName, `${msServiceName}`);
@@ -385,7 +388,7 @@ class MerakiDevice extends EventEmitter {
                         for (let i = 0; i < msExposedPortsCount; i++) {
                             if (this.msPortsSensorsEnable[i]) {
                                 const msPortName = this.msPortsName[i];
-                                const msSensorServiceName = `${this.msPortsId[i]}. Sensor ${msPortName}`;
+                                const msSensorServiceName = this.msPortsPrefix ? `Sensor ${this.msPortsId[i]}.${msPortName}` : `Sensor ${msPortName}`;
                                 const msSensorService = new Service.ContactSensor(msSensorServiceName, `Port Sensor${i}`);
                                 msSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 msSensorService.setCharacteristic(Characteristic.ConfiguredName, `${msSensorServiceName}`);

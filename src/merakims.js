@@ -36,6 +36,7 @@ class MerakiMs extends EventEmitter {
         const swNames = [];
         const swSerialsNumber = [];
         const swHideUplinksPort = [];
+        const swPrefixForPortName = [];
         const swHidenPortsByName = [];
         const swPortsSensorEnabled = [];
 
@@ -44,12 +45,14 @@ class MerakiMs extends EventEmitter {
             const serialNumber = sw.serialNumber ?? false;
             const controlEnabled = sw.mode || false;
             const hideUplinkPort = sw.hideUplinkPorts || false;
+            const prefixForPortName = sw.enablePrefixForPortName || false;
             const enableSonsorPorts = sw.enableSonsorPorts || false;
 
             if (serialNumber && controlEnabled) {
                 swNames.push(name);
                 swSerialsNumber.push(serialNumber);
                 swHideUplinksPort.push(hideUplinkPort);
+                swPrefixForPortName.push(prefixForPortName);
                 swPortsSensorEnabled.push(enableSonsorPorts);
 
                 //hidde port by name
@@ -67,6 +70,7 @@ class MerakiMs extends EventEmitter {
                 const portsSn = [];
                 const portsId = [];
                 const portsName = [];
+                const portsPrefix = [];
                 const portsState = [];
                 const portsPoeState = [];
                 const portsSensorsEnable = [];
@@ -74,6 +78,7 @@ class MerakiMs extends EventEmitter {
                 for (let i = 0; i < swCount; i++) {
                     const serialNumber = swSerialsNumber[i];
                     const hideUplinks = swHideUplinksPort[i];
+                    const enablePrefixForPortName = swPrefixForPortName[i];
                     const enableSonsorPorts = swPortsSensorEnabled[i];
 
                     const portsUrl = `/devices/${serialNumber}/switch/ports`;
@@ -98,6 +103,7 @@ class MerakiMs extends EventEmitter {
                             portsSn.push(serialNumber);
                             portsId.push(portId);
                             portsName.push(portName);
+                            portsPrefix.push(enablePrefixForPortName);
                             portsState.push(portState);
                             portsPoeState.push(portPoeState);
                             portsSensorsEnable.push(enableSonsorPorts);
@@ -110,7 +116,7 @@ class MerakiMs extends EventEmitter {
                     return;
                 }
 
-                this.emit('data', portsSn, portsId, portsName, portsState, portsPoeState, portsSensorsEnable, portsCount);
+                this.emit('data', portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsSensorsEnable, portsCount);
                 this.updateSwitches()
             } catch (error) {
                 this.emit('error', `switches data errorr: ${error}.`);
