@@ -61,7 +61,7 @@
               "title": "Prefix For Client Name",
               "type": "boolean",
               "default": false,
-              "description": "This option enable prefix for client name displayed in HomeKit app.",
+              "description": "This option enable prefix (C.) for client name displayed in HomeKit app.",
               "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
@@ -156,7 +156,7 @@
               "title": "Prefix For SSIDs Name",
               "type": "boolean",
               "default": false,
-              "description": "This option enable prefix for SSIDs name displayed in HomeKit app.",
+              "description": "This option enable prefix (W.) for SSIDs name displayed in HomeKit app.",
               "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
@@ -241,7 +241,7 @@
                     "title": "Prefix For Port Name",
                     "type": "boolean",
                     "default": false,
-                    "description": "This option enable prefix for port name displayed in HomeKit app.",
+                    "description": "This option enable prefix (Port Number) for port name displayed in HomeKit app.",
                     "required": false
                   },
                   "enableSonsorPorts": {
