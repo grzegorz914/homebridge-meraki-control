@@ -64,7 +64,7 @@
               "description": "This option enable prefix for client name displayed in HomeKit app.",
               "required": false,
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
+                "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
               }
             },
             "enableSonsorClients": {
@@ -242,10 +242,7 @@
                     "type": "boolean",
                     "default": false,
                     "description": "This option enable prefix for port name displayed in HomeKit app.",
-                    "required": false,
-                    "condition": {
-                      "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-                    }
+                    "required": false
                   },
                   "enableSonsorPorts": {
                     "title": "Ports Sensors",

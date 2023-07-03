@@ -25,6 +25,7 @@
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",
                     "dashboardClientsControl": false,
+                    "enablePrefixForClientName": false,
                     "enableSonsorClients": false,
                     "dashboardClientsPolicy": [
                         {
@@ -35,6 +36,7 @@
                         }
                     ],
                     "accessPointsControl": false,
+                    "enablePrefixForSsidsName": false,
                     "hideUnconfiguredSsids": false,
                     "enableSonsorSsids": false,
                     "hideSsids": [
@@ -48,6 +50,7 @@
                         {
                             "name": "Switch Name",
                             "serialNumber": "O1H1-GL5D-AXXX",
+                            "enablePrefixForPortName": false,
                             "hideUplinkPorts": false,
                             "mode": false,
                             "enableSonsorPorts": false,
