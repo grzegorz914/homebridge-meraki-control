@@ -352,7 +352,7 @@ class MerakiDevice extends EventEmitter {
                     this.msServices = [];
                     for (let i = 0; i < msExposedPortsCount; i++) {
                         const msPortName = this.msPortsName[i];
-                        const msServiceName = this.msPortsPrefix ? `${this.msPortsId[i]}.${msPortName}` : msPortName;
+                        const msServiceName = this.msPortsPrefix[i] ? `${this.msPortsId[i]}.${msPortName}` : msPortName;
                         const msService = new Service.Outlet(msServiceName, `msService${i}`);
                         msService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         msService.setCharacteristic(Characteristic.ConfiguredName, `${msServiceName}`);
@@ -388,7 +388,7 @@ class MerakiDevice extends EventEmitter {
                         for (let i = 0; i < msExposedPortsCount; i++) {
                             if (this.msPortsSensorsEnable[i]) {
                                 const msPortName = this.msPortsName[i];
-                                const msSensorServiceName = this.msPortsPrefix ? `Sensor ${this.msPortsId[i]}.${msPortName}` : `Sensor ${msPortName}`;
+                                const msSensorServiceName = this.msPortsPrefix[i] ? `Sensor ${this.msPortsId[i]}.${msPortName}` : `Sensor ${msPortName}`;
                                 const msSensorService = new Service.ContactSensor(msSensorServiceName, `Port Sensor${i}`);
                                 msSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 msSensorService.setCharacteristic(Characteristic.ConfiguredName, `${msSensorServiceName}`);
