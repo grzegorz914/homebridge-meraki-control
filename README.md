@@ -27,17 +27,17 @@
 * Dashboard:
   * Expose `Clients` filtered by *Mac Address*.
   * Apply policy `Normal, Whitelisted, Group Policy` / `Blocked` for clients.
-  * Enable/Disable prefix for `Clients` name displayed in HomeKit.app.
+  * Enable/Disable prefix `C.` for `Clients` name displayed in HomeKit.app.
   * Expose Contact Sensors in HomeKit app for exposed `Clients`.
 * Access Points:
   * Switch `ON/OFF SSIDs` in the organisation.
-  * Enable/Disable prefix for `SSIDs` name displayed in HomeKit.app.
+  * Enable/Disable prefix `W.` for `SSIDs` name displayed in HomeKit.app.
   * Hide `Unconfigured SSIDs` networks, if the name contain word *Unconfigured*.
   * Hide `SSIDs` filtered by network *Name*.
   * Expose Contact Sensors in HomeKit app for exposed `SSIDs`.
 * Switches:
   * Switch `ON/OFF` ports.
-  * Enable/Disable prefix for `Ports` name displayed in HomeKit.app.
+  * Enable/Disable prefix `Port Number` for `Ports` name displayed in HomeKit.app.
   * Hide `Uplink` ports, if the port name contain word *Uplink*.
   * Hide `Ports` filtered by port *Name*.
   * Expose Contact Sensors in HomeKit app for exposed `Ports`.
@@ -63,7 +63,7 @@
 | `organizationId` | Here set the *Organization Id*. |
 | `networkId` | Here set the *Network Id*. |
 | `dashboardClientsControl` | This option *Enable/Disable* dashboard clients control. |
-| `enablePrefixForClientName` | This option enable prefix for *Client* name displayed in HomeKit app. |
+| `enablePrefixForClientName` | This option enable prefix `C.` for *Client* name displayed in HomeKit app. |
 | `enableSonsorClients` | This option expose Contact Sensor in HomeKit app for all exposed Clients. |
 | `dashboardClientsPolicy.name` | Here set the *Name* to be displayed in the the *Homebridge/HomeKit* for this Client. |
 | `dashboardClientsPolicy.mac` | Here set the *Client Mac Address* which You want expose to the *Homebridge/HomeKit*. |
@@ -71,7 +71,7 @@
 | `dashboardClientsPolicy.mode` | Here *Activate/Deactivate* this Client control. |
 | `accessPointsControl` | This option *Enable/Disable* control of Access Points. |
 | `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden and not exposed to the *Homebridge/HomeKit*. |
-| `enablePrefixForSsidsName` | This option enable prefix for *SSIDs* name displayed in HomeKit app. |
+| `enablePrefixForSsidsName` | This option enable prefix `W.` for *SSIDs* name displayed in HomeKit app. |
 | `hideSsids.name` | Here set *SSID Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `hideSsids.mode` | Here *Activate/Deactivate* this SSID control. |
 | `enableSonsorSsids` | This option expose Contact Sensor in HomeKit app for all exposed SSIDs. |
@@ -79,7 +79,7 @@
 | `switches.name` | Here set the *Name* for this Switch. |
 | `switches.serialNumber` | Here set the *Serial Number* for this Switch. |
 | `switches.hideUplinkPorts` | If enabled, all *Uplink* ports will be hidden and not exposed to the *Homebridge/HomeKit*. |
-| `switches.enablePrefixForPortName` | This option enable prefix for *Port* name displayed in HomeKit app. |
+| `switches.enablePrefixForPortName` | This option enable prefix `Port Number` for *Port* name displayed in HomeKit app. |
 | `switches.enableSonsorPorts` | This option expose Contact Sensor in HomeKit app for all exposed ports. |
 | `switches.mode` | Here *Activate/Deactivate* this Swich control. |
 | `switches.hidePorts` | Array of hidden Ports. |
