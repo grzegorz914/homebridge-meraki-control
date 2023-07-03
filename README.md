@@ -27,14 +27,17 @@
 * Dashboard:
   * Expose `Clients` filtered by *Mac Address*.
   * Apply policy `Normal, Whitelisted, Group Policy` / `Blocked` for clients.
+  * Enable/Disable prefix for `Clients` name displayed in HomeKit.app.
   * Expose Contact Sensors in HomeKit app for exposed `Clients`.
 * Access Points:
   * Switch `ON/OFF SSIDs` in the organisation.
+  * Enable/Disable prefix for `SSIDs` name displayed in HomeKit.app.
   * Hide `Unconfigured SSIDs` networks, if the name contain word *Unconfigured*.
   * Hide `SSIDs` filtered by network *Name*.
   * Expose Contact Sensors in HomeKit app for exposed `SSIDs`.
 * Switches:
   * Switch `ON/OFF` ports.
+  * Enable/Disable prefix for `Ports` name displayed in HomeKit.app.
   * Hide `Uplink` ports, if the port name contain word *Uplink*.
   * Hide `Ports` filtered by port *Name*.
   * Expose Contact Sensors in HomeKit app for exposed `Ports`.
