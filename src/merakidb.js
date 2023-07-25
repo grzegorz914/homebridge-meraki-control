@@ -62,18 +62,25 @@ class MerakiDb extends EventEmitter {
                 };
 
                 const exposedAndExistingClients = [];
-                for (const client of clientsPolicy) {
-                    const clientName = client.name;
-                    const clientMac = (client.mac).split(':').join('');
-                    const clientPolicyType = client.type;
-                    const clientEnabled = client.mode;
+                for (const clientPolicy of clientsPolicy) {
+                    const clientName = clientPolicy.name;
+                    const clientMac = (clientPolicy.mac).split(':').join('');
+                    const clientPolicyType = clientPolicy.type;
+                    const clientEnabled = clientPolicy.mode;
 
                     const clientIndex = clientEnabled ? clientsMac.indexOf(clientMac) : -1;
                     const clientId = clientIndex !== -1 ? clientsId[clientIndex] : -1;
 
+                    const exposedClient = {
+                        "name": clientName,
+                        "mac": clientMac,
+                        "type": clientPolicyType,
+                        "id": clientId
+                    }
+
                     //check and push existed clients
                     const exposeClient = (clientId !== -1);
-                    const pushExposedAndExistingClient = exposeClient ? exposedAndExistingClients.push(client) : false;
+                    const pushExposedAndExistingClient = exposeClient ? exposedAndExistingClients.push(exposedClient) : false;
                 };
 
                 const exposedAndExistingClientsCount = exposedAndExistingClients.length;
@@ -99,9 +106,9 @@ class MerakiDb extends EventEmitter {
                     const clientsPolicyState = [];
 
                     for (const client of exposedAndExistingClients) {
-                        const clientId = client.iD
+                        const clientId = client.id;
                         const clientPolicyData = await this.axiosInstance.get(`${dashboardClientsUrl}/${clientId}/policy`);
-                        const debug = debugLog ? this.emit('debug', `Debug dashboard client policy data: ${JSON.stringify(clientPolicyData.data[0], null, 2)}`) : false;
+                        const debug = debugLog ? this.emit('debug', `Debug dashboard client policy data: ${JSON.stringify(clientPolicyData.data, null, 2)}`) : false;
 
                         if (clientPolicyData.status !== 200) {
                             this.emit('message', `Update dashboard client policy data status: ${clientPolicyData.status}.`);
