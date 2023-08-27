@@ -6,7 +6,7 @@ const EventEmitter = require('events');
 let Accessory, Characteristic, Service, Categories, UUID;
 
 class MerakiDevice extends EventEmitter {
-    constructor(api, prefDir, config) {
+    constructor(api, config) {
         super();
 
         Accessory = api.platformAccessory;
@@ -183,9 +183,10 @@ class MerakiDevice extends EventEmitter {
 
     async start() {
         try {
-            await new Promise(resolve => setTimeout(resolve, 2500));
+            await new Promise(resolve => setTimeout(resolve, 5000));
             if (this.dbClientsCount === 0 && this.mrSsidsCount == 0 && this.msPortsCount === 0) {
-                this.emit('message', `not found configured devices.`)
+                this.emit('message', `not found configured devices.`);
+                this.start();
                 return;
             };
 

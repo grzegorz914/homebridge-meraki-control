@@ -28,7 +28,7 @@ class MerakiPlatform {
         const debug = device.enableDebugMode ? log(`Network: ${device.name}, did finish launching.`) : false;
 
         //meraki device
-        const merakiDevice = new MerakiDevice(api, prefDir, device);
+        const merakiDevice = new MerakiDevice(api, device);
         merakiDevice.on('publishAccessory', (accessory) => {
           api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
           const debug = device.enableDebugMode ? log(`Network: ${device.name}, published as external accessory.`) : false;

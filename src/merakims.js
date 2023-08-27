@@ -29,6 +29,8 @@ class MerakiMs extends EventEmitter {
         });
 
         const swCount = switches.length;
+        const debug = debugLog ? this.emit('debug', `found configured switches count: ${swCount}`) : false;
+
         if (swCount === 0) {
             return;
         }
@@ -83,12 +85,7 @@ class MerakiMs extends EventEmitter {
 
                     const portsUrl = `/devices/${serialNumber}/switch/ports`;
                     const swData = await this.axiosInstance.get(portsUrl);
-                    const debug = debugLog ? this.emit('debug', `Debug switches data: ${JSON.stringify(swData.data, null, 2)}`) : false;
-
-                    if (swData.status !== 200) {
-                        this.emit('message', `Update switches data status: ${swData.status}.`);
-                        return;
-                    }
+                    const debug = debugLog ? this.emit('debug', `switches data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 
                     for (const port of swData.data) {
                         const portId = port.portId;
@@ -112,15 +109,17 @@ class MerakiMs extends EventEmitter {
                 };
 
                 const portsCount = portsState.length;
+                const debug = debugLog ? this.emit('debug', `found configured ports count: ${portsCount}`) : false;
+
                 if (portsCount === 0) {
                     return;
                 }
 
                 this.emit('data', portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsSensorsEnable, portsCount);
-                this.updateSwitches()
+                this.updateSwitches();
             } catch (error) {
                 this.emit('error', `switches data errorr: ${error}.`);
-                this.updateSwitches()
+                this.updateSwitches();
             };
         })
 

@@ -48,12 +48,7 @@ class MerakiMr extends EventEmitter {
 
                 //ap ssids states
                 const ssidsData = await this.axiosInstance.get(wirelessUrl);
-                const debug = debugLog ? this.emit('debug', `Debug access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
-
-                if (ssidsData.status !== 200) {
-                    this.emit('message', `Update access points data status: ${ssidsData.status}.`);
-                    return;
-                }
+                const debug = debugLog ? this.emit('debug', `access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
                 for (const ssid of ssidsData.data) {
                     const ssidNumber = ssid.number;
@@ -73,6 +68,8 @@ class MerakiMr extends EventEmitter {
                 };
 
                 const ssidsCount = ssidsState.length;
+                const debug1 = debugLog ? this.emit('debug', `found ssids count: ${ssidsCount}`) : false;
+
                 if (ssidsCount === 0) {
                     return;
                 }
@@ -81,7 +78,7 @@ class MerakiMr extends EventEmitter {
                 this.updateAccessPoints();
             } catch (error) {
                 this.emit('error', `access points data errorr: ${error}.`);
-                this.updateAccessPoints()
+                this.updateAccessPoints();
             };
         })
 
