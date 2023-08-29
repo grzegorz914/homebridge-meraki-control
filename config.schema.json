@@ -325,115 +325,116 @@
         {
           "key": "devices[]",
           "type": "section",
-          "title": "Dashboard Clients",
-          "expandable": true,
-          "expanded": false,
-          "items": [
-            "devices[].dashboardClientsControl",
-            "devices[].enablePrefixForClientName",
-            "devices[].enableSonsorClients",
-            {
-              "key": "devices[].dashboardClientsPolicy",
-              "type": "tabarray",
-              "title": "{{ value.name || 'new Client' }}",
-              "expandable": true,
-              "expanded": true,
-              "orderable": false,
-              "items": [
-                "devices[].dashboardClientsPolicy[].name",
-                "devices[].dashboardClientsPolicy[].mac",
-                "devices[].dashboardClientsPolicy[].type",
-                "devices[].dashboardClientsPolicy[].mode"
-              ]
-            }
-          ]
-        },
-        {
-          "key": "devices[]",
-          "type": "section",
-          "title": "Access Points",
-          "expandable": true,
-          "expanded": false,
-          "items": [
-            "devices[].accessPointsControl",
-            "devices[].hideUnconfiguredSsids",
-            "devices[].enablePrefixForSsidsName",
-            "devices[].enableSonsorSsids",
-            {
-              "key": "devices[].hideSsids",
-              "type": "tabarray",
-              "title": "{{ value.name || 'new SSID' }}",
-              "expandable": true,
-              "expanded": true,
-              "orderable": false,
-              "items": [
-                "devices[].hideSsids[].name",
-                "devices[].hideSsids[].mode"
-              ]
-            }
-          ]
-        },
-        {
-          "key": "devices[]",
-          "type": "section",
-          "title": "Switches",
-          "expandable": true,
-          "expanded": false,
-          "items": [
-            "devices[].switchesControl",
-            {
-              "key": "devices[].switches",
-              "type": "tabarray",
-              "title": "{{ value.name || 'new Switch' }}",
-              "expandable": true,
-              "expanded": true,
-              "orderable": false,
-              "items": [
-                "devices[].switches[].name",
-                "devices[].switches[].serialNumber",
-                "devices[].switches[].mode",
-                "devices[].switches[].hideUplinkPorts",
-                "devices[].switches[].enablePrefixForPortName",
-                "devices[].switches[].enableSonsorPorts",
-                {
-                  "key": "devices[].switches[].hidePorts",
-                  "type": "tabarray",
-                  "title": "{{ value.name || 'new Port' }}",
-                  "expandable": true,
-                  "expanded": true,
-                  "orderable": false,
-                  "items": [
-                    "devices[].switches[].hidePorts[].name",
-                    "devices[].switches[].hidePorts[].mode"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "key": "devices[]",
-          "type": "section",
-          "title": "Authorization",
-          "expandable": true,
-          "expanded": false,
-          "items": [
-            "devices[].apiKey",
-            "devices[].organizationId",
-            "devices[].networkId"
-          ]
-        },
-        {
-          "key": "devices[]",
-          "type": "section",
           "title": "Advanced Settings",
           "expandable": true,
           "expanded": false,
           "items": [
-            "devices[].enableDebugMode",
-            "devices[].disableLogInfo",
-            "devices[].disableLogDeviceInfo",
-            "devices[].refreshInterval"
+            {
+              "key": "devices[]",
+              "type": "tabarray",
+              "title": "{{ value.title }}",
+              "items": [
+                {
+                  "key": "devices[]",
+                  "title": "Dashboard Clients",
+                  "items": [
+                    "devices[].dashboardClientsControl",
+                    "devices[].enablePrefixForClientName",
+                    "devices[].enableSonsorClients",
+                    {
+                      "key": "devices[].dashboardClientsPolicy",
+                      "type": "tabarray",
+                      "title": "{{ value.name || 'new Client' }}",
+                      "expandable": true,
+                      "expanded": true,
+                      "orderable": false,
+                      "items": [
+                        "devices[].dashboardClientsPolicy[].name",
+                        "devices[].dashboardClientsPolicy[].mac",
+                        "devices[].dashboardClientsPolicy[].type",
+                        "devices[].dashboardClientsPolicy[].mode"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "key": "devices[]",
+                  "title": "Access Points",
+                  "items": [
+                    "devices[].accessPointsControl",
+                    "devices[].hideUnconfiguredSsids",
+                    "devices[].enablePrefixForSsidsName",
+                    "devices[].enableSonsorSsids",
+                    {
+                      "key": "devices[].hideSsids",
+                      "type": "tabarray",
+                      "title": "{{ value.name || 'new SSID' }}",
+                      "expandable": true,
+                      "expanded": true,
+                      "orderable": false,
+                      "items": [
+                        "devices[].hideSsids[].name",
+                        "devices[].hideSsids[].mode"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "key": "devices[]",
+                  "title": "Switches",
+                  "items": [
+                    "devices[].switchesControl",
+                    {
+                      "key": "devices[].switches",
+                      "type": "tabarray",
+                      "title": "{{ value.name || 'new Switch' }}",
+                      "expandable": true,
+                      "expanded": true,
+                      "orderable": false,
+                      "items": [
+                        "devices[].switches[].name",
+                        "devices[].switches[].serialNumber",
+                        "devices[].switches[].mode",
+                        "devices[].switches[].hideUplinkPorts",
+                        "devices[].switches[].enablePrefixForPortName",
+                        "devices[].switches[].enableSonsorPorts",
+                        {
+                          "key": "devices[].switches[].hidePorts",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'new Port' }}",
+                          "expandable": true,
+                          "expanded": true,
+                          "orderable": false,
+                          "items": [
+                            "devices[].switches[].hidePorts[].name",
+                            "devices[].switches[].hidePorts[].mode"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "key": "devices[]",
+                  "title": "Authorization",
+                  "items": [
+                    "devices[].apiKey",
+                    "devices[].organizationId",
+                    "devices[].networkId"
+                  ]
+                },
+                {
+                  "key": "devices[]",
+                  "title": "System",
+                  "items": [
+                    "devices[].enableDebugMode",
+                    "devices[].disableLogInfo",
+                    "devices[].disableLogDeviceInfo",
+                    "devices[].refreshInterval"
+                  ]
+                }
+              ]
+            }
           ]
         }
       ]
