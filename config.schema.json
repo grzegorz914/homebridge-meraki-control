@@ -416,21 +416,37 @@
                 },
                 {
                   "key": "devices[]",
-                  "title": "Authorization",
+                  "type": "section",
+                  "title": "Advanced Settings",
+                  "expandable": true,
+                  "expanded": false,
                   "items": [
-                    "devices[].apiKey",
-                    "devices[].organizationId",
-                    "devices[].networkId"
-                  ]
-                },
-                {
-                  "key": "devices[]",
-                  "title": "System",
-                  "items": [
-                    "devices[].enableDebugMode",
-                    "devices[].disableLogInfo",
-                    "devices[].disableLogDeviceInfo",
-                    "devices[].refreshInterval"
+                    {
+                      "key": "devices[]",
+                      "type": "tabarray",
+                      "title": "{{ value.title }}",
+                      "items": [
+                        {
+                          "key": "devices[]",
+                          "title": "Authorization",
+                          "items": [
+                            "devices[].apiKey",
+                            "devices[].organizationId",
+                            "devices[].networkId"
+                          ]
+                        },
+                        {
+                          "key": "devices[]",
+                          "title": "System",
+                          "items": [
+                            "devices[].enableDebugMode",
+                            "devices[].disableLogInfo",
+                            "devices[].disableLogDeviceInfo",
+                            "devices[].refreshInterval"
+                          ]
+                        }
+                      ]
+                    }
                   ]
                 }
               ]
