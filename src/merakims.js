@@ -40,6 +40,7 @@ class MerakiMs extends EventEmitter {
         const swHideUplinksPort = [];
         const swPrefixForPortName = [];
         const swHidenPortsByName = [];
+        const swPoePortsControlEnabled = [];
         const swPortsSensorEnabled = [];
 
         for (const sw of switches) {
@@ -48,14 +49,16 @@ class MerakiMs extends EventEmitter {
             const controlEnabled = sw.mode || false;
             const hideUplinkPort = sw.hideUplinkPorts || false;
             const prefixForPortName = sw.enablePrefixForPortName || false;
-            const enableSonsorPorts = sw.enableSonsorPorts || false;
+            const enablePoePortsControl = sw.enablePoePortsControl || false;
+            const enableSensorPorts = sw.enableSensorPorts || false;
 
             if (serialNumber && controlEnabled) {
                 swNames.push(name);
                 swSerialsNumber.push(serialNumber);
                 swHideUplinksPort.push(hideUplinkPort);
                 swPrefixForPortName.push(prefixForPortName);
-                swPortsSensorEnabled.push(enableSonsorPorts);
+                swPoePortsControlEnabled.push(enablePoePortsControl);
+                swPortsSensorEnabled.push(enableSensorPorts);
 
                 //hidde port by name
                 for (const hidePort of sw.hidePorts) {
@@ -75,13 +78,15 @@ class MerakiMs extends EventEmitter {
                 const portsPrefix = [];
                 const portsState = [];
                 const portsPoeState = [];
+                const portsPoeControlEnable = [];
                 const portsSensorsEnable = [];
 
                 for (let i = 0; i < swCount; i++) {
                     const serialNumber = swSerialsNumber[i];
                     const hideUplinks = swHideUplinksPort[i];
                     const prefixForPortName = swPrefixForPortName[i];
-                    const enableSonsorPorts = swPortsSensorEnabled[i];
+                    const enablePoePortsControl = swPoePortsControlEnabled[i];
+                    const enableSensorPorts = swPortsSensorEnabled[i];
 
                     const portsUrl = `/devices/${serialNumber}/switch/ports`;
                     const swData = await this.axiosInstance.get(portsUrl);
@@ -103,7 +108,8 @@ class MerakiMs extends EventEmitter {
                             portsPrefix.push(prefixForPortName);
                             portsState.push(portState);
                             portsPoeState.push(portPoeState);
-                            portsSensorsEnable.push(enableSonsorPorts);
+                            portsPoeControlEnable.push(enablePoePortsControl);
+                            portsSensorsEnable.push(enableSensorPorts);
                         }
                     };
                 };
@@ -115,7 +121,7 @@ class MerakiMs extends EventEmitter {
                     return;
                 }
 
-                this.emit('data', portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsSensorsEnable, portsCount);
+                this.emit('data', portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsPoeControlEnable, portsSensorsEnable, portsCount);
                 this.updateSwitches();
             } catch (error) {
                 this.emit('error', `switches data errorr: ${error}.`);

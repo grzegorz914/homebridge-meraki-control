@@ -80,7 +80,8 @@
 | `switches.serialNumber` | Here set the *Serial Number* for this Switch. |
 | `switches.hideUplinkPorts` | If enabled, all *Uplink* ports will be hidden and not exposed to the *Homebridge/HomeKit*. |
 | `switches.enablePrefixForPortName` | This option enable prefix `Port Number` for *Port* name displayed in HomeKit app. |
-| `switches.enableSonsorPorts` | This option expose Contact Sensor in HomeKit app for all exposed ports. |
+| `switches.enablePoePortsControl` | This option expose Contact Sensor in HomeKit app for all exposed ports. |
+| `switches.enableSensorPorts` | This option enable POE control for controled ports. |
 | `switches.mode` | Here *Activate/Deactivate* this Swich control. |
 | `switches.hidePorts` | Array of hidden Ports. |
 | `switches.hidePorts.name` | Here set *Port Name* which You want hide and not expose to the *Homebridge/HomeKit*. |

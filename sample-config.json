@@ -53,7 +53,8 @@
                             "enablePrefixForPortName": false,
                             "hideUplinkPorts": false,
                             "mode": false,
-                            "enableSonsorPorts": false,
+                            "enablePoePortsControl": false,
+                            "enableSensorPorts": false,
                             "hidePorts": [
                                 {
                                     "name": "Port Name",

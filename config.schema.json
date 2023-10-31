@@ -244,7 +244,14 @@
                     "description": "This option enable prefix (Port Number) for port name displayed in HomeKit app.",
                     "required": false
                   },
-                  "enableSonsorPorts": {
+                  "enablePoePortsControl": {
+                    "title": "POE Ports Control",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This option enable POE control for controled ports.",
+                    "required": false
+                  },
+                  "enableSensorPorts": {
                     "title": "Ports Sensors",
                     "type": "boolean",
                     "default": false,
@@ -397,7 +404,8 @@
                         "devices[].switches[].mode",
                         "devices[].switches[].hideUplinkPorts",
                         "devices[].switches[].enablePrefixForPortName",
-                        "devices[].switches[].enableSonsorPorts",
+                        "devices[].switches[].enablePoePortsControl",
+                        "devices[].switches[].enableSensorPorts",
                         {
                           "key": "devices[].switches[].hidePorts",
                           "type": "tabarray",

@@ -145,13 +145,14 @@ class MerakiDevice extends EventEmitter {
                 refreshInterval: this.refreshInterval,
             });
 
-            this.merakiMs.on('data', (msPortsSn, msPortsId, msPortsName, msPortsPrefix, msPortsState, msPortsPoeState, msPortsSensorsEnable, msPortsCount) => {
+            this.merakiMs.on('data', (msPortsSn, msPortsId, msPortsName, msPortsPrefix, msPortsState, msPortsPoeState, msPortsPoeControlEnable, msPortsSensorsEnable, msPortsCount) => {
                 this.msPortsSn = msPortsSn;
                 this.msPortsId = msPortsId;
                 this.msPortsName = msPortsName;
                 this.msPortsPrefix = msPortsPrefix;
                 this.msPortsState = msPortsState;
                 this.msPortsPoeState = msPortsPoeState;
+                this.msPortsPoeControlEnable = msPortsPoeControlEnable;
                 this.msPortsSensorsEnable = msPortsSensorsEnable;
                 this.msPortsCount = msPortsCount;
 
@@ -353,6 +354,7 @@ class MerakiDevice extends EventEmitter {
                     this.msServices = [];
                     for (let i = 0; i < msExposedPortsCount; i++) {
                         const msPortName = this.msPortsName[i];
+                        const msPortsPoeControlEnable = this.msPortsPoeControlEnable[i];
                         const msServiceName = this.msPortsPrefix[i] ? `${this.msPortsId[i]}.${msPortName}` : msPortName;
                         const msService = new Service.Outlet(msServiceName, `msService${i}`);
                         msService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -367,7 +369,10 @@ class MerakiDevice extends EventEmitter {
                                 try {
                                     state = state ? true : false;
                                     const switchPortUrl = `/devices/${this.msPortsSn[i]}/switch/ports/${this.msPortsId[i]}`;
-                                    const switchPortData = {
+                                    const switchPortData = msPortsPoeControlEnable ? {
+                                        'enabled': state,
+                                        'poeEnabled': state
+                                    } : {
                                         'enabled': state
                                     };
                                     await this.merakiMs.send(switchPortUrl, switchPortData);
