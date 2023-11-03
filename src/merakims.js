@@ -72,6 +72,7 @@ class MerakiMs extends EventEmitter {
         this.on('updateSwitches', async () => {
             const debug = debugLog ? this.emit('debug', `requesting switches data.`) : false;
             try {
+                const portsPrefixNames = [];
                 const portsSn = [];
                 const portsId = [];
                 const portsName = [];
@@ -81,7 +82,9 @@ class MerakiMs extends EventEmitter {
                 const portsPoeControlEnable = [];
                 const portsSensorsEnable = [];
 
-                for (let i = 0; i < swCount; i++) {
+                const enabledSwCount = swSerialsNumber.length;
+                for (let i = 0; i < enabledSwCount; i++) {
+                    const prefixName = swNames[i];
                     const serialNumber = swSerialsNumber[i];
                     const hideUplinks = swHideUplinksPort[i];
                     const prefixForPortName = swPrefixForPortName[i];
@@ -102,6 +105,7 @@ class MerakiMs extends EventEmitter {
 
                         //push exposed ports to array
                         if (!hideUplinksPorts && !hidePortByName) {
+                            portsPrefixNames.push(prefixName);
                             portsSn.push(serialNumber);
                             portsId.push(portId);
                             portsName.push(portName);
@@ -121,7 +125,7 @@ class MerakiMs extends EventEmitter {
                     return;
                 }
 
-                this.emit('data', portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsPoeControlEnable, portsSensorsEnable, portsCount);
+                this.emit('data', portsPrefixNames, portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsPoeControlEnable, portsSensorsEnable, portsCount);
                 this.updateSwitches();
             } catch (error) {
                 this.emit('error', `switches data errorr: ${error}.`);

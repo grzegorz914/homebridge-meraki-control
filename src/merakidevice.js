@@ -145,7 +145,8 @@ class MerakiDevice extends EventEmitter {
                 refreshInterval: this.refreshInterval,
             });
 
-            this.merakiMs.on('data', (msPortsSn, msPortsId, msPortsName, msPortsPrefix, msPortsState, msPortsPoeState, msPortsPoeControlEnable, msPortsSensorsEnable, msPortsCount) => {
+            this.merakiMs.on('data', (msPortsPrefixNames, msPortsSn, msPortsId, msPortsName, msPortsPrefix, msPortsState, msPortsPoeState, msPortsPoeControlEnable, msPortsSensorsEnable, msPortsCount) => {
+                this.msPortsPrefixNames = msPortsPrefixNames;
                 this.msPortsSn = msPortsSn;
                 this.msPortsId = msPortsId;
                 this.msPortsName = msPortsName;
@@ -353,6 +354,7 @@ class MerakiDevice extends EventEmitter {
 
                     this.msServices = [];
                     for (let i = 0; i < msExposedPortsCount; i++) {
+                        const msPortPrefixName = this.msPortsPrefixNames[i];
                         const msPortName = this.msPortsName[i];
                         const msPortsPoeControlEnable = this.msPortsPoeControlEnable[i];
                         const msServiceName = this.msPortsPrefix[i] ? `${this.msPortsId[i]}.${msPortName}` : msPortName;
