@@ -14,9 +14,10 @@ class MerakiMr extends EventEmitter {
         const hideSsidsName = config.hideSsidsName;
         const debugLog = config.debugLog;
         this.refreshInterval = config.refreshInterval;
+        this.prepareMr = true;
 
-        const baseUrl = (`${host}${CONSTANS.ApiUrls.BaseUrl}`);
-        const wirelessUrl = `/networks/${networkId}/wireless/ssids`;
+        const baseUrl = (`${host}${CONSTANS.ApiUrls.Base}`);
+        const wirelessUrl = CONSTANS.ApiUrls.MrSsids.replace('networkId', networkId);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             headers: {
@@ -39,16 +40,25 @@ class MerakiMr extends EventEmitter {
             const pushHideSsidsName = (hideSsidEnabled && hideSsidName !== 'Undefined') ? hidenSsidsName.push(hideSsidName) : false;
         };
 
-        this.on('updateAccessPoints', async () => {
-            const debug = debugLog ? this.emit('debug', `requesting switches data.`) : false;
+        this.on('checkDeviceInfo', async () => {
             try {
+                const debug = debugLog ? this.emit('debug', `requesting access points data.`) : false;
+                //ap ssids states
+                const ssidsData = await this.axiosInstance.get(wirelessUrl);
+                const debug1 = debugLog ? this.emit('debug', `access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
+
+                //check device state
+                this.emit('checkDeviceState', ssidsData);
+            } catch (error) {
+                this.emit('error', `access points data error: ${error}.`);
+                this.checkDeviceInfo();
+            };
+        }).on('checkDeviceState', (ssidsData) => {
+            try {
+                const debug = debugLog ? this.emit('debug', `requesting access points SSIDs status.`) : false;
                 const ssidsNumber = [];
                 const ssidsName = [];
                 const ssidsState = [];
-
-                //ap ssids states
-                const ssidsData = await this.axiosInstance.get(wirelessUrl);
-                const debug = debugLog ? this.emit('debug', `access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
                 for (const ssid of ssidsData.data) {
                     const ssidNumber = ssid.number;
@@ -68,26 +78,29 @@ class MerakiMr extends EventEmitter {
                 };
 
                 const ssidsCount = ssidsState.length;
-                const debug1 = debugLog ? this.emit('debug', `found ssids count: ${ssidsCount}`) : false;
+                const debug1 = debugLog ? this.emit('debug', `access points found: ${ssidsCount} exposed SSIDs.`) : false;
 
                 if (ssidsCount === 0) {
                     return;
                 }
 
-                this.emit('data', ssidsNumber, ssidsName, ssidsState, ssidsCount);
-                this.updateAccessPoints();
+                //emit device info
+                const emitDeviceInfo = this.prepareMr ? this.emit('deviceInfo', ssidsCount) : false;
+                this.emit('deviceState', ssidsNumber, ssidsName, ssidsState, ssidsCount, this.prepareMr);
+                this.prepareMr = false;
+                this.checkDeviceInfo();
             } catch (error) {
-                this.emit('error', `access points data errorr: ${error}.`);
-                this.updateAccessPoints();
+                this.emit('error', `access points data error: ${error}.`);
+                this.checkDeviceInfo();
             };
-        })
+        });
 
-        this.emit('updateAccessPoints');
+        this.emit('checkDeviceInfo');
     };
 
-    async updateAccessPoints() {
+    async checkDeviceInfo() {
         await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-        this.emit('updateAccessPoints');
+        this.emit('checkDeviceInfo');
     };
 
     send(url, payload) {

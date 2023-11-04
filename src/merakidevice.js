@@ -3,6 +3,7 @@ const MerakiDb = require('./merakidb.js');
 const MerakiMr = require('./merakimr.js');
 const MerakiMs = require('./merakims.js');
 const EventEmitter = require('events');
+const CONSTANS = require('./constans.json');
 let Accessory, Characteristic, Service, Categories, UUID;
 
 class MerakiDevice extends EventEmitter {
@@ -37,21 +38,15 @@ class MerakiDevice extends EventEmitter {
         this.disableLogInfo = config.disableLogInfo || false;
         this.disableLogDeviceInfo = config.disableLogDeviceInfo || false;
 
-        //meraki url
-        this.organizationsIdUrl = `/organizations`;
-        this.networksIdUrl = `/organizations/${this.organizationId}/networks`;
-        this.networkUrl = `/networks/${this.networkId}`;
-        this.devicesUrl = `/organizations/${this.organizationId}/devices`;
-        this.dashboardClientsUrl = `/networks/${this.networkId}/clients`;
-        this.mrlianceUrl = `/networks/${this.networkId}/appliance/ports`;
-        this.wirelessUrl = `/networks/${this.networkId}/wireless/ssids`;
-
         //devices variables
         this.dbClientsCount = 0;
         this.mrSsidsCount = 0;
         this.msPortsCount = 0;
+        this.prepareDb = true;
+        this.prepareMr = true;
+        this.switchesArray = [];
+        this.switchesPrefixNamesArray = [];
 
-        //meraki dashboard
         if (this.dashboardClientsControl) {
             this.merakiDb = new MerakiDb({
                 host: this.host,
@@ -62,7 +57,18 @@ class MerakiDevice extends EventEmitter {
                 refreshInterval: this.refreshInterval,
             });
 
-            this.merakiDb.on('data', (confClientsPolicyName, confClientsPolicyType, clientsPolicyId, clientsPolicyMac, clientsPolicyPolicy, clientsPolicyState, clientsCount) => {
+            this.merakiDb.on('deviceInfo', (clientsCount) => {
+                //meraki info
+                if (!this.disableLogDeviceInfo) {
+                    this.emit('devInfo', `---- Dashboard ----`);
+                    this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
+                    this.emit('devInfo', `Network: ${this.name}`);
+                    this.emit('devInfo', `Network Id: ${this.networkId}`);
+                    this.emit('devInfo', `Organization Id: ${this.organizationId}`);
+                    this.emit('devInfo', `Exposed Clients Count: ${clientsCount}`);
+                    this.emit('devInfo', `----------------------------------`)
+                };
+            }).on('deviceState', async (confClientsPolicyName, confClientsPolicyType, clientsPolicyId, clientsPolicyMac, clientsPolicyPolicy, clientsPolicyState, clientsCount) => {
                 this.dbConfClientsPolicyName = confClientsPolicyName;
                 this.dbConfClientsPolicyType = confClientsPolicyType;
 
@@ -82,6 +88,17 @@ class MerakiDevice extends EventEmitter {
                         this.dbSensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
                     };
                 }
+
+                //start prepare accessory
+                if (this.prepareDb) {
+                    try {
+                        const accessory = await this.prepareAccessory(0, 'Dashboard', this.organizationId);
+                        this.emit('publishAccessory', accessory, 'Dashboard');
+                        this.prepareDb = false;
+                    } catch (error) {
+                        this.emit('error', `prepare dashboard accessory error: ${error}`);
+                    };
+                };
             })
                 .on('message', (message) => {
                     this.emit('message', message);
@@ -94,7 +111,6 @@ class MerakiDevice extends EventEmitter {
                 });
         };
 
-        //meraki mr
         if (this.accessPointsControl) {
             this.merakiMr = new MerakiMr({
                 host: this.host,
@@ -106,7 +122,18 @@ class MerakiDevice extends EventEmitter {
                 refreshInterval: this.refreshInterval,
             });
 
-            this.merakiMr.on('data', (mrSsidsNumber, mrSsidsName, mrSsidsState, mrSsidsCount) => {
+            this.merakiMr.on('deviceInfo', (ssidsCount) => {
+                //meraki info
+                if (!this.disableLogDeviceInfo) {
+                    this.emit('devInfo', `---- Access Point ----`);
+                    this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
+                    this.emit('devInfo', `Network: ${this.name}`);
+                    this.emit('devInfo', `Network Id: ${this.networkId}`);
+                    this.emit('devInfo', `Organization Id: ${this.organizationId}`);
+                    this.emit('devInfo', `Exposed SSIDs Count: ${ssidsCount}`);
+                    this.emit('devInfo', `----------------------------------`)
+                };
+            }).on('deviceState', async (mrSsidsNumber, mrSsidsName, mrSsidsState, mrSsidsCount) => {
                 this.mrSsidsNumber = mrSsidsNumber;
                 this.mrSsidsName = mrSsidsName;
                 this.mrSsidsState = mrSsidsState;
@@ -123,6 +150,17 @@ class MerakiDevice extends EventEmitter {
                         this.mrSensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
                     };
                 }
+
+                //start prepare accessory
+                if (this.prepareMr) {
+                    try {
+                        const accessory = await this.prepareAccessory(1, 'Access Point', this.networkId);
+                        this.emit('publishAccessory', accessory, 'Access Point');
+                        this.prepareMr = false;
+                    } catch (error) {
+                        this.emit('error', `prepare access point accessory error: ${error}`);
+                    };
+                };
             })
                 .on('message', (message) => {
                     this.emit('message', message);
@@ -133,9 +171,8 @@ class MerakiDevice extends EventEmitter {
                 .on('error', (error) => {
                     this.emit('error', error);
                 });
-        }
+        };
 
-        //meraki ms
         if (this.switchesControl) {
             this.merakiMs = new MerakiMs({
                 host: this.host,
@@ -145,7 +182,18 @@ class MerakiDevice extends EventEmitter {
                 refreshInterval: this.refreshInterval,
             });
 
-            this.merakiMs.on('data', (msPortsPrefixNames, msPortsSn, msPortsId, msPortsName, msPortsPrefix, msPortsState, msPortsPoeState, msPortsPoeControlEnable, msPortsSensorsEnable, msPortsCount) => {
+            this.merakiMs.on('deviceInfo', (prefixName, serialNumber, portsCount) => {
+                //meraki info
+                if (!this.disableLogDeviceInfo) {
+                    this.emit('devInfo', `---- ${prefixName}: ${serialNumber} ----`);
+                    this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
+                    this.emit('devInfo', `Network: ${this.name}`);
+                    this.emit('devInfo', `Network Id: ${this.networkId}`);
+                    this.emit('devInfo', `Organization Id: ${this.organizationId}`);
+                    this.emit('devInfo', `Exposed Ports Count: ${portsCount}`);
+                    this.emit('devInfo', `----------------------------------`)
+                };
+            }).on('deviceState', async (msPrefixName, msSerialNumber, msPortsPrefixNames, msPortsSn, msPortsId, msPortsName, msPortsPrefix, msPortsState, msPortsPoeState, msPortsPoeControlEnable, msPortsSensorsEnable, msPortsCount) => {
                 this.msPortsPrefixNames = msPortsPrefixNames;
                 this.msPortsSn = msPortsSn;
                 this.msPortsId = msPortsId;
@@ -168,6 +216,18 @@ class MerakiDevice extends EventEmitter {
                         this.msSensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
                     };
                 };
+
+                //start prepare accessory
+                if (!this.switchesArray.includes(msSerialNumber)) {
+                    try {
+                        const accessory = await this.prepareAccessory(2, msPrefixName, msSerialNumber);
+                        this.emit('publishAccessory', accessory, msPrefixName);
+                    } catch (error) {
+                        this.emit('error', `prepare ${msPrefixName} accessory error: ${error}`);
+                    };
+                    this.switchesArray.push(msSerialNumber);
+                    this.switchesPrefixNamesArray.push(msPrefixName);
+                }
             })
                 .on('message', (message) => {
                     this.emit('message', message);
@@ -179,45 +239,16 @@ class MerakiDevice extends EventEmitter {
                     this.emit('error', error);
                 });
         };
-
-        this.start();
-    };
-
-    async start() {
-        try {
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            if (this.dbClientsCount === 0 && this.mrSsidsCount == 0 && this.msPortsCount === 0) {
-                this.emit('message', `not found configured devices.`);
-                this.start();
-                return;
-            };
-
-            //meraki info
-            if (!this.disableLogDeviceInfo) {
-                this.emit('devInfo', `-------- ${this.name} --------`);
-                this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                this.emit('devInfo', `Network: ${this.name}`);
-                this.emit('devInfo', `Network Id: ${this.networkId}`);
-                this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                this.emit('devInfo', `----------------------------------`)
-            };
-
-            //prepare accessory
-            const accessory = await this.prepareAccessory();
-            this.emit('publishAccessory', accessory)
-        } catch (error) {
-            this.emit('error', `prepare accessory error: ${error}.`);
-        };
     };
 
     //Prepare accessory
-    prepareAccessory() {
+    prepareAccessory(deviceType, deviceName, accessoryUuid) {
         return new Promise((resolve, reject) => {
             try {
                 //prepare accessory
                 const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare accessory`);
-                const accessoryName = this.name;
-                const accessoryUUID = UUID.generate(this.networkId);
+                const accessoryName = deviceName;
+                const accessoryUUID = UUID.generate(accessoryUuid);
                 const accessoryCategory = Categories.AIRPORT;
                 const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
@@ -234,185 +265,187 @@ class MerakiDevice extends EventEmitter {
                 const mrExposedSsidsCount = this.mrSsidsCount;
                 const msExposedPortsCount = this.msPortsCount;
 
-                //meraki db
-                if (this.dashboardClientsControl && dbExposedClientsCount > 0) {
-                    const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki db service`);
+                //meraki device
+                switch (deviceType) {
+                    case 0: //dashboard clients
+                        const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki db service`);
 
-                    this.dbServices = [];
-                    for (let i = 0; i < dbExposedClientsCount; i++) {
-                        const dbClientName = this.dbConfClientsPolicyName[i];
-                        const dbServiceName = this.dashboardClientsPrefixForClientName ? `C.${dbClientName}` : dbClientName;
-                        const dbClientPolicyService = new Service.Outlet(dbServiceName, `dbClientPolicyService${i}`);
-                        dbClientPolicyService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        dbClientPolicyService.setCharacteristic(Characteristic.ConfiguredName, `${dbServiceName}`);
-                        dbClientPolicyService.getCharacteristic(Characteristic.On)
-                            .onGet(async () => {
-                                const state = this.dbClientsPolicyState[i];
-                                const policy = state ? this.dbClientsPolicyPolicy[i] : 'Blocked';
-                                const logInfo = this.disableLogInfo ? false : this.emit('message', `Client: % ${dbClientName}, Policy: ${policy}`);
-                                return state;
-                            })
-                            .onSet(async (state) => {
-                                try {
-                                    const policy = state ? this.dbConfClientsPolicyType[i] : 'Blocked';
-                                    const policyUrl = `${this.dashboardClientsUrl}/${this.dbClientsPolicyId[i]}/policy`;
-                                    const policyData = {
-                                        'devicePolicy': policy
-                                    }
-                                    await this.merakiDb.send(policyUrl, policyData);
-                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `Client: % ${dbClientName}, Policy: ${policy}`);
-                                } catch (error) {
-                                    this.emit('error', `Client: ${dbClientName}, set Policy error: ${error}`);
-                                }
-                            });
-
-                        this.dbServices.push(dbClientPolicyService);
-                        accessory.addService(this.dbServices[i]);
-                    };
-
-                    if (this.dashboardClientsSensor) {
-                        const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki db sensor service`);
-
-                        this.dbSensorServices = [];
-                        for (let i = 0; i < mrExposedSsidsCount; i++) {
+                        this.dbServices = [];
+                        for (let i = 0; i < dbExposedClientsCount; i++) {
                             const dbClientName = this.dbConfClientsPolicyName[i];
-                            const dbSensorServiceName = this.dashboardClientsPrefixForClientName ? `Sensor C.${dbClientName}` : `Sensor ${dbClientName}`;
-                            const dbSensorService = new Service.ContactSensor(dbSensorServiceName, `Client Sensor${i}`);
-                            dbSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                            dbSensorService.setCharacteristic(Characteristic.ConfiguredName, `${dbSensorServiceName}`);
-                            dbSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                            const dbServiceName = this.dashboardClientsPrefixForClientName ? `C.${dbClientName}` : dbClientName;
+                            const dbClientPolicyService = new Service.Outlet(dbServiceName, `dbClientPolicyService${i}`);
+                            dbClientPolicyService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                            dbClientPolicyService.setCharacteristic(Characteristic.ConfiguredName, `${dbServiceName}`);
+                            dbClientPolicyService.getCharacteristic(Characteristic.On)
                                 .onGet(async () => {
                                     const state = this.dbClientsPolicyState[i];
+                                    const policy = state ? this.dbClientsPolicyPolicy[i] : 'Blocked';
+                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `Client: % ${dbClientName}, Policy: ${policy}`);
                                     return state;
+                                })
+                                .onSet(async (state) => {
+                                    try {
+                                        const policy = state ? this.dbConfClientsPolicyType[i] : 'Blocked';
+                                        const policyUrl = `${CONSTANS.ApiUrls.DbClients.replace('networkId', this.networkId)}/${this.dbClientsPolicyId[i]}/policy`;
+                                        const policyData = {
+                                            'devicePolicy': policy
+                                        }
+                                        await this.merakiDb.send(policyUrl, policyData);
+                                        const logInfo = this.disableLogInfo ? false : this.emit('message', `Client: % ${dbClientName}, Policy: ${policy}`);
+                                    } catch (error) {
+                                        this.emit('error', `Client: ${dbClientName}, set Policy error: ${error}`);
+                                    }
                                 });
 
-                            this.dbSensorServices.push(dbSensorService);
-                            accessory.addService(this.dbSensorServices[i]);
+                            this.dbServices.push(dbClientPolicyService);
+                            accessory.addService(this.dbServices[i]);
                         };
-                    };
-                };
 
-                //meraki mr
-                if (this.accessPointsControl && mrExposedSsidsCount > 0) {
-                    const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki mr service`);
+                        if (this.dashboardClientsSensor) {
+                            const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki db sensor service`);
 
-                    this.mrServices = [];
-                    for (let i = 0; i < mrExposedSsidsCount; i++) {
-                        const ssidName = this.mrSsidsName[i];
-                        const mrServiceName = this.accessPointsPrefixForSsidsName ? `W.${ssidName}` : ssidName;
-                        const mrService = new Service.Outlet(mrServiceName, `mrService${i}`);
-                        mrService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        mrService.setCharacteristic(Characteristic.ConfiguredName, `${mrServiceName}`);
-                        mrService.getCharacteristic(Characteristic.On)
-                            .onGet(async () => {
-                                const state = this.mrSsidsState[i] ?? false;
-                                const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
-                                return state;
-                            })
-                            .onSet(async (state) => {
-                                try {
-                                    state = state ? true : false;
-                                    const mrUrl = `${this.wirelessUrl}/${this.mrSsidsNumber[i]}`;
-                                    const mrData = {
-                                        'enabled': state
-                                    };
-                                    await this.merakiMr.send(mrUrl, mrData);
-                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
-                                } catch (error) {
-                                    this.emit('error', `SSID: ${ssidName}, set state error: ${error}`);
-                                }
-                            });
-
-                        this.mrServices.push(mrService);
-                        accessory.addService(this.mrServices[i]);
-                    };
-
-                    if (this.accessPointsSsidsSensor) {
-                        const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki mr sensor service`);
-
-                        this.mrSensorServices = [];
-                        for (let i = 0; i < mrExposedSsidsCount; i++) {
-                            const ssidName = this.mrSsidsName[i];
-                            const mrSensorServiceName = this.accessPointsPrefixForSsidsName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
-                            const mrSensorService = new Service.ContactSensor(mrSensorServiceName, `Ssid Sensor${i}`);
-                            mrSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                            mrSensorService.setCharacteristic(Characteristic.ConfiguredName, `${mrSensorServiceName}`);
-                            mrSensorService.getCharacteristic(Characteristic.ContactSensorState)
-                                .onGet(async () => {
-                                    const state = this.mrSsidsState[i];
-                                    return state;
-                                });
-                            this.mrSensorServices.push(mrSensorService);
-                            accessory.addService(this.mrSensorServices[i]);
-                        };
-                    };
-                };
-
-                //meraki ms
-                if (this.switchesControl && msExposedPortsCount > 0) {
-                    const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki ms service`);
-
-                    this.msServices = [];
-                    for (let i = 0; i < msExposedPortsCount; i++) {
-                        const msPortPrefixName = this.msPortsPrefixNames[i];
-                        const msPortName = this.msPortsName[i];
-                        const msPortsPoeControlEnable = this.msPortsPoeControlEnable[i];
-                        const msServiceName = this.msPortsPrefix[i] ? `${this.msPortsId[i]}.${msPortName}` : msPortName;
-                        const msService = new Service.Outlet(msServiceName, `msService${i}`);
-                        msService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        msService.setCharacteristic(Characteristic.ConfiguredName, `${msServiceName}`);
-                        msService.getCharacteristic(Characteristic.On)
-                            .onGet(async () => {
-                                const state = this.msPortsState[i] ?? false;
-                                const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${this.msPortsId[i]}, Name: ${msPortName}, state: ${state ? 'Enabled' : 'Disabled'}`);
-                                return state;
-                            })
-                            .onSet(async (state) => {
-                                try {
-                                    state = state ? true : false;
-                                    const switchPortUrl = `/devices/${this.msPortsSn[i]}/switch/ports/${this.msPortsId[i]}`;
-                                    const switchPortData = msPortsPoeControlEnable ? {
-                                        'enabled': state,
-                                        'poeEnabled': state
-                                    } : {
-                                        'enabled': state
-                                    };
-                                    await this.merakiMs.send(switchPortUrl, switchPortData);
-                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${this.msPortsId[i]}, Name: ${msPortName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
-                                } catch (error) {
-                                    this.emit('error', `Port: ${this.msPortsId[i]}, Name: ${msPortName}, set state error: %${error}`);
-                                }
-                            });
-
-                        this.msServices.push(msService);
-                        accessory.addService(this.msServices[i]);
-                    };
-
-                    const sensorEnabled = this.msPortsSensorsEnable.includes(true);
-                    if (sensorEnabled) {
-                        const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki ms sensor service`);
-
-                        this.msSensorServices = [];
-                        for (let i = 0; i < msExposedPortsCount; i++) {
-                            if (this.msPortsSensorsEnable[i]) {
-                                const msPortName = this.msPortsName[i];
-                                const msSensorServiceName = this.msPortsPrefix[i] ? `Sensor ${this.msPortsId[i]}.${msPortName}` : `Sensor ${msPortName}`;
-                                const msSensorService = new Service.ContactSensor(msSensorServiceName, `Port Sensor${i}`);
-                                msSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                msSensorService.setCharacteristic(Characteristic.ConfiguredName, `${msSensorServiceName}`);
-                                msSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                            this.dbSensorServices = [];
+                            for (let i = 0; i < mrExposedSsidsCount; i++) {
+                                const dbClientName = this.dbConfClientsPolicyName[i];
+                                const dbSensorServiceName = this.dashboardClientsPrefixForClientName ? `Sensor C.${dbClientName}` : `Sensor ${dbClientName}`;
+                                const dbSensorService = new Service.ContactSensor(dbSensorServiceName, `Client Sensor${i}`);
+                                dbSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                dbSensorService.setCharacteristic(Characteristic.ConfiguredName, `${dbSensorServiceName}`);
+                                dbSensorService.getCharacteristic(Characteristic.ContactSensorState)
                                     .onGet(async () => {
-                                        const state = this.msPortsState[i];
+                                        const state = this.dbClientsPolicyState[i];
                                         return state;
                                     });
-                                this.msSensorServices.push(msSensorService);
-                                accessory.addService(this.msSensorServices[i]);
+
+                                this.dbSensorServices.push(dbSensorService);
+                                accessory.addService(this.dbSensorServices[i]);
                             };
                         };
-                    };
-                };
 
-                resolve(accessory);
+                        resolve(accessory);
+                        break;
+                    case 1: //access points
+                        const debug1 = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki mr service`);
+
+                        this.mrServices = [];
+                        for (let i = 0; i < mrExposedSsidsCount; i++) {
+                            const ssidName = this.mrSsidsName[i];
+                            const mrServiceName = this.accessPointsPrefixForSsidsName ? `W.${ssidName}` : ssidName;
+                            const mrService = new Service.Outlet(mrServiceName, `mrService${i}`);
+                            mrService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                            mrService.setCharacteristic(Characteristic.ConfiguredName, `${mrServiceName}`);
+                            mrService.getCharacteristic(Characteristic.On)
+                                .onGet(async () => {
+                                    const state = this.mrSsidsState[i] ?? false;
+                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
+                                    return state;
+                                })
+                                .onSet(async (state) => {
+                                    try {
+                                        state = state ? true : false;
+                                        const mrUrl = `${CONSTANS.ApiUrls.MrSsids.replace('networkId', this.networkId)}/${this.mrSsidsNumber[i]}`;
+                                        const mrData = {
+                                            'enabled': state
+                                        };
+                                        await this.merakiMr.send(mrUrl, mrData);
+                                        const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                                    } catch (error) {
+                                        this.emit('error', `SSID: ${ssidName}, set state error: ${error}`);
+                                    }
+                                });
+
+                            this.mrServices.push(mrService);
+                            accessory.addService(this.mrServices[i]);
+                        };
+
+                        if (this.accessPointsSsidsSensor) {
+                            const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki mr sensor service`);
+
+                            this.mrSensorServices = [];
+                            for (let i = 0; i < mrExposedSsidsCount; i++) {
+                                const ssidName = this.mrSsidsName[i];
+                                const mrSensorServiceName = this.accessPointsPrefixForSsidsName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
+                                const mrSensorService = new Service.ContactSensor(mrSensorServiceName, `Ssid Sensor${i}`);
+                                mrSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                mrSensorService.setCharacteristic(Characteristic.ConfiguredName, `${mrSensorServiceName}`);
+                                mrSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                                    .onGet(async () => {
+                                        const state = this.mrSsidsState[i];
+                                        return state;
+                                    });
+                                this.mrSensorServices.push(mrSensorService);
+                                accessory.addService(this.mrSensorServices[i]);
+                            };
+                        };
+
+                        resolve(accessory);
+                        break;
+                    case 2: ///switches
+                        const debug2 = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki ms service`);
+
+                        this.msServices = [];
+                        for (let i = 0; i < msExposedPortsCount; i++) {
+                            const msPortPrefixName = this.msPortsPrefixNames[i];
+                            const msPortName = this.msPortsName[i];
+                            const msPortsPoeControlEnable = this.msPortsPoeControlEnable[i];
+                            const msServiceName = this.msPortsPrefix[i] ? `${this.msPortsId[i]}.${msPortName}` : msPortName;
+                            const msService = new Service.Outlet(msServiceName, `msService${i}`);
+                            msService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                            msService.setCharacteristic(Characteristic.ConfiguredName, `${msServiceName}`);
+                            msService.getCharacteristic(Characteristic.On)
+                                .onGet(async () => {
+                                    const state = this.msPortsState[i] ?? false;
+                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${this.msPortsId[i]}, Name: ${msPortName}, state: ${state ? 'Enabled' : 'Disabled'}`);
+                                    return state;
+                                })
+                                .onSet(async (state) => {
+                                    try {
+                                        state = state ? true : false;
+                                        const switchPortUrl = `/devices/${this.msPortsSn[i]}/switch/ports/${this.msPortsId[i]}`;
+                                        const switchPortData = msPortsPoeControlEnable ? {
+                                            'enabled': state,
+                                            'poeEnabled': state
+                                        } : {
+                                            'enabled': state
+                                        };
+                                        await this.merakiMs.send(switchPortUrl, switchPortData);
+                                        const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${this.msPortsId[i]}, Name: ${msPortName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                                    } catch (error) {
+                                        this.emit('error', `Port: ${this.msPortsId[i]}, Name: ${msPortName}, set state error: %${error}`);
+                                    }
+                                });
+
+                            this.msServices.push(msService);
+                            accessory.addService(this.msServices[i]);
+                        };
+
+                        const sensorEnabled = this.msPortsSensorsEnable.includes(true);
+                        if (sensorEnabled) {
+                            const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki ms sensor service`);
+
+                            this.msSensorServices = [];
+                            for (let i = 0; i < msExposedPortsCount; i++) {
+                                if (this.msPortsSensorsEnable[i]) {
+                                    const msPortName = this.msPortsName[i];
+                                    const msSensorServiceName = this.msPortsPrefix[i] ? `Sensor ${this.msPortsId[i]}.${msPortName}` : `Sensor ${msPortName}`;
+                                    const msSensorService = new Service.ContactSensor(msSensorServiceName, `Port Sensor${i}`);
+                                    msSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    msSensorService.setCharacteristic(Characteristic.ConfiguredName, `${msSensorServiceName}`);
+                                    msSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                                        .onGet(async () => {
+                                            const state = this.msPortsState[i];
+                                            return state;
+                                        });
+                                    this.msSensorServices.push(msSensorService);
+                                    accessory.addService(this.msSensorServices[i]);
+                                };
+                            };
+                        };
+
+                        resolve(accessory);
+                        break;
+                }
             } catch (error) {
                 reject(error);
             };

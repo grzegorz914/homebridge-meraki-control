@@ -20,30 +20,32 @@ class MerakiPlatform {
     };
 
     api.on('didFinishLaunching', () => {
-      for (const device of config.devices) {
-        if (!device.name || !device.apiKey || !device.organizationId || !device.networkId) {
-          log.warn('Network name, api key, organization Id or network Id missing');
+      for (const account of config.devices) {
+        if (!account.name || !account.apiKey || !account.organizationId || !account.networkId) {
+          log.warn(`Name: ${account.name ? 'OK' : account.name}, api key: ${account.apiKey ? 'OK' : account.apiKey}, organization Id: ${account.organizationId ? 'OK' : account.organizationId}, network Id: ${account.networkId ? 'OK' : account.networkId} in config missing.`);
           return;
         }
-        const debug = device.enableDebugMode ? log(`Network: ${device.name}, did finish launching.`) : false;
+        const debug = account.enableDebugMode ? log(`Network: ${account.name}, did finish launching.`) : false;
 
-        //meraki device
-        const merakiDevice = new MerakiDevice(api, device);
-        merakiDevice.on('publishAccessory', (accessory) => {
+        //meraki account
+        const merakiDevice = new MerakiDevice(api, account);
+        merakiDevice.on('publishAccessory', (accessory, accessoryName) => {
+
+          //publish devices
           api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
-          const debug = device.enableDebugMode ? log(`Network: ${device.name}, published as external accessory.`) : false;
+          const debug = account.enableDebugMode ? log(`Network: ${account.name}, ${accessoryName}, published as external accessory.`) : false;
         })
           .on('devInfo', (devInfo) => {
             log(devInfo);
           })
           .on('message', (message) => {
-            log(`Network: ${device.name}, ${message}`);
+            log(`Network: ${account.name}, ${message}`);
           })
           .on('debug', (debug) => {
-            log(`Network: ${device.name}, debug: ${debug}`);
+            log(`Network: ${account.name}, debug: ${debug}`);
           })
           .on('error', (error) => {
-            log.error(`Network: ${device.name}, ${error}`);
+            log.error(`Network: ${account.name}, ${error}`);
           });
       }
     });

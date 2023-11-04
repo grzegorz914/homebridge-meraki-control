@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Warning!!! - After update to v1.0.0 and above all automations and scene will not work and the accessory and to be added to the HomeKit again.
+
+## [1.0.0] - (04.11.2023)
+## Changes
+- publish Dashboard, Access Points, Switches as a separate dynamic accessory in HomeKit
+- code refactor
+- bump dependencies
+- config.schema updated
+- cleanup
+
 ## [0.18.0] - (31.10.2023)
 ## Changes
 - added POE ports control paralle with port
