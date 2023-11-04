@@ -13,6 +13,7 @@ class MerakiDb extends EventEmitter {
         const clientsPolicy = config.clientsPolicy;
         const debugLog = config.debugLog;
         this.refreshInterval = config.refreshInterval;
+        this.prepareDb = true;
 
         const baseUrl = (`${host}${CONSTANS.ApiUrls.Base}`);
         const dashboardClientsUrl = CONSTANS.ApiUrls.DbClients.replace('networkId', networkId);
@@ -31,7 +32,7 @@ class MerakiDb extends EventEmitter {
         });
 
         this.on('updateDashboardClients', async () => {
-            const debug = debugLog ? this.emit('debug', `requesting dashboard clients data.`) : false;
+            const debug = debugLog ? this.emit('debug', `dashboard requesting clients data.`) : false;
             try {
                 const clientsData = await this.axiosInstance.get(`${dashboardClientsUrl}?perPage=255&timespan=2592000`);
                 const debug = debugLog ? this.emit('debug', `dashboard clients data: ${JSON.stringify(clientsData.data, null, 2)}`) : false;
@@ -52,7 +53,7 @@ class MerakiDb extends EventEmitter {
 
                 //exposed existings and configured clients
                 const clientsPolicyCount = clientsPolicy.length;
-                const debug1 = debugLog ? this.emit('debug', `found clients policy count: ${clientsPolicyCount}`) : false;
+                const debug1 = debugLog ? this.emit('debug', `dashboard found: ${clientsPolicyCount} clients policy.`) : false;
 
                 if (clientsPolicyCount === 0) {
                     return;
@@ -81,7 +82,7 @@ class MerakiDb extends EventEmitter {
                 };
 
                 const exposedAndExistingClientsCount = exposedAndExistingClients.length;
-                const debug2 = debugLog ? this.emit('debug', `found exposed and existing clients count: ${clientsPolicyCount}`) : false;
+                const debug2 = debugLog ? this.emit('debug', `dashboard found: ${clientsPolicyCount} exposed and existing clients.`) : false;
 
                 if (exposedAndExistingClientsCount === 0) {
                     return;
@@ -94,7 +95,7 @@ class MerakiDb extends EventEmitter {
             };
         })
             .on('updateDashboardClientsPolicy', async (exposedAndExistingClients) => {
-                const debug = debugLog ? this.emit('debug', `requesting dashboard clients policy data.`) : false;
+                const debug = debugLog ? this.emit('debug', `dashboard requesting clients policy data.`) : false;
                 try {
                     const confClientsPolicyName = [];
                     const confClientsPolicyType = [];
@@ -125,14 +126,15 @@ class MerakiDb extends EventEmitter {
 
                     //configured clients policy
                     const clientsCount = clientsPolicyState.length;
-                    const debug = debugLog ? this.emit('debug', `found dashboard clients count: ${clientsCount}`) : false;
+                    const debug = debugLog ? this.emit('debug', `dashboard found: ${clientsCount} exposed clients.`) : false;
 
                     if (clientsCount === 0) {
                         return;
                     };
 
-                    this.emit('deviceInfo', clientsCount);
-                    this.emit('deviceState', confClientsPolicyName, confClientsPolicyType, clientsPolicyId, clientsPolicyMac, clientsPolicyPolicy, clientsPolicyState, clientsCount);
+                    const emitDeviceInfo = this.prepareDb ? this.emit('deviceInfo', clientsCount) : false;
+                    this.emit('deviceState', confClientsPolicyName, confClientsPolicyType, clientsPolicyId, clientsPolicyMac, clientsPolicyPolicy, clientsPolicyState, clientsCount, this.prepareDb);
+                    this.prepareDb = false;
                     this.updateDashboardClients();
                 } catch (error) {
                     this.emit('error', `dashboard client policy data error: ${error}.`);

@@ -29,11 +29,11 @@ class MerakiPlatform {
 
         //meraki account
         const merakiDevice = new MerakiDevice(api, account);
-        merakiDevice.on('publishAccessory', (accessory) => {
+        merakiDevice.on('publishAccessory', (accessory, accessoryName) => {
 
           //publish devices
           api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
-          const debug = account.enableDebugMode ? log(`Network: ${account.name}, published as external accessory.`) : false;
+          const debug = account.enableDebugMode ? log(`Network: ${account.name}, ${accessoryName}, published as external accessory.`) : false;
         })
           .on('devInfo', (devInfo) => {
             log(devInfo);

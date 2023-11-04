@@ -42,6 +42,10 @@ class MerakiDevice extends EventEmitter {
         this.dbClientsCount = 0;
         this.mrSsidsCount = 0;
         this.msPortsCount = 0;
+        this.prepareDb = true;
+        this.prepareMr = true;
+        this.switchesArray = [];
+        this.switchesPrefixNamesArray = [];
 
         if (this.dashboardClientsControl) {
             this.merakiDb = new MerakiDb({
@@ -86,24 +90,24 @@ class MerakiDevice extends EventEmitter {
                 }
 
                 //start prepare accessory
-                if (this.startPrepareAccessory && this.dashboardClientsControl && clientsCount > 0) {
+                if (this.prepareDb && this.dashboardClientsControl && clientsCount > 0) {
                     try {
                         const accessory = await this.prepareAccessory(0, 'Dashboard', this.organizationId);
-                        this.emit('publishAccessory', accessory);
-                        this.startPrepareAccessory = false;
+                        this.emit('publishAccessory', accessory, 'Dashboard');
+                        this.prepareDb = false;
                     } catch (error) {
                         this.emit('error', `prepare accessory error: ${error}`);
                     };
                 };
             })
                 .on('message', (message) => {
-                    this.emit('message', `Dashboard, ${message}.`);
+                    this.emit('message', message);
                 })
                 .on('debug', (debug) => {
-                    this.emit('debug', `Dashboard, ${debug}.`);
+                    this.emit('debug', debug);
                 })
                 .on('error', (error) => {
-                    this.emit('error', `Dashboard, ${error}.`);
+                    this.emit('error', error);
                 });
         };
 
@@ -148,24 +152,24 @@ class MerakiDevice extends EventEmitter {
                 }
 
                 //start prepare accessory
-                if (this.startPrepareAccessory && this.accessPointsControl && mrSsidsCount > 0) {
+                if (this.prepareMr && this.accessPointsControl && mrSsidsCount > 0) {
                     try {
                         const accessory = await this.prepareAccessory(1, 'Access Point', this.networkId);
-                        this.emit('publishAccessory', accessory);
-                        this.startPrepareAccessory = false;
+                        this.emit('publishAccessory', accessory, 'Access Point');
+                        this.prepareMr = false;
                     } catch (error) {
                         this.emit('error', `prepare accessory error: ${error}`);
                     };
                 };
             })
                 .on('message', (message) => {
-                    this.emit('message', `Access Point, ${message}.`);
+                    this.emit('message', message);
                 })
                 .on('debug', (debug) => {
-                    this.emit('debug', `Access Point, ${debug}.`);
+                    this.emit('debug', debug);
                 })
                 .on('error', (error) => {
-                    this.emit('error', `Access Point, ${error}.`);
+                    this.emit('error', error);
                 });
         };
 
@@ -188,9 +192,8 @@ class MerakiDevice extends EventEmitter {
                     this.emit('devInfo', `Organization Id: ${this.organizationId}`);
                     this.emit('devInfo', `Exposed Ports Count: ${portsCount}`);
                     this.emit('devInfo', `----------------------------------`)
-                    this.prefixName = prefixName;
                 };
-            }).on('deviceState', async (msSerialNumber, msPortsPrefixNames, msPortsSn, msPortsId, msPortsName, msPortsPrefix, msPortsState, msPortsPoeState, msPortsPoeControlEnable, msPortsSensorsEnable, msPortsCount) => {
+            }).on('deviceState', async (msPrefixName, msSerialNumber, msPortsPrefixNames, msPortsSn, msPortsId, msPortsName, msPortsPrefix, msPortsState, msPortsPoeState, msPortsPoeControlEnable, msPortsSensorsEnable, msPortsCount) => {
                 this.msPortsPrefixNames = msPortsPrefixNames;
                 this.msPortsSn = msPortsSn;
                 this.msPortsId = msPortsId;
@@ -215,24 +218,27 @@ class MerakiDevice extends EventEmitter {
                 };
 
                 //start prepare accessory
-                if (this.startPrepareAccessory && this.switchesControl && msPortsCount > 0) {
-                    try {
-                        const accessory = await this.prepareAccessory(2, msSerialNumber);
-                        this.emit('publishAccessory', accessory);
-                        this.startPrepareAccessory = false;
-                    } catch (error) {
-                        this.emit('error', `prepare accessory error: ${error}`);
+                if (!this.switchesArray.includes(msSerialNumber)) {
+                    if (this.switchesControl && msPortsCount > 0) {
+                        try {
+                            const accessory = await this.prepareAccessory(2, msPrefixName, msSerialNumber);
+                            this.emit('publishAccessory', accessory, msPrefixName);
+                        } catch (error) {
+                            this.emit('error', `prepare accessory error: ${error}`);
+                        };
                     };
-                };
+                    this.switchesArray.push(msSerialNumber);
+                    this.switchesPrefixNamesArray.push(msPrefixName);
+                }
             })
                 .on('message', (message) => {
-                    this.emit('message', `Switch ${this.prefixName}, ${message}.`);
+                    this.emit('message', message);
                 })
                 .on('debug', (debug) => {
-                    this.emit('debug', `Switch ${this.prefixName}, ${debug}.`);
+                    this.emit('debug', debug);
                 })
                 .on('error', (error) => {
-                    this.emit('error', `Switch ${this.prefixName}, ${error}.`);
+                    this.emit('error', error);
                 });
         };
     };

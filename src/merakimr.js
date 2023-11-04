@@ -14,6 +14,7 @@ class MerakiMr extends EventEmitter {
         const hideSsidsName = config.hideSsidsName;
         const debugLog = config.debugLog;
         this.refreshInterval = config.refreshInterval;
+        this.prepareMr = true;
 
         const baseUrl = (`${host}${CONSTANS.ApiUrls.Base}`);
         const wirelessUrl = CONSTANS.ApiUrls.MrSsids.replace('networkId', networkId);
@@ -40,6 +41,7 @@ class MerakiMr extends EventEmitter {
         };
 
         this.on('checkDeviceInfo', async () => {
+            const debug = debugLog ? this.emit('debug', `access points requesting data.`) : false;
             try {
                 //ap ssids states
                 const ssidsData = await this.axiosInstance.get(wirelessUrl);
@@ -48,11 +50,11 @@ class MerakiMr extends EventEmitter {
                 //check device state
                 this.emit('checkDeviceState', ssidsData);
             } catch (error) {
-                this.emit('error', `check info, ${error}.`);
+                this.emit('error', `access points check device info, ${error}.`);
                 this.checkDeviceInfo();
             };
         }).on('checkDeviceState', async (ssidsData) => {
-            const debug = debugLog ? this.emit('debug', `requesting switches data.`) : false;
+            const debug = debugLog ? this.emit('debug', `access points requesting SSIDs state.`) : false;
             try {
                 const ssidsNumber = [];
                 const ssidsName = [];
@@ -76,18 +78,19 @@ class MerakiMr extends EventEmitter {
                 };
 
                 const ssidsCount = ssidsState.length;
-                const debug1 = debugLog ? this.emit('debug', `found ssids count: ${ssidsCount}`) : false;
+                const debug1 = debugLog ? this.emit('debug', `access points found: ${ssidsCount} exposed SSIDs.`) : false;
 
                 if (ssidsCount === 0) {
                     return;
                 }
 
                 //emit device info
-                this.emit('deviceInfo', ssidsCount);
-                this.emit('deviceState', ssidsNumber, ssidsName, ssidsState, ssidsCount);
+                const emitDeviceInfo = this.prepareMr ? this.emit('deviceInfo', ssidsCount) : false;
+                this.emit('deviceState', ssidsNumber, ssidsName, ssidsState, ssidsCount, this.prepareMr);
+                this.prepareMr = false;
                 this.updateAccessPoints();
             } catch (error) {
-                this.emit('error', `check device state error, ${error}.`);
+                this.emit('error', `access points check device state error, ${error}.`);
                 this.checkDeviceInfo();
             };
         });

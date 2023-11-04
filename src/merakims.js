@@ -29,12 +29,13 @@ class MerakiMs extends EventEmitter {
         });
 
         const swCount = switches.length;
-        const debug = debugLog ? this.emit('debug', `found configured switches count: ${swCount}`) : false;
+        const debug = debugLog ? this.emit('debug', `found: ${swCount} configured switch(es).`) : false;
 
         if (swCount === 0) {
             return;
         }
 
+        const switchesArray = [];
         const swNames = [];
         const swSerialsNumber = [];
         const swHideUplinksPort = [];
@@ -70,7 +71,7 @@ class MerakiMs extends EventEmitter {
         };
 
         this.on('checkDeviceInfo', async () => {
-            const debug = debugLog ? this.emit('debug', `requesting switch data.`) : false;
+            const debug = debugLog ? this.emit('debug', `requesting data.`) : false;
             try {
                 const enabledSwCount = swSerialsNumber.length;
                 for (let i = 0; i < enabledSwCount; i++) {
@@ -83,7 +84,7 @@ class MerakiMs extends EventEmitter {
 
                     const portsUrl = CONSTANS.ApiUrls.MsPorts.replace('serialNumber', serialNumber);
                     const swData = await this.axiosInstance.get(portsUrl);
-                    const debug = debugLog ? this.emit('debug', `switch data: ${JSON.stringify(swData.data, null, 2)}`) : false;
+                    const debug = debugLog ? this.emit('debug', `${prefixName}, data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 
                     //check device state
                     this.emit('checkDeviceState', swData, prefixName, serialNumber, hideUplinks, prefixForPortName, enablePoePortsControl, enableSensorPorts);
@@ -94,7 +95,7 @@ class MerakiMs extends EventEmitter {
                 this.checkDeviceInfo();
             };
         }).on('checkDeviceState', async (swData, prefixName, serialNumber, hideUplinks, prefixForPortName, enablePoePortsControl, enableSensorPorts) => {
-            const debug = debugLog ? this.emit('debug', `requesting switch ports state.`) : false;
+            const debug = debugLog ? this.emit('debug', `requesting ports state.`) : false;
             try {
                 const portsPrefixNames = [];
                 const portsSn = [];
@@ -128,17 +129,20 @@ class MerakiMs extends EventEmitter {
                     }
                 };
                 const portsCount = portsState.length;
-                const debug = debugLog ? this.emit('debug', `found configured ports count: ${portsCount}`) : false;
+                const debug = debugLog ? this.emit('debug', `${prefixName}, found: ${portsCount} exposed ports.`) : false;
 
                 if (portsCount === 0) {
                     return;
                 }
 
-                //emit device info
-                this.emit('deviceInfo', prefixName, serialNumber, portsCount);
+                //emit device info if not in devices array
+                if (!switchesArray.includes(serialNumber)) {
+                    this.emit('deviceInfo', prefixName, serialNumber, portsCount);
+                    switchesArray.push(serialNumber);
+                }
 
                 //emit device state
-                this.emit('deviceState', serialNumber, portsPrefixNames, portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsPoeControlEnable, portsSensorsEnable, portsCount);
+                this.emit('deviceState', prefixName, serialNumber, portsPrefixNames, portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsPoeControlEnable, portsSensorsEnable, portsCount);
                 this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `check device state error, ${error}.`);
