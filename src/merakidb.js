@@ -14,8 +14,8 @@ class MerakiDb extends EventEmitter {
         const debugLog = config.debugLog;
         this.refreshInterval = config.refreshInterval;
 
-        const baseUrl = (`${host}${CONSTANS.ApiUrls.BaseUrl}`);
-        const dashboardClientsUrl = `/networks/${networkId}/clients`;
+        const baseUrl = (`${host}${CONSTANS.ApiUrls.Base}`);
+        const dashboardClientsUrl = CONSTANS.ApiUrls.DbClients.replace('networkId', networkId);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             headers: {

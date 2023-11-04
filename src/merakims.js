@@ -13,7 +13,7 @@ class MerakiMs extends EventEmitter {
         const debugLog = config.debugLog;
         this.refreshInterval = config.refreshInterval;
 
-        const baseUrl = (`${host}${CONSTANS.ApiUrls.BaseUrl}`);
+        const baseUrl = (`${host}${CONSTANS.ApiUrls.Base}`);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             headers: {
@@ -81,7 +81,7 @@ class MerakiMs extends EventEmitter {
                     const enablePoePortsControl = swPoePortsControlEnabled[i];
                     const enableSensorPorts = swPortsSensorEnabled[i];
 
-                    const portsUrl = `/devices/${serialNumber}/switch/ports`;
+                    const portsUrl = CONSTANS.ApiUrls.MsPorts.replace('serialNumber', serialNumber);
                     const swData = await this.axiosInstance.get(portsUrl);
                     const debug = debugLog ? this.emit('debug', `switch data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 

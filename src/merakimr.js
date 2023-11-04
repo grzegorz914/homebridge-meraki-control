@@ -15,8 +15,8 @@ class MerakiMr extends EventEmitter {
         const debugLog = config.debugLog;
         this.refreshInterval = config.refreshInterval;
 
-        const baseUrl = (`${host}${CONSTANS.ApiUrls.BaseUrl}`);
-        const wirelessUrl = `/networks/${networkId}/wireless/ssids`;
+        const baseUrl = (`${host}${CONSTANS.ApiUrls.Base}`);
+        const wirelessUrl = CONSTANS.ApiUrls.MrSsids.replace('networkId', networkId);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             headers: {

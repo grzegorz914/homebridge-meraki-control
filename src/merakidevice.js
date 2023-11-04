@@ -3,6 +3,7 @@ const MerakiDb = require('./merakidb.js');
 const MerakiMr = require('./merakimr.js');
 const MerakiMs = require('./merakims.js');
 const EventEmitter = require('events');
+const CONSTANS = require('./constans.json');
 let Accessory, Characteristic, Service, Categories, UUID;
 
 class MerakiDevice extends EventEmitter {
@@ -36,15 +37,6 @@ class MerakiDevice extends EventEmitter {
         this.enableDebugMode = config.enableDebugMode || false;
         this.disableLogInfo = config.disableLogInfo || false;
         this.disableLogDeviceInfo = config.disableLogDeviceInfo || false;
-
-        //meraki url
-        this.organizationsIdUrl = `/organizations`;
-        this.networksIdUrl = `/organizations/${this.organizationId}/networks`;
-        this.networkUrl = `/networks/${this.networkId}`;
-        this.devicesUrl = `/organizations/${this.organizationId}/devices`;
-        this.dashboardClientsUrl = `/networks/${this.networkId}/clients`;
-        this.mrlianceUrl = `/networks/${this.networkId}/appliance/ports`;
-        this.wirelessUrl = `/networks/${this.networkId}/wireless/ssids`;
 
         //devices variables
         this.dbClientsCount = 0;
@@ -291,7 +283,7 @@ class MerakiDevice extends EventEmitter {
                                 .onSet(async (state) => {
                                     try {
                                         const policy = state ? this.dbConfClientsPolicyType[i] : 'Blocked';
-                                        const policyUrl = `${this.dashboardClientsUrl}/${this.dbClientsPolicyId[i]}/policy`;
+                                        const policyUrl = `${CONSTANS.ApiUrls.DbClients.replace('networkId', this.networkId)}/${this.dbClientsPolicyId[i]}/policy`;
                                         const policyData = {
                                             'devicePolicy': policy
                                         }
@@ -348,7 +340,7 @@ class MerakiDevice extends EventEmitter {
                                 .onSet(async (state) => {
                                     try {
                                         state = state ? true : false;
-                                        const mrUrl = `${this.wirelessUrl}/${this.mrSsidsNumber[i]}`;
+                                        const mrUrl = `${CONSTANS.ApiUrls.MrSsids.replace('networkId', this.networkId)}/${this.mrSsidsNumber[i]}`;
                                         const mrData = {
                                             'enabled': state
                                         };

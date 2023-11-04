@@ -2,6 +2,13 @@
     "PlatformName": "Meraki",
     "PluginName": "homebridge-meraki-control",
     "ApiUrls": {
-        "BaseUrl": "/api/v1"
+        "Base": "/api/v1",
+        "OrganizationNetworks": "/organizations/organizationId/networks",
+        "OrganizationDevices": "/organizations/organizationId/devices",
+        "NetworkId": "/networks/networkId",
+        "AppliancePorts": "/networks/networkId/appliance/ports",
+        "MrSsids": "/networks/networkId/wireless/ssids",
+        "MsPorts": "/devices/serialNumber/switch/ports",
+        "DbClients": "/networks/networkId/clients"
     }
 }
