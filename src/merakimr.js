@@ -41,21 +41,21 @@ class MerakiMr extends EventEmitter {
         };
 
         this.on('checkDeviceInfo', async () => {
-            const debug = debugLog ? this.emit('debug', `access points requesting data.`) : false;
             try {
+                const debug = debugLog ? this.emit('debug', `requesting access points data.`) : false;
                 //ap ssids states
                 const ssidsData = await this.axiosInstance.get(wirelessUrl);
-                const debug = debugLog ? this.emit('debug', `access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
+                const debug1 = debugLog ? this.emit('debug', `access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
                 //check device state
                 this.emit('checkDeviceState', ssidsData);
             } catch (error) {
-                this.emit('error', `access points check device info, ${error}.`);
+                this.emit('error', `access points data error: ${error}.`);
                 this.checkDeviceInfo();
             };
-        }).on('checkDeviceState', async (ssidsData) => {
-            const debug = debugLog ? this.emit('debug', `access points requesting SSIDs state.`) : false;
+        }).on('checkDeviceState', (ssidsData) => {
             try {
+                const debug = debugLog ? this.emit('debug', `requesting access points SSIDs status.`) : false;
                 const ssidsNumber = [];
                 const ssidsName = [];
                 const ssidsState = [];
@@ -88,9 +88,9 @@ class MerakiMr extends EventEmitter {
                 const emitDeviceInfo = this.prepareMr ? this.emit('deviceInfo', ssidsCount) : false;
                 this.emit('deviceState', ssidsNumber, ssidsName, ssidsState, ssidsCount, this.prepareMr);
                 this.prepareMr = false;
-                this.updateAccessPoints();
+                this.checkDeviceInfo();
             } catch (error) {
-                this.emit('error', `access points check device state error, ${error}.`);
+                this.emit('error', `access points data error: ${error}.`);
                 this.checkDeviceInfo();
             };
         });
@@ -98,7 +98,7 @@ class MerakiMr extends EventEmitter {
         this.emit('checkDeviceInfo');
     };
 
-    async updateAccessPoints() {
+    async checkDeviceInfo() {
         await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
         this.emit('checkDeviceInfo');
     };

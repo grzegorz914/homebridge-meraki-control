@@ -37,13 +37,13 @@
   * Expose Contact Sensors in HomeKit app for exposed `SSIDs`.
 * Switches:
   * Switch `ON/OFF` ports.
+  * Switch `ON/OFF` POE+ ports.
   * Enable/Disable prefix `Port Number` for `Ports` name displayed in HomeKit.app.
   * Hide `Uplink` ports, if the port name contain word *Uplink*.
   * Hide `Ports` filtered by port *Name*.
   * Expose Contact Sensors in HomeKit app for exposed `Ports`.
 * Siri can be used to switch ON/OFF SSIDs, Policy, Ports.
 * Home automations and shortcuts can be used for all functions.
-* More comming soon...
 
 ## Configuration
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
@@ -51,7 +51,7 @@
 * The `sample-config.json` can be edited and used as an alternative. 
 * Be sure to always make a backup copy of your config.json file before making any changes to it.
 
-<p align="left">
+<p align="center">
   <a href="https://github.com/grzegorz914/homebridge-meraki-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-meraki-control/main/graphics/ustawienia.png" width="840"></a>
 </p>
 
@@ -80,7 +80,7 @@
 | `switches.serialNumber` | Here set the *Serial Number* for this Switch. |
 | `switches.hideUplinkPorts` | If enabled, all *Uplink* ports will be hidden and not exposed to the *Homebridge/HomeKit*. |
 | `switches.enablePrefixForPortName` | This option enable prefix `Port Number` for *Port* name displayed in HomeKit app. |
-| `switches.enablePoePortsControl` | This option expose Contact Sensor in HomeKit app for all exposed ports. |
+| `switches.enablePoePortsControl` | This option enable POE control for controled ports. |
 | `switches.enableSensorPorts` | This option enable POE control for controled ports. |
 | `switches.mode` | Here *Activate/Deactivate* this Swich control. |
 | `switches.hidePorts` | Array of hidden Ports. |

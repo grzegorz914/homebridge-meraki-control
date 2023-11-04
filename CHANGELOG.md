@@ -6,10 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Warning!!! - After update to v1.0.0 and above all automations and scene will not work and the accessory and to be added to the HomeKit again.
 
-## [1.0.0] - (xx.11.2023)
+## [1.0.0] - (04.11.2023)
 ## Changes
-- moved all devices to separate accessory
+- publish Dashboard, Access Points, Switches as a separate dynamic accessory in HomeKit
 - code refactor
+- bump dependencies
 - config.schema updated
 - cleanup
 

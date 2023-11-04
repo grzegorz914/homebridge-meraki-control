@@ -96,7 +96,7 @@ class MerakiDevice extends EventEmitter {
                         this.emit('publishAccessory', accessory, 'Dashboard');
                         this.prepareDb = false;
                     } catch (error) {
-                        this.emit('error', `prepare accessory error: ${error}`);
+                        this.emit('error', `prepare dashboard accessory error: ${error}`);
                     };
                 };
             })
@@ -158,7 +158,7 @@ class MerakiDevice extends EventEmitter {
                         this.emit('publishAccessory', accessory, 'Access Point');
                         this.prepareMr = false;
                     } catch (error) {
-                        this.emit('error', `prepare accessory error: ${error}`);
+                        this.emit('error', `prepare access point accessory error: ${error}`);
                     };
                 };
             })
@@ -223,7 +223,7 @@ class MerakiDevice extends EventEmitter {
                         const accessory = await this.prepareAccessory(2, msPrefixName, msSerialNumber);
                         this.emit('publishAccessory', accessory, msPrefixName);
                     } catch (error) {
-                        this.emit('error', `prepare accessory error: ${error}`);
+                        this.emit('error', `prepare ${msPrefixName} accessory error: ${error}`);
                     };
                     this.switchesArray.push(msSerialNumber);
                     this.switchesPrefixNamesArray.push(msPrefixName);
