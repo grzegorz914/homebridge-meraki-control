@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Warning!!! - After update to v1.0.0 and above all automations and scene will not work and the accessory and to be added to the HomeKit again.
+
+## [1.0.0] - (xx.11.2023)
+## Changes
+- moved all devices to separate accessory
+- code refactor
+- config.schema updated
+- cleanup
+
 ## [0.18.0] - (31.10.2023)
 ## Changes
 - added POE ports control paralle with port

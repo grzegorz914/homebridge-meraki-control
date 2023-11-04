@@ -39,16 +39,24 @@ class MerakiMr extends EventEmitter {
             const pushHideSsidsName = (hideSsidEnabled && hideSsidName !== 'Undefined') ? hidenSsidsName.push(hideSsidName) : false;
         };
 
-        this.on('updateAccessPoints', async () => {
+        this.on('checkDeviceInfo', async () => {
+            try {
+                //ap ssids states
+                const ssidsData = await this.axiosInstance.get(wirelessUrl);
+                const debug = debugLog ? this.emit('debug', `access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
+
+                //check device state
+                this.emit('checkDeviceState', ssidsData);
+            } catch (error) {
+                this.emit('error', `check info, ${error}.`);
+                this.checkDeviceInfo();
+            };
+        }).on('checkDeviceState', async (ssidsData) => {
             const debug = debugLog ? this.emit('debug', `requesting switches data.`) : false;
             try {
                 const ssidsNumber = [];
                 const ssidsName = [];
                 const ssidsState = [];
-
-                //ap ssids states
-                const ssidsData = await this.axiosInstance.get(wirelessUrl);
-                const debug = debugLog ? this.emit('debug', `access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
                 for (const ssid of ssidsData.data) {
                     const ssidNumber = ssid.number;
@@ -74,20 +82,22 @@ class MerakiMr extends EventEmitter {
                     return;
                 }
 
-                this.emit('data', ssidsNumber, ssidsName, ssidsState, ssidsCount);
+                //emit device info
+                this.emit('deviceInfo', ssidsCount);
+                this.emit('deviceState', ssidsNumber, ssidsName, ssidsState, ssidsCount);
                 this.updateAccessPoints();
             } catch (error) {
-                this.emit('error', `access points data errorr: ${error}.`);
-                this.updateAccessPoints();
+                this.emit('error', `check device state error, ${error}.`);
+                this.checkDeviceInfo();
             };
-        })
+        });
 
-        this.emit('updateAccessPoints');
+        this.emit('checkDeviceInfo');
     };
 
     async updateAccessPoints() {
         await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-        this.emit('updateAccessPoints');
+        this.emit('checkDeviceInfo');
     };
 
     send(url, payload) {

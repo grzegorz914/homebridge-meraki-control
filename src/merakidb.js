@@ -131,7 +131,8 @@ class MerakiDb extends EventEmitter {
                         return;
                     };
 
-                    this.emit('data', confClientsPolicyName, confClientsPolicyType, clientsPolicyId, clientsPolicyMac, clientsPolicyPolicy, clientsPolicyState, clientsCount);
+                    this.emit('deviceInfo', clientsCount);
+                    this.emit('deviceState', confClientsPolicyName, confClientsPolicyType, clientsPolicyId, clientsPolicyMac, clientsPolicyPolicy, clientsPolicyState, clientsCount);
                     this.updateDashboardClients();
                 } catch (error) {
                     this.emit('error', `dashboard client policy data error: ${error}.`);

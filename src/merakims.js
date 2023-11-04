@@ -69,19 +69,9 @@ class MerakiMs extends EventEmitter {
             };
         };
 
-        this.on('updateSwitches', async () => {
-            const debug = debugLog ? this.emit('debug', `requesting switches data.`) : false;
+        this.on('checkDeviceInfo', async () => {
+            const debug = debugLog ? this.emit('debug', `requesting switch data.`) : false;
             try {
-                const portsPrefixNames = [];
-                const portsSn = [];
-                const portsId = [];
-                const portsName = [];
-                const portsPrefix = [];
-                const portsState = [];
-                const portsPoeState = [];
-                const portsPoeControlEnable = [];
-                const portsSensorsEnable = [];
-
                 const enabledSwCount = swSerialsNumber.length;
                 for (let i = 0; i < enabledSwCount; i++) {
                     const prefixName = swNames[i];
@@ -93,31 +83,50 @@ class MerakiMs extends EventEmitter {
 
                     const portsUrl = `/devices/${serialNumber}/switch/ports`;
                     const swData = await this.axiosInstance.get(portsUrl);
-                    const debug = debugLog ? this.emit('debug', `switches data: ${JSON.stringify(swData.data, null, 2)}`) : false;
+                    const debug = debugLog ? this.emit('debug', `switch data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 
-                    for (const port of swData.data) {
-                        const portId = port.portId;
-                        const portName = port.name;
-                        const portState = port.enabled;
-                        const portPoeState = port.poeEnabled;
-                        const hideUplinksPorts = hideUplinks && portName.substr(0, 6) === 'Uplink';
-                        const hidePortByName = swHidenPortsByName.includes(portName);
-
-                        //push exposed ports to array
-                        if (!hideUplinksPorts && !hidePortByName) {
-                            portsPrefixNames.push(prefixName);
-                            portsSn.push(serialNumber);
-                            portsId.push(portId);
-                            portsName.push(portName);
-                            portsPrefix.push(prefixForPortName);
-                            portsState.push(portState);
-                            portsPoeState.push(portPoeState);
-                            portsPoeControlEnable.push(enablePoePortsControl);
-                            portsSensorsEnable.push(enableSensorPorts);
-                        }
-                    };
+                    //check device state
+                    this.emit('checkDeviceState', swData, prefixName, serialNumber, hideUplinks, prefixForPortName, enablePoePortsControl, enableSensorPorts);
                 };
 
+            } catch (error) {
+                this.emit('error', `check info, ${error}.`);
+                this.checkDeviceInfo();
+            };
+        }).on('checkDeviceState', async (swData, prefixName, serialNumber, hideUplinks, prefixForPortName, enablePoePortsControl, enableSensorPorts) => {
+            const debug = debugLog ? this.emit('debug', `requesting switch ports state.`) : false;
+            try {
+                const portsPrefixNames = [];
+                const portsSn = [];
+                const portsId = [];
+                const portsName = [];
+                const portsPrefix = [];
+                const portsState = [];
+                const portsPoeState = [];
+                const portsPoeControlEnable = [];
+                const portsSensorsEnable = [];
+
+                for (const port of swData.data) {
+                    const portId = port.portId;
+                    const portName = port.name;
+                    const portState = port.enabled;
+                    const portPoeState = port.poeEnabled;
+                    const hideUplinksPorts = hideUplinks && portName.substr(0, 6) === 'Uplink';
+                    const hidePortByName = swHidenPortsByName.includes(portName);
+
+                    //push exposed ports to array
+                    if (!hideUplinksPorts && !hidePortByName) {
+                        portsPrefixNames.push(prefixName);
+                        portsSn.push(serialNumber);
+                        portsId.push(portId);
+                        portsName.push(portName);
+                        portsPrefix.push(prefixForPortName);
+                        portsState.push(portState);
+                        portsPoeState.push(portPoeState);
+                        portsPoeControlEnable.push(enablePoePortsControl);
+                        portsSensorsEnable.push(enableSensorPorts);
+                    }
+                };
                 const portsCount = portsState.length;
                 const debug = debugLog ? this.emit('debug', `found configured ports count: ${portsCount}`) : false;
 
@@ -125,20 +134,24 @@ class MerakiMs extends EventEmitter {
                     return;
                 }
 
-                this.emit('data', portsPrefixNames, portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsPoeControlEnable, portsSensorsEnable, portsCount);
-                this.updateSwitches();
-            } catch (error) {
-                this.emit('error', `switches data errorr: ${error}.`);
-                this.updateSwitches();
-            };
-        })
+                //emit device info
+                this.emit('deviceInfo', prefixName, serialNumber, portsCount);
 
-        this.emit('updateSwitches');
+                //emit device state
+                this.emit('deviceState', serialNumber, portsPrefixNames, portsSn, portsId, portsName, portsPrefix, portsState, portsPoeState, portsPoeControlEnable, portsSensorsEnable, portsCount);
+                this.checkDeviceInfo();
+            } catch (error) {
+                this.emit('error', `check device state error, ${error}.`);
+                this.checkDeviceInfo();
+            };
+        });
+
+        this.emit('checkDeviceInfo');
     };
 
-    async updateSwitches() {
+    async checkDeviceInfo() {
         await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-        this.emit('updateSwitches');
+        this.emit('checkDeviceInfo');
     };
 
     send(url, payload) {
