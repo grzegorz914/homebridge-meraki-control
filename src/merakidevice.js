@@ -90,7 +90,7 @@ class MerakiDevice extends EventEmitter {
                 }
 
                 //start prepare accessory
-                if (this.prepareDb && this.dashboardClientsControl && clientsCount > 0) {
+                if (this.prepareDb) {
                     try {
                         const accessory = await this.prepareAccessory(0, 'Dashboard', this.organizationId);
                         this.emit('publishAccessory', accessory, 'Dashboard');
@@ -152,7 +152,7 @@ class MerakiDevice extends EventEmitter {
                 }
 
                 //start prepare accessory
-                if (this.prepareMr && this.accessPointsControl && mrSsidsCount > 0) {
+                if (this.prepareMr) {
                     try {
                         const accessory = await this.prepareAccessory(1, 'Access Point', this.networkId);
                         this.emit('publishAccessory', accessory, 'Access Point');
@@ -219,13 +219,11 @@ class MerakiDevice extends EventEmitter {
 
                 //start prepare accessory
                 if (!this.switchesArray.includes(msSerialNumber)) {
-                    if (this.switchesControl && msPortsCount > 0) {
-                        try {
-                            const accessory = await this.prepareAccessory(2, msPrefixName, msSerialNumber);
-                            this.emit('publishAccessory', accessory, msPrefixName);
-                        } catch (error) {
-                            this.emit('error', `prepare accessory error: ${error}`);
-                        };
+                    try {
+                        const accessory = await this.prepareAccessory(2, msPrefixName, msSerialNumber);
+                        this.emit('publishAccessory', accessory, msPrefixName);
+                    } catch (error) {
+                        this.emit('error', `prepare accessory error: ${error}`);
                     };
                     this.switchesArray.push(msSerialNumber);
                     this.switchesPrefixNamesArray.push(msPrefixName);
