@@ -91,41 +91,36 @@ class MerakiDb extends EventEmitter {
                 this.emit('updateDashboardClientsPolicy', exposedAndExistingClients);
             } catch (error) {
                 this.emit('error', `dashboard client data error: ${error}.`);
-                this.checkDeviceInfo();
+                this.refreshData();
             };
         })
             .on('updateDashboardClientsPolicy', async (exposedAndExistingClients) => {
                 try {
                     const debug = debugLog ? this.emit('debug', `requesting dashboard clients policy data.`) : false;
-                    const confClientsPolicyName = [];
-                    const confClientsPolicyType = [];
-
-                    const clientsPolicyId = [];
-                    const clientsPolicyMac = [];
-                    const clientsPolicyPolicy = [];
-                    const clientsPolicyState = [];
+                    const exposedClients = [];
 
                     for (const client of exposedAndExistingClients) {
                         const clientId = client.id;
                         const clientPolicyData = await this.axiosInstance.get(`${dashboardClientsUrl}/${clientId}/policy`);
                         const debug = debugLog ? this.emit('debug', `dashboard client policy data: ${JSON.stringify(clientPolicyData.data, null, 2)}`) : false;
-
-                        const confClientName = client.name;
-                        const confClientPolicyType = client.type;
                         const clientPolicyMac = clientPolicyData.data.mac;
                         const clientPolicyPolicy = clientPolicyData.data.devicePolicy ?? 'undefined';
                         const clientPolicyState = clientPolicyPolicy !== 'Blocked' ?? false;
 
-                        confClientsPolicyName.push(confClientName);
-                        confClientsPolicyType.push(confClientPolicyType);
-                        clientsPolicyId.push(clientId);
-                        clientsPolicyMac.push(clientPolicyMac);
-                        clientsPolicyPolicy.push(clientPolicyPolicy);
-                        clientsPolicyState.push(clientPolicyState);
+                        //push exposed clients to array
+                        const obj = {
+                            'id': clientId,
+                            'name': client.name,
+                            'policyType': client.type,
+                            'mac': clientPolicyMac,
+                            'policy': clientPolicyPolicy,
+                            'policyState': clientPolicyState
+                        };
+                        exposedClients.push(obj);
                     };
 
                     //configured clients policy
-                    const clientsCount = clientsPolicyState.length;
+                    const clientsCount = exposedClients.length;
                     const debug1 = debugLog ? this.emit('debug', `dashboard found: ${clientsCount} exposed clients.`) : false;
 
                     if (clientsCount === 0) {
@@ -133,21 +128,21 @@ class MerakiDb extends EventEmitter {
                     };
 
                     const emitDeviceInfo = this.prepareDb ? this.emit('deviceInfo', clientsCount) : false;
-                    this.emit('deviceState', confClientsPolicyName, confClientsPolicyType, clientsPolicyId, clientsPolicyMac, clientsPolicyPolicy, clientsPolicyState, clientsCount, this.prepareDb);
+                    this.emit('deviceState', exposedClients, clientsCount);
                     this.prepareDb = false;
-                    this.checkDeviceInfo();
+                    this.refreshData();
                 } catch (error) {
                     this.emit('error', `dashboard client policy data error: ${error}.`);
-                    this.checkDeviceInfo();
+                    this.refreshData();
                 };
             });
 
-        this.emit('checkDeviceInfo');
+        this.emit('updateDashboardClients');
     };
 
-    async checkDeviceInfo() {
+    async refreshData() {
         await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-        this.emit('checkDeviceInfo');
+        this.emit('updateDashboardClients');
     };
 
     send(url, payload) {

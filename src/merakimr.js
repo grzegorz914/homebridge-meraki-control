@@ -48,22 +48,18 @@ class MerakiMr extends EventEmitter {
                 const debug1 = debugLog ? this.emit('debug', `access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
                 //check device state
-                this.emit('checkDeviceState', ssidsData);
+                this.emit('checkDeviceState', ssidsData.data);
             } catch (error) {
                 this.emit('error', `access points data error: ${error}.`);
-                this.checkDeviceInfo();
+                this.refreshData();
             };
         }).on('checkDeviceState', (ssidsData) => {
             try {
                 const debug = debugLog ? this.emit('debug', `requesting access points SSIDs status.`) : false;
-                const ssidsNumber = [];
-                const ssidsName = [];
-                const ssidsState = [];
+                const exposedSsids = [];
 
-                for (const ssid of ssidsData.data) {
-                    const ssidNumber = ssid.number;
+                for (const ssid of ssidsData) {
                     const ssidName = ssid.name;
-                    const ssidState = ssid.enabled;
 
                     //hidde unconfigured and ssids by name
                     const hideSsidsByName = hidenSsidsName.includes(ssidName);
@@ -71,13 +67,16 @@ class MerakiMr extends EventEmitter {
 
                     //push exposed ssids to array
                     if (!hideUnconfiguredSsids1 && !hideSsidsByName) {
-                        ssidsNumber.push(ssidNumber);
-                        ssidsName.push(ssidName);
-                        ssidsState.push(ssidState);
+                        const obj = {
+                            'number': ssid.number,
+                            'name': ssidName,
+                            'state': ssid.enabled
+                        };
+                        exposedSsids.push(obj);
                     };
                 };
 
-                const ssidsCount = ssidsState.length;
+                const ssidsCount = exposedSsids.length;
                 const debug1 = debugLog ? this.emit('debug', `access points found: ${ssidsCount} exposed SSIDs.`) : false;
 
                 if (ssidsCount === 0) {
@@ -86,19 +85,19 @@ class MerakiMr extends EventEmitter {
 
                 //emit device info
                 const emitDeviceInfo = this.prepareMr ? this.emit('deviceInfo', ssidsCount) : false;
-                this.emit('deviceState', ssidsNumber, ssidsName, ssidsState, ssidsCount, this.prepareMr);
+                this.emit('deviceState', exposedSsids, ssidsCount);
                 this.prepareMr = false;
-                this.checkDeviceInfo();
+                this.refreshData();
             } catch (error) {
                 this.emit('error', `access points data error: ${error}.`);
-                this.checkDeviceInfo();
+                this.refreshData();
             };
         });
 
         this.emit('checkDeviceInfo');
     };
 
-    async checkDeviceInfo() {
+    async refreshData() {
         await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
         this.emit('checkDeviceInfo');
     };
