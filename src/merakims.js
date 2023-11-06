@@ -47,12 +47,13 @@ class MerakiMs extends EventEmitter {
 
         this.on('checkDeviceInfo', async () => {
             try {
-                const debug = debugLog ? this.emit('debug', `requesting switch data.`) : false;
                 for (const confSwitch of configuredSwitches) {
                     const swName = confSwitch.name;
                     const serialNumber = confSwitch.serialNumber;
+                    this.swName = swName;
 
                     //get data of switch
+                    const debug = debugLog ? this.emit('debug', `${swName}, requesting data.`) : false;
                     const portsUrl = CONSTANS.ApiUrls.MsPorts.replace('serialNumber', serialNumber);
                     const swData = await this.axiosInstance.get(portsUrl);
                     const debug1 = debugLog ? this.emit('debug', `${swName}, data: ${JSON.stringify(swData.data, null, 2)}`) : false;
@@ -62,12 +63,12 @@ class MerakiMs extends EventEmitter {
                 };
 
             } catch (error) {
-                this.emit('error', `check switch data error: ${error}.`);
+                this.emit('error', `${this.swName}, requesting data error: ${error}.`);
                 this.refreshData();
             };
         }).on('checkDeviceState', (confSwitch, swData) => {
             try {
-                const debug = debugLog ? this.emit('debug', `requesting ports status.`) : false;
+                const debug = debugLog ? this.emit('debug', `${this.swName}, requesting ports status.`) : false;
                 const swName = confSwitch.name;
                 const swSerialNumber = confSwitch.serialNumber;
                 const swHideUplinksPorts = confSwitch.hideUplinkPorts;
@@ -113,7 +114,7 @@ class MerakiMs extends EventEmitter {
                 this.emit('deviceState', swName, swSerialNumber, exposedPorts, portsCount);
                 this.refreshData();
             } catch (error) {
-                this.emit('error', `check port status error: ${error}.`);
+                this.emit('error', `${this.swName}, requesting port status error: ${error}.`);
                 this.refreshData();
             };
         });

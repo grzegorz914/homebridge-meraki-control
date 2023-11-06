@@ -1,7 +1,7 @@
 {
     "displayName": "Meraki Control",
     "name": "homebridge-meraki-control",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Homebridge plugin (https://github.com/homebridge/homebridge) to control Meraki devices.",
     "license": "MIT",
     "author": "grzegorz914",

@@ -64,7 +64,7 @@ class MerakiDevice extends EventEmitter {
                     this.emit('devInfo', `Network: ${this.name}`);
                     this.emit('devInfo', `Network Id: ${this.networkId}`);
                     this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                    this.emit('devInfo', `Exposed Clients Count: ${clientsCount}`);
+                    this.emit('devInfo', `Exposed Clients: ${clientsCount}`);
                     this.emit('devInfo', `----------------------------------`)
                 };
             }).on('deviceState', async (exposedClients, clientsCount) => {
@@ -89,7 +89,7 @@ class MerakiDevice extends EventEmitter {
                         this.emit('publishAccessory', accessory, 'Dashboard');
                         this.prepareDb = false;
                     } catch (error) {
-                        this.emit('error', `prepare dashboard accessory error: ${error}`);
+                        this.emit('error', `Dasshboard, prepare accessory error: ${error}`);
                     };
                 };
             })
@@ -123,7 +123,7 @@ class MerakiDevice extends EventEmitter {
                     this.emit('devInfo', `Network: ${this.name}`);
                     this.emit('devInfo', `Network Id: ${this.networkId}`);
                     this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                    this.emit('devInfo', `Exposed SSIDs Count: ${ssidsCount}`);
+                    this.emit('devInfo', `Exposed SSIDs: ${ssidsCount}`);
                     this.emit('devInfo', `----------------------------------`)
                 };
             }).on('deviceState', async (exposedSsids, ssidsCount) => {
@@ -146,10 +146,10 @@ class MerakiDevice extends EventEmitter {
                 if (this.prepareMr) {
                     try {
                         const accessory = await this.prepareAccessory(1, 'Access Point', this.networkId);
-                        this.emit('publishAccessory', accessory, 'Access Point');
+                        this.emit('publishAccessory', accessory, 'Access Points');
                         this.prepareMr = false;
                     } catch (error) {
-                        this.emit('error', `prepare access point accessory error: ${error}`);
+                        this.emit('error', `Access Points, prepare accessory error: ${error}`);
                     };
                 };
             })
@@ -181,7 +181,7 @@ class MerakiDevice extends EventEmitter {
                     this.emit('devInfo', `Network: ${this.name}`);
                     this.emit('devInfo', `Network Id: ${this.networkId}`);
                     this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                    this.emit('devInfo', `Exposed Ports Count: ${portsCount}`);
+                    this.emit('devInfo', `Exposed Ports: ${portsCount}`);
                     this.emit('devInfo', `----------------------------------`)
                 };
             }).on('deviceState', async (swName, swSerialNumber, exposedPorts, portsCount) => {
@@ -207,7 +207,7 @@ class MerakiDevice extends EventEmitter {
                         const accessory = await this.prepareAccessory(2, swName, swSerialNumber);
                         this.emit('publishAccessory', accessory, swName);
                     } catch (error) {
-                        this.emit('error', `prepare ${swName} accessory error: ${error}`);
+                        this.emit('error', `${swName}, prepare accessory error: ${error}`);
                     };
                     this.switchesArray.push(swSerialNumber);
                 }
@@ -229,14 +229,14 @@ class MerakiDevice extends EventEmitter {
         return new Promise((resolve, reject) => {
             try {
                 //prepare accessory
-                const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare accessory`);
+                const debug = !this.enableDebugMode ? false : this.emit('debug', `${deviceName}, prepare accessory`);
                 const accessoryName = deviceName;
                 const accessoryUUID = UUID.generate(accessoryUuid);
                 const accessoryCategory = Categories.AIRPORT;
                 const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
                 //prepare information service
-                const debug1 = !this.enableDebugMode ? false : this.emit('debug', `Prepare information service`);
+                const debug1 = !this.enableDebugMode ? false : this.emit('debug', `${accessoryName}, prepare information service`);
                 accessory.getService(Service.AccessoryInformation)
                     .setCharacteristic(Characteristic.Manufacturer, 'Cisco/Meraki')
                     .setCharacteristic(Characteristic.Model, accessoryName)
@@ -246,7 +246,7 @@ class MerakiDevice extends EventEmitter {
                 //meraki devices
                 switch (deviceType) {
                     case 0: //dashboard clients
-                        const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki db service`);
+                        const debug = !this.enableDebugMode ? false : this.emit('debug', `${accessoryName}, prepare meraki service`);
                         const exposedClients = this.dbExposedClients;
 
                         this.dbServices = [];
@@ -262,7 +262,7 @@ class MerakiDevice extends EventEmitter {
                                 .onGet(async () => {
                                     const state = client.policyState ?? false;
                                     const policy = state ? client.policyType : 'Blocked';
-                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `Client: % ${dbClientName}, Policy: ${policy}`);
+                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `${accessoryName}, Client: ${dbClientName}, Policy: ${policy}`);
                                     return state;
                                 })
                                 .onSet(async (state) => {
@@ -273,9 +273,9 @@ class MerakiDevice extends EventEmitter {
                                             'devicePolicy': policy
                                         }
                                         await this.merakiDb.send(policyUrl, policyData);
-                                        const logInfo = this.disableLogInfo ? false : this.emit('message', `Client: % ${dbClientName}, Policy: ${policy}`);
+                                        const logInfo = this.disableLogInfo ? false : this.emit('message', `${accessoryName}, Client: ${dbClientName}, Policy: ${policy}`);
                                     } catch (error) {
-                                        this.emit('error', `Client: ${dbClientName}, set Policy error: ${error}`);
+                                        this.emit('error', `${accessoryName}, Client: ${dbClientName}, set Policy error: ${error}`);
                                     }
                                 });
 
@@ -283,7 +283,7 @@ class MerakiDevice extends EventEmitter {
                             accessory.addService(this.dbServices[i]);
 
                             if (this.dashboardClientsSensor) {
-                                const debug = !this.enableDebugMode && i > 0 ? false : this.emit('debug', `Prepare meraki db sensor service`);
+                                const debug = !this.enableDebugMode && i > 0 ? false : this.emit('debug', `${accessoryName}, prepare meraki sensor service`);
                                 const dbSensorServiceName = this.dashboardClientsPrefixForClientName ? `Sensor C.${dbClientName}` : `Sensor ${dbClientName}`;
                                 const dbSensorService = new Service.ContactSensor(dbSensorServiceName, `Client Sensor${i}`);
                                 dbSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -303,7 +303,7 @@ class MerakiDevice extends EventEmitter {
                         resolve(accessory);
                         break;
                     case 1: //network ssids
-                        const debug1 = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki mr service`);
+                        const debug1 = !this.enableDebugMode ? false : this.emit('debug', `${accessoryName}, prepare meraki service`);
                         const exposedSsids = this.mrExposedSsids;
 
                         this.mrServices = [];
@@ -318,7 +318,7 @@ class MerakiDevice extends EventEmitter {
                             mrService.getCharacteristic(Characteristic.On)
                                 .onGet(async () => {
                                     const state = ssid.state ?? false;
-                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
+                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `${accessoryName}, SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
                                     return state;
                                 })
                                 .onSet(async (state) => {
@@ -329,9 +329,9 @@ class MerakiDevice extends EventEmitter {
                                             'enabled': state
                                         };
                                         await this.merakiMr.send(mrUrl, mrData);
-                                        const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                                        const logInfo = this.disableLogInfo ? false : this.emit('message', `${accessoryName}, SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
                                     } catch (error) {
-                                        this.emit('error', `SSID: ${ssidName}, set state error: ${error}`);
+                                        this.emit('error', `${accessoryName}, SSID: ${ssidName}, set state error: ${error}`);
                                     }
                                 });
 
@@ -339,7 +339,7 @@ class MerakiDevice extends EventEmitter {
                             accessory.addService(this.mrServices[j]);
 
                             if (this.accessPointsSsidsSensor) {
-                                const debug = !this.enableDebugMode && j > 0 ? false : this.emit('debug', `Prepare meraki mr sensor service`);
+                                const debug = !this.enableDebugMode && j > 0 ? false : this.emit('debug', `${accessoryName}, prepare meraki sensor service`);
                                 const mrSensorServiceName = this.accessPointsPrefixForSsidsName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
                                 const mrSensorService = new Service.ContactSensor(mrSensorServiceName, `Ssid Sensor${j}`);
                                 mrSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -358,7 +358,7 @@ class MerakiDevice extends EventEmitter {
                         resolve(accessory);
                         break;
                     case 2: ///switches
-                        const debug2 = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki ms service`);
+                        const debug2 = !this.enableDebugMode ? false : this.emit('debug', `${accessoryName}, prepare meraki service`);
                         const exposedPorts = this.msExposedPorts;
 
                         this.msServices = [];
@@ -376,7 +376,7 @@ class MerakiDevice extends EventEmitter {
                             msService.getCharacteristic(Characteristic.On)
                                 .onGet(async () => {
                                     const state = port.state ?? false;
-                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${msPortId}, Name: ${msPortName}, state: ${state ? 'Enabled' : 'Disabled'}`);
+                                    const logInfo = this.disableLogInfo ? false : this.emit('message', `${accessoryName}, Port: ${msPortId}, Name: ${msPortName}, State: ${state ? 'Enabled' : 'Disabled'}`);
                                     return state;
                                 })
                                 .onSet(async (state) => {
@@ -390,9 +390,9 @@ class MerakiDevice extends EventEmitter {
                                             'enabled': state
                                         };
                                         await this.merakiMs.send(switchPortUrl, switchPortData);
-                                        const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${msPortId}, Name: ${msPortName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                                        const logInfo = this.disableLogInfo ? false : this.emit('message', `${accessoryName}, Port: ${msPortId}, Name: ${msPortName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
                                     } catch (error) {
-                                        this.emit('error', `Port: ${msPortId}, Name: ${msPortName}, set state error: %${error}`);
+                                        this.emit('error', `${accessoryName}, Port: ${msPortId}, Name: ${msPortName}, set state error: %${error}`);
                                     }
                                 });
 
@@ -400,7 +400,7 @@ class MerakiDevice extends EventEmitter {
                             accessory.addService(this.msServices[k]);
 
                             if (port.sensorsEnable) {
-                                const debug = !this.enableDebugMode && k > 0 ? false : this.emit('debug', `Prepare meraki ms sensor service`);
+                                const debug = !this.enableDebugMode && k > 0 ? false : this.emit('debug', `${accessoryName}, prepare meraki sensor service`);
                                 const msSensorServiceName = msPortPrefixEnable ? `Sensor ${msPortId}.${msPortName}` : `Sensor ${msPortName}`;
                                 const msSensorService = new Service.ContactSensor(msSensorServiceName, `Port Sensor${k}`);
                                 msSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);

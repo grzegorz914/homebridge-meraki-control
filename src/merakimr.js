@@ -42,20 +42,20 @@ class MerakiMr extends EventEmitter {
 
         this.on('checkDeviceInfo', async () => {
             try {
-                const debug = debugLog ? this.emit('debug', `requesting access points data.`) : false;
+                const debug = debugLog ? this.emit('debug', `Access Points, requesting data.`) : false;
                 //ap ssids states
                 const ssidsData = await this.axiosInstance.get(wirelessUrl);
-                const debug1 = debugLog ? this.emit('debug', `access points data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
+                const debug1 = debugLog ? this.emit('debug', `Access Points, data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
                 //check device state
                 this.emit('checkDeviceState', ssidsData.data);
             } catch (error) {
-                this.emit('error', `access points data error: ${error}.`);
+                this.emit('error', ` data error: ${error}.`);
                 this.refreshData();
             };
         }).on('checkDeviceState', (ssidsData) => {
             try {
-                const debug = debugLog ? this.emit('debug', `requesting access points SSIDs status.`) : false;
+                const debug = debugLog ? this.emit('debug', `Access Points, requesting SSIDs status.`) : false;
                 const exposedSsids = [];
 
                 for (const ssid of ssidsData) {
@@ -77,7 +77,7 @@ class MerakiMr extends EventEmitter {
                 };
 
                 const ssidsCount = exposedSsids.length;
-                const debug1 = debugLog ? this.emit('debug', `access points found: ${ssidsCount} exposed SSIDs.`) : false;
+                const debug1 = debugLog ? this.emit('debug', `Access Points, found: ${ssidsCount} exposed SSIDs.`) : false;
 
                 if (ssidsCount === 0) {
                     return;
@@ -89,7 +89,7 @@ class MerakiMr extends EventEmitter {
                 this.prepareMr = false;
                 this.refreshData();
             } catch (error) {
-                this.emit('error', `access points data error: ${error}.`);
+                this.emit('error', `Access Points, requesting SSIDs status error: ${error}.`);
                 this.refreshData();
             };
         });
