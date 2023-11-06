@@ -45,7 +45,6 @@ class MerakiDevice extends EventEmitter {
         this.prepareDb = true;
         this.prepareMr = true;
         this.switchesArray = [];
-        this.switchesPrefixNamesArray = [];
 
         if (this.dashboardClientsControl) {
             this.merakiDb = new MerakiDb({
@@ -211,7 +210,6 @@ class MerakiDevice extends EventEmitter {
                         this.emit('error', `prepare ${swName} accessory error: ${error}`);
                     };
                     this.switchesArray.push(swSerialNumber);
-                    this.switchesPrefixNamesArray.push(swName);
                 }
             })
                 .on('message', (message) => {
@@ -245,10 +243,7 @@ class MerakiDevice extends EventEmitter {
                     .setCharacteristic(Characteristic.SerialNumber, this.networkId)
                     .setCharacteristic(Characteristic.FirmwareRevision, this.organizationId);
 
-                //devices variable
-                const dbExposedClientsCount = this.dbClientsCount;
-
-                //meraki device
+                //meraki devices
                 switch (deviceType) {
                     case 0: //dashboard clients
                         const debug = !this.enableDebugMode ? false : this.emit('debug', `Prepare meraki db service`);
@@ -288,6 +283,7 @@ class MerakiDevice extends EventEmitter {
                             accessory.addService(this.dbServices[i]);
 
                             if (this.dashboardClientsSensor) {
+                                const debug = !this.enableDebugMode && i > 0 ? false : this.emit('debug', `Prepare meraki db sensor service`);
                                 const dbSensorServiceName = this.dashboardClientsPrefixForClientName ? `Sensor C.${dbClientName}` : `Sensor ${dbClientName}`;
                                 const dbSensorService = new Service.ContactSensor(dbSensorServiceName, `Client Sensor${i}`);
                                 dbSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -343,6 +339,7 @@ class MerakiDevice extends EventEmitter {
                             accessory.addService(this.mrServices[j]);
 
                             if (this.accessPointsSsidsSensor) {
+                                const debug = !this.enableDebugMode && j > 0 ? false : this.emit('debug', `Prepare meraki mr sensor service`);
                                 const mrSensorServiceName = this.accessPointsPrefixForSsidsName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
                                 const mrSensorService = new Service.ContactSensor(mrSensorServiceName, `Ssid Sensor${j}`);
                                 mrSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -403,6 +400,7 @@ class MerakiDevice extends EventEmitter {
                             accessory.addService(this.msServices[k]);
 
                             if (port.sensorsEnable) {
+                                const debug = !this.enableDebugMode && k > 0 ? false : this.emit('debug', `Prepare meraki ms sensor service`);
                                 const msSensorServiceName = msPortPrefixEnable ? `Sensor ${msPortId}.${msPortName}` : `Sensor ${msPortName}`;
                                 const msSensorService = new Service.ContactSensor(msSensorServiceName, `Port Sensor${k}`);
                                 msSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);

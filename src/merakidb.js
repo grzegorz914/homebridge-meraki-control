@@ -33,76 +33,97 @@ class MerakiDb extends EventEmitter {
 
         this.on('updateDashboardClients', async () => {
             try {
-                const debug = debugLog ? this.emit('debug', `requesting dashboard clients data.`) : false;
-                const clientsData = await this.axiosInstance.get(`${dashboardClientsUrl}?perPage=255&timespan=2592000`);
-                const debug1 = debugLog ? this.emit('debug', `dashboard clients data: ${JSON.stringify(clientsData.data, null, 2)}`) : false;
+                const debug = debugLog ? this.emit('debug', `requesting clients data.`) : false;
+                const dbClientsData = await this.axiosInstance.get(`${dashboardClientsUrl}?perPage=255&timespan=2592000`);
+                const debug1 = debugLog ? this.emit('debug', `clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`) : false;
 
-                const clientsId = [];
-                const clientsMac = [];
-                const clientsDescription = [];
+                const dbClients = [];
+                for (const dbClient of dbClientsData.data) {
+                    const id = dbClient.id;
+                    const mac = (dbClient.mac).split(':').join('');
+                    const description = dbClient.description;
 
-                for (const client of clientsData.data) {
-                    const clientId = client.id;
-                    const clientMac = (client.mac).split(':').join('');
-                    const clientDescription = client.description;
-
-                    clientsId.push(clientId);
-                    clientsMac.push(clientMac);
-                    clientsDescription.push(clientDescription);
+                    const obj = {
+                        "id": id,
+                        "mac": mac,
+                        "description": description
+                    }
+                    dbClients.push(obj);
                 }
 
                 //exposed existings and configured clients
-                const clientsPolicyCount = clientsPolicy.length;
-                const debug2 = debugLog ? this.emit('debug', `dashboard found: ${clientsPolicyCount} clients policy.`) : false;
+                const dbClientsCount = dbClients.length;
+                const debug2 = debugLog ? this.emit('debug', `found: ${dbClientsCount} clients.`) : false;
 
-                if (clientsPolicyCount === 0) {
+                if (dbClientsCount === 0) {
                     return;
                 };
 
-                const exposedAndExistingClients = [];
-                for (const clientPolicy of clientsPolicy) {
-                    const clientName = clientPolicy.name;
-                    const clientMac = (clientPolicy.mac).split(':').join('');
-                    const clientPolicyType = clientPolicy.type;
-                    const clientEnabled = clientPolicy.mode;
-
-                    const clientIndex = clientEnabled ? clientsMac.indexOf(clientMac) : -1;
-                    const clientId = clientIndex !== -1 ? clientsId[clientIndex] : -1;
-
-                    const exposedClient = {
-                        "name": clientName,
-                        "mac": clientMac,
-                        "type": clientPolicyType,
-                        "id": clientId
-                    }
-
-                    //check and push existed clients
-                    const exposeClient = (clientId !== -1);
-                    const pushExposedAndExistingClient = exposeClient ? exposedAndExistingClients.push(exposedClient) : false;
-                };
-
-                const exposedAndExistingClientsCount = exposedAndExistingClients.length;
-                const debug3 = debugLog ? this.emit('debug', `dashboard found: ${clientsPolicyCount} exposed and existing clients.`) : false;
-
-                if (exposedAndExistingClientsCount === 0) {
-                    return;
-                };
-
-                this.emit('updateDashboardClientsPolicy', exposedAndExistingClients);
+                this.emit('updateConfiguredAndExistingClients', dbClients);
             } catch (error) {
-                this.emit('error', `dashboard client data error: ${error}.`);
+                this.emit('error', `clients data error: ${error}.`);
                 this.refreshData();
             };
         })
-            .on('updateDashboardClientsPolicy', async (exposedAndExistingClients) => {
+            .on('updateConfiguredAndExistingClients', (dbClients) => {
                 try {
-                    const debug = debugLog ? this.emit('debug', `requesting dashboard clients policy data.`) : false;
+                    const debug = debugLog ? this.emit('debug', `requesting configured clients.`) : false;
+
+                    //configured clients policy
+                    const configuredClientsPolicy = clientsPolicy;
+                    const cconfiguredCientsPolicyCount = clientsPolicy.length;
+                    const debug1 = debugLog ? this.emit('debug', `found: ${cconfiguredCientsPolicyCount} configured clients.`) : false;
+
+                    if (cconfiguredCientsPolicyCount === 0) {
+                        return;
+                    };
+
+                    const debug2 = debugLog ? this.emit('debug', `check configured and activ clients.`) : false;
+                    //create exposed clientsPolicy
+                    const configuredAndExistedClients = [];
+                    for (const configuredClientPolicy of configuredClientsPolicy) {
+                        const name = configuredClientPolicy.name;
+                        const mac = (configuredClientPolicy.mac).split(':').join('');
+                        const policyType = configuredClientPolicy.type;
+                        const state = configuredClientPolicy.mode; //activ - not activ
+
+                        //check if configured client exist in dashboard
+                        const index = dbClients.findIndex(item => item.id === mac);
+                        const id = index !== -1 ? dbClients[index].id : -1;
+
+                        const obj = {
+                            "name": name,
+                            "mac": mac,
+                            "type": policyType,
+                            "id": id
+                        }
+
+                        //check and push existed clients
+                        const push = index !== -1 ? configuredAndExistedClients.push(obj) : false;
+                    };
+
+                    const configuredAndExistedClientsCount = configuredAndExistedClients.length;
+                    const debug3 = debugLog ? this.emit('debug', `found: ${configuredAndExistedClientsCount} configured and activ clients.`) : false;
+
+                    if (configuredAndExistedClientsCount === 0) {
+                        return;
+                    };
+
+                    this.emit('updateExistedClientsPolicy', configuredAndExistedClients);
+                } catch (error) {
+                    this.emit('error', `configured clients error: ${error}.`);
+                    this.refreshData();
+                };
+            })
+            .on('updateExistedClientsPolicy', async (configuredAndExistedClients) => {
+                try {
+                    const debug = debugLog ? this.emit('debug', `requesting existed client policy data.`) : false;
                     const exposedClients = [];
 
-                    for (const client of exposedAndExistingClients) {
+                    for (const client of configuredAndExistedClients) {
                         const clientId = client.id;
                         const clientPolicyData = await this.axiosInstance.get(`${dashboardClientsUrl}/${clientId}/policy`);
-                        const debug = debugLog ? this.emit('debug', `dashboard client policy data: ${JSON.stringify(clientPolicyData.data, null, 2)}`) : false;
+                        const debug = debugLog ? this.emit('debug', `existed client policy data: ${JSON.stringify(clientPolicyData.data, null, 2)}`) : false;
                         const clientPolicyMac = clientPolicyData.data.mac;
                         const clientPolicyPolicy = clientPolicyData.data.devicePolicy ?? 'undefined';
                         const clientPolicyState = clientPolicyPolicy !== 'Blocked' ?? false;
@@ -121,7 +142,7 @@ class MerakiDb extends EventEmitter {
 
                     //configured clients policy
                     const clientsCount = exposedClients.length;
-                    const debug1 = debugLog ? this.emit('debug', `dashboard found: ${clientsCount} exposed clients.`) : false;
+                    const debug1 = debugLog ? this.emit('debug', `found: ${clientsCount} exposed clients.`) : false;
 
                     if (clientsCount === 0) {
                         return;
@@ -132,7 +153,7 @@ class MerakiDb extends EventEmitter {
                     this.prepareDb = false;
                     this.refreshData();
                 } catch (error) {
-                    this.emit('error', `dashboard client policy data error: ${error}.`);
+                    this.emit('error', `existed client policy data error: ${error}.`);
                     this.refreshData();
                 };
             });
