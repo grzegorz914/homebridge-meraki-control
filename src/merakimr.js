@@ -11,10 +11,9 @@ class MerakiMr extends EventEmitter {
         const apiKey = config.apiKey;
         const networkId = config.networkId;
         const hideUnconfiguredSsid = config.hideUnconfiguredSsid;
-        const hideSsidsName = config.hideSsidsName;
+        const hidenSsidsName = config.deviceData;
         const debugLog = config.debugLog;
         this.refreshInterval = config.refreshInterval;
-        this.prepareMr = true;
 
         const baseUrl = (`${host}${CONSTANS.ApiUrls.Base}`);
         const wirelessUrl = CONSTANS.ApiUrls.MrSsids.replace('networkId', networkId);
@@ -32,20 +31,12 @@ class MerakiMr extends EventEmitter {
             })
         });
 
-        //hidde ssid by name
-        const hidenSsidsName = [];
-        for (const hideSsid of hideSsidsName) {
-            const hideSsidName = hideSsid.name || 'Undefined';
-            const hideSsidEnabled = hideSsid.mode || false;
-            const pushHideSsidsName = (hideSsidEnabled && hideSsidName !== 'Undefined') ? hidenSsidsName.push(hideSsidName) : false;
-        };
-
         this.on('checkDeviceInfo', async () => {
+            const debug = debugLog ? this.emit('debug', `requesting data.`) : false;
             try {
-                const debug = debugLog ? this.emit('debug', `Access Points, requesting data.`) : false;
                 //ap ssids states
                 const ssidsData = await this.axiosInstance.get(wirelessUrl);
-                const debug1 = debugLog ? this.emit('debug', `Access Points, data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
+                const debug1 = debugLog ? this.emit('debug', `data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
                 //check device state
                 this.emit('checkDeviceState', ssidsData.data);
@@ -54,8 +45,8 @@ class MerakiMr extends EventEmitter {
                 this.refreshData();
             };
         }).on('checkDeviceState', (ssidsData) => {
+            const debug = debugLog ? this.emit('debug', `requesting SSIDs status.`) : false;
             try {
-                const debug = debugLog ? this.emit('debug', `Access Points, requesting SSIDs status.`) : false;
                 const exposedSsids = [];
 
                 for (const ssid of ssidsData) {
@@ -63,10 +54,10 @@ class MerakiMr extends EventEmitter {
 
                     //hidde unconfigured and ssids by name
                     const hideSsidsByName = hidenSsidsName.includes(ssidName);
-                    const hideUnconfiguredSsids1 = hideUnconfiguredSsid && (ssidName.substr(0, 12) === 'Unconfigured');
+                    const hideUnconfiguredSsids = hideUnconfiguredSsid && (ssidName.substr(0, 12) === 'Unconfigured');
 
                     //push exposed ssids to array
-                    if (!hideUnconfiguredSsids1 && !hideSsidsByName) {
+                    if (!hideUnconfiguredSsids && !hideSsidsByName) {
                         const obj = {
                             'number': ssid.number,
                             'name': ssidName,
@@ -77,19 +68,18 @@ class MerakiMr extends EventEmitter {
                 };
 
                 const ssidsCount = exposedSsids.length;
-                const debug1 = debugLog ? this.emit('debug', `Access Points, found: ${ssidsCount} exposed SSIDs.`) : false;
+                const debug1 = debugLog ? this.emit('debug', `found: ${ssidsCount} exposed SSIDs.`) : false;
 
                 if (ssidsCount === 0) {
                     return;
                 }
 
-                //emit device info
-                const emitDeviceInfo = this.prepareMr ? this.emit('deviceInfo', ssidsCount) : false;
+                //emit device info and state
+                this.emit('deviceInfo', ssidsCount);
                 this.emit('deviceState', exposedSsids, ssidsCount);
-                this.prepareMr = false;
                 this.refreshData();
             } catch (error) {
-                this.emit('error', `Access Points, requesting SSIDs status error: ${error}.`);
+                this.emit('error', `requesting SSIDs status error: ${error}.`);
                 this.refreshData();
             };
         });
