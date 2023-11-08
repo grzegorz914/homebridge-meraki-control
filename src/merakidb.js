@@ -69,20 +69,17 @@ class MerakiDb extends EventEmitter {
                 try {
                     //create exposed clientsPolicy
                     const configuredAndExistedClients = [];
-                    for (const configuredClientPolicy of clientsPolicy) {
-                        const name = configuredClientPolicy.name;
-                        const mac = (configuredClientPolicy.mac).split(':').join('');
-                        const policyType = configuredClientPolicy.type;
-                        const state = configuredClientPolicy.mode; //activ - not activ
+                    for (const clientPolicy of clientsPolicy) {
+                        const mac = (clientPolicy.mac).split(':').join('');
 
                         //check if configured client exist in dashboard
                         const index = dbClients.findIndex(item => item.id === mac);
                         const id = index !== -1 ? dbClients[index].id : -1;
 
                         const obj = {
-                            "name": name,
-                            "mac": mac,
-                            "type": policyType,
+                            "name": clientPolicy.name,
+                            "mac": clientPolicy.mac,
+                            "type": clientPolicy.type,
                             "id": id
                         }
 

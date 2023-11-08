@@ -54,30 +54,18 @@ class MerakiMs extends EventEmitter {
         }).on('checkDeviceState', (swData) => {
             const debug = debugLog ? this.emit('debug', `requesting ports status.`) : false;
             try {
-                const swName = device.name;
-                const swSerialNumber = device.serialNumber;
-                const swHideUplinksPorts = device.hideUplinkPorts;
-                const swPrefixForPortsName = device.enablePrefixForPortName;
-                const swPoeControlEnable = device.enablePoePortsControl;
-                const swSensorsEnable = device.enableSensorPorts;
-
                 const exposedPorts = [];
                 for (const port of swData) {
-                    const hideUplinksPorts = swHideUplinksPorts && port.name.substr(0, 6) === 'Uplink';
+                    const hideUplinksPorts = device.hideUplinkPorts && port.name.substr(0, 6) === 'Uplink';
                     const hidePortByName = swHidenPortsByName.includes(port.name);
 
                     //push exposed ports to array
                     if (!hideUplinksPorts && !hidePortByName) {
                         const obj = {
-                            'swName': swName,
-                            'swSrialNumber': swSerialNumber,
-                            'prefixEnable': swPrefixForPortsName,
                             'id': port.portId,
                             'name': port.name,
                             'state': port.enabled,
-                            'poeState': port.poeEnabled,
-                            'poeControlEnable': swPoeControlEnable,
-                            'sensorsEnable': swSensorsEnable
+                            'poeState': port.poeEnabled
                         };
                         exposedPorts.push(obj);
                     }

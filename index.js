@@ -34,46 +34,48 @@ class MerakiPlatform {
         const allDevices = [];
 
         //dashboard clients
-        const dashboardClientsControl = account.dashboardClientsControl || false;
-        if (dashboardClientsControl) {
-          const configuredClientsPolicy = account.clientsPolicy || [];
+        const dbClientsControl = account.dashboardClientsControl || false;
+        if (dbClientsControl) {
+          const clientsPolicy = account.clientsPolicy || [];
 
           //configured clients policy
-          const clientsPolicy = [];
-          for (const clientPolicy of configuredClientsPolicy) {
+          const configuredClientsPolicy = [];
+          for (const clientPolicy of clientsPolicy) {
             const policyName = clientPolicy.name;
+            const policyMac = (clientPolicy.mac).split(':').join('');
+            const policyType = clientPolicy.type;
             const policyEnabled = clientPolicy.mode || false;
-            const push = policyEnabled && policyName ? clientsPolicy.push(policyName) : false;
+            const push = policyEnabled && policyName && policyMac && policyType ? configuredClientsPolicy.push(clientPolicy) : false;
           };
 
-          const clientsPolicyCount = clientsPolicy.length;
+          const clientsPolicyExist = configuredClientsPolicy.length > 0;
           const obj = {
             'type': 0,
             'name': 'Dashboard',
             'uuid': organizationId,
-            'deviceData': clientsPolicy
+            'deviceData': configuredClientsPolicy
           };
-          const push = clientsPolicyCount > 0 ? allDevices.push(obj) : false;
+          const push = clientsPolicyExist ? allDevices.push(obj) : false;
         };
 
         //access points
-        const accessPointsControl = account.accessPointsControl || false;
-        if (accessPointsControl) {
+        const mrPointsControl = account.accessPointsControl || false;
+        if (mrPointsControl) {
           const hideSsids = account.hideSsids || [];
 
           //hidde ssids by name
-          const hidenSsidsName = [];
+          const configuredHidenSsidsName = [];
           for (const hideSsid of hideSsids) {
             const hideSsidName = hideSsid.name;
             const hideSsidEnabled = hideSsid.mode || false;
-            const push = hideSsidEnabled && hideSsidName ? hidenSsidsName.push(hideSsidName) : false;
+            const push = hideSsidEnabled && hideSsidName ? configuredHidenSsidsName.push(hideSsidName) : false;
           };
 
           const obj = {
             'type': 1,
             'name': 'Access Points',
             'uuid': networkId,
-            'deviceData': hidenSsidsName
+            'deviceData': configuredHidenSsidsName
           };
           allDevices.push(obj);
         };
