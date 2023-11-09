@@ -17,6 +17,7 @@ class MerakiDevice extends EventEmitter {
         UUID = api.hap.uuid;
 
         //meraki configuration
+        this.networkName = config.name;
         this.organizationId = config.organizationId;
         this.networkId = config.networkId;
 
@@ -48,7 +49,7 @@ class MerakiDevice extends EventEmitter {
                     if (!this.disableLogDeviceInfo && this.startPrepareAccessory) {
                         this.emit('devInfo', `---- ${deviceName} ----`);
                         this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                        this.emit('devInfo', `Network: ${config.name}`);
+                        this.emit('devInfo', `Network: ${this.networkName}`);
                         this.emit('devInfo', `Network Id: ${this.networkId}`);
                         this.emit('devInfo', `Organization Id: ${this.organizationId}`);
                         this.emit('devInfo', `Exposed Clients: ${clientsCount}`);
@@ -109,7 +110,7 @@ class MerakiDevice extends EventEmitter {
                     if (!this.disableLogDeviceInfo && this.startPrepareAccessory) {
                         this.emit('devInfo', `---- ${deviceName} ----`);
                         this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                        this.emit('devInfo', `Network: ${config.name}`);
+                        this.emit('devInfo', `Network: ${this.networkName}`);
                         this.emit('devInfo', `Network Id: ${this.networkId}`);
                         this.emit('devInfo', `Organization Id: ${this.organizationId}`);
                         this.emit('devInfo', `Exposed SSIDs: ${ssidsCount}`);
@@ -169,7 +170,7 @@ class MerakiDevice extends EventEmitter {
                     if (!this.disableLogDeviceInfo && this.startPrepareAccessory) {
                         this.emit('devInfo', `---- ${deviceName}: ${deviceUuid} ----`);
                         this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                        this.emit('devInfo', `Network: ${config.name}`);
+                        this.emit('devInfo', `Network: ${this.networkName}`);
                         this.emit('devInfo', `Network Id: ${this.networkId}`);
                         this.emit('devInfo', `Organization Id: ${this.organizationId}`);
                         this.emit('devInfo', `Exposed Ports: ${portsCount}`);
