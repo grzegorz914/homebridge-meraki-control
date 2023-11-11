@@ -241,11 +241,10 @@ class MerakiDevice extends EventEmitter {
 
                         this.dbServices = [];
                         this.dbSensorServices = [];
-                        let i = 0;
                         for (const client of exposedClients) {
                             const dbClientName = client.name;
                             const dbServiceName = this.dbPrefixForClientName ? `C.${dbClientName}` : dbClientName;
-                            const dbClientPolicyService = new Service.Outlet(dbServiceName, `dbClientPolicyService${i}`);
+                            const dbClientPolicyService = new Service.Outlet(dbServiceName, `Client Service ${dbClientName}`);
                             dbClientPolicyService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             dbClientPolicyService.setCharacteristic(Characteristic.ConfiguredName, `${dbServiceName}`);
                             dbClientPolicyService.getCharacteristic(Characteristic.On)
@@ -270,12 +269,12 @@ class MerakiDevice extends EventEmitter {
                                 });
 
                             this.dbServices.push(dbClientPolicyService);
-                            accessory.addService(this.dbServices[i]);
+                            accessory.addService(dbClientPolicyService);
 
                             if (this.dbClientsSensor) {
                                 const debug = !this.enableDebugMode && i > 0 ? false : this.emit('debug', `prepare meraki db sensor service`);
                                 const dbSensorServiceName = this.dbPrefixForClientName ? `Sensor C.${dbClientName}` : `Sensor ${dbClientName}`;
-                                const dbSensorService = new Service.ContactSensor(dbSensorServiceName, `Client Sensor${i}`);
+                                const dbSensorService = new Service.ContactSensor(dbSensorServiceName, `Client Service Sensor ${dbClientName}`);
                                 dbSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 dbSensorService.setCharacteristic(Characteristic.ConfiguredName, `${dbSensorServiceName}`);
                                 dbSensorService.getCharacteristic(Characteristic.ContactSensorState)
@@ -285,9 +284,8 @@ class MerakiDevice extends EventEmitter {
                                     });
 
                                 this.dbSensorServices.push(dbSensorService);
-                                accessory.addService(this.dbSensorServices[i]);
+                                accessory.addService(dbSensorService);
                             };
-                            i++;
                         };
 
                         resolve(accessory);
@@ -298,11 +296,10 @@ class MerakiDevice extends EventEmitter {
 
                         this.mrServices = [];
                         this.mrSensorServices = [];
-                        let j = 0;
                         for (const ssid of exposedSsids) {
                             const ssidName = ssid.name;
                             const mrServiceName = this.mrPrefixForSsidName ? `W.${ssidName}` : ssidName;
-                            const mrService = new Service.Outlet(mrServiceName, `mrService${j}`);
+                            const mrService = new Service.Outlet(mrServiceName, `Ssid Service ${ssidName}`);
                             mrService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             mrService.setCharacteristic(Characteristic.ConfiguredName, `${mrServiceName}`);
                             mrService.getCharacteristic(Characteristic.On)
@@ -326,12 +323,12 @@ class MerakiDevice extends EventEmitter {
                                 });
 
                             this.mrServices.push(mrService);
-                            accessory.addService(this.mrServices[j]);
+                            accessory.addService(mrService);
 
                             if (this.mrSsidsSensor) {
                                 const debug = !this.enableDebugMode && j > 0 ? false : this.emit('debug', `prepare meraki mr sensor service`);
                                 const mrSensorServiceName = this.mrPrefixForSsidName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
-                                const mrSensorService = new Service.ContactSensor(mrSensorServiceName, `Ssid Sensor${j}`);
+                                const mrSensorService = new Service.ContactSensor(mrSensorServiceName, `Ssid Service Sensor ${ssidName}`);
                                 mrSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 mrSensorService.setCharacteristic(Characteristic.ConfiguredName, `${mrSensorServiceName}`);
                                 mrSensorService.getCharacteristic(Characteristic.ContactSensorState)
@@ -340,9 +337,8 @@ class MerakiDevice extends EventEmitter {
                                         return state;
                                     });
                                 this.mrSensorServices.push(mrSensorService);
-                                accessory.addService(this.mrSensorServices[j]);
+                                accessory.addService(mrSensorService);
                             };
-                            j++;
                         };
 
                         resolve(accessory);
@@ -353,12 +349,11 @@ class MerakiDevice extends EventEmitter {
 
                         this.msServices = [];
                         this.msSensorServices = [];
-                        let k = 0;
                         for (const port of exposedPorts) {
                             const msPortName = port.name;
                             const msPortId = port.id;
                             const msServiceName = this.msPrefixForPortName ? `${msPortId}.${msPortName}` : msPortName;
-                            const msService = new Service.Outlet(msServiceName, `msService${k}`);
+                            const msService = new Service.Outlet(msServiceName, `Port Service ${msPortName}`);
                             msService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             msService.setCharacteristic(Characteristic.ConfiguredName, `${msServiceName}`);
                             msService.getCharacteristic(Characteristic.On)
@@ -385,12 +380,12 @@ class MerakiDevice extends EventEmitter {
                                 });
 
                             this.msServices.push(msService);
-                            accessory.addService(this.msServices[k]);
+                            accessory.addService(msService);
 
                             if (this.msPortsSensor) {
                                 const debug = !this.enableDebugMode && k > 0 ? false : this.emit('debug', `prepare meraki ms sensor service`);
                                 const msSensorServiceName = this.msPrefixForPortName ? `Sensor ${msPortId}.${msPortName}` : `Sensor ${msPortName}`;
-                                const msSensorService = new Service.ContactSensor(msSensorServiceName, `Port Sensor${k}`);
+                                const msSensorService = new Service.ContactSensor(msSensorServiceName, `Port Service Sensor ${msPortName}`);
                                 msSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 msSensorService.setCharacteristic(Characteristic.ConfiguredName, `${msSensorServiceName}`);
                                 msSensorService.getCharacteristic(Characteristic.ContactSensorState)
@@ -399,9 +394,8 @@ class MerakiDevice extends EventEmitter {
                                         return state;
                                     });
                                 this.msSensorServices.push(msSensorService);
-                                accessory.addService(this.msSensorServices[k]);
+                                accessory.addService(msSensorService);
                             };
-                            k++;
                         };
 
                         resolve(accessory);
