@@ -11,8 +11,8 @@
       "devices": {
         "type": "array",
         "items": {
-          "title": "Networks",
           "type": "object",
+          "title": "Network",
           "properties": {
             "name": {
               "title": "Network",
@@ -124,9 +124,9 @@
                     "required": true
                   },
                   "mode": {
-                    "title": "Client Control",
+                    "title": "Enable",
                     "type": "boolean",
-                    "description": "Here set ON/OFF for Activate/Deactivate this Client control.",
+                    "description": "Here Enable/Disable this Client control.",
                     "required": false
                   }
                 }
@@ -186,9 +186,9 @@
                     "required": false
                   },
                   "mode": {
-                    "title": "SSID Control",
+                    "title": "Enable",
                     "type": "boolean",
-                    "description": "Here Activate/Deactivate this SSID control.",
+                    "description": "Here Enable/Disable this SSID control.",
                     "required": false
                   }
                 }
@@ -225,9 +225,9 @@
                     "required": false
                   },
                   "mode": {
-                    "title": "Switch Control",
+                    "title": "Enable",
                     "type": "boolean",
-                    "description": "Here Activate/Deactivate this Switch control.",
+                    "description": "Here Enable/Disable this Switch control.",
                     "required": false
                   },
                   "hideUplinkPorts": {
@@ -272,9 +272,9 @@
                           "required": false
                         },
                         "mode": {
-                          "title": "Port Control",
+                          "title": "Enable",
                           "type": "boolean",
-                          "description": "Here Activate/Deactivate this Port control.",
+                          "description": "Here Enable/Disable this Port control.",
                           "required": false
                         }
                       }
@@ -325,7 +325,7 @@
     {
       "key": "devices",
       "type": "tabarray",
-      "title": "{{ value.name || 'new network' }}",
+      "title": "{{ value.name || 'network' }}",
       "items": [
         "devices[].name",
         "devices[].host",
@@ -349,17 +349,26 @@
                     "devices[].enablePrefixForClientName",
                     "devices[].enableSonsorClients",
                     {
-                      "key": "devices[].dashboardClientsPolicy",
-                      "type": "tabarray",
-                      "title": "{{ value.name || 'new Client' }}",
+                      "key": "devices[]",
+                      "type": "section",
+                      "title": "Clients policy",
                       "expandable": true,
-                      "expanded": true,
-                      "orderable": false,
+                      "expanded": false,
                       "items": [
-                        "devices[].dashboardClientsPolicy[].name",
-                        "devices[].dashboardClientsPolicy[].mac",
-                        "devices[].dashboardClientsPolicy[].type",
-                        "devices[].dashboardClientsPolicy[].mode"
+                        {
+                          "key": "devices[].dashboardClientsPolicy",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'client' }}",
+                          "expandable": true,
+                          "expanded": true,
+                          "orderable": false,
+                          "items": [
+                            "devices[].dashboardClientsPolicy[].name",
+                            "devices[].dashboardClientsPolicy[].mac",
+                            "devices[].dashboardClientsPolicy[].type",
+                            "devices[].dashboardClientsPolicy[].mode"
+                          ]
+                        }
                       ]
                     }
                   ]
@@ -373,15 +382,24 @@
                     "devices[].enablePrefixForSsidsName",
                     "devices[].enableSonsorSsids",
                     {
-                      "key": "devices[].hideSsids",
-                      "type": "tabarray",
-                      "title": "{{ value.name || 'new SSID' }}",
+                      "key": "devices[]",
+                      "type": "section",
+                      "title": "Hidden SSIDs",
                       "expandable": true,
-                      "expanded": true,
-                      "orderable": false,
+                      "expanded": false,
                       "items": [
-                        "devices[].hideSsids[].name",
-                        "devices[].hideSsids[].mode"
+                        {
+                          "key": "devices[].hideSsids",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'SSID' }}",
+                          "expandable": true,
+                          "expanded": true,
+                          "orderable": false,
+                          "items": [
+                            "devices[].hideSsids[].name",
+                            "devices[].hideSsids[].mode"
+                          ]
+                        }
                       ]
                     }
                   ]
@@ -394,7 +412,7 @@
                     {
                       "key": "devices[].switches",
                       "type": "tabarray",
-                      "title": "{{ value.name || 'new Switch' }}",
+                      "title": "{{ value.name || 'switch' }}",
                       "expandable": true,
                       "expanded": true,
                       "orderable": false,
@@ -407,15 +425,24 @@
                         "devices[].switches[].enablePoePortsControl",
                         "devices[].switches[].enableSensorPorts",
                         {
-                          "key": "devices[].switches[].hidePorts",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'new Port' }}",
+                          "key": "devices[].switches[]",
+                          "type": "section",
+                          "title": "Hidden Ports",
                           "expandable": true,
-                          "expanded": true,
-                          "orderable": false,
+                          "expanded": false,
                           "items": [
-                            "devices[].switches[].hidePorts[].name",
-                            "devices[].switches[].hidePorts[].mode"
+                            {
+                              "key": "devices[].switches[].hidePorts",
+                              "type": "tabarray",
+                              "title": "{{ value.name || 'port' }}",
+                              "expandable": true,
+                              "expanded": true,
+                              "orderable": false,
+                              "items": [
+                                "devices[].switches[].hidePorts[].name",
+                                "devices[].switches[].hidePorts[].mode"
+                              ]
+                            }
                           ]
                         }
                       ]
