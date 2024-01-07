@@ -30,10 +30,12 @@ class MerakiPlatform {
           log.warn(`Name: ${accountName ? 'OK' : accountName}, api key: ${apiKey ? 'OK' : apiKey}, organization Id: ${organizationId ? 'OK' : organizationId}, network Id: ${networkId ? 'OK' : networkId} in config missing.`);
           return;
         }
+        //debug config
         const debug = account.enableDebugMode ? log(`Network: ${accountName}, did finish launching.`) : false;
-        const allDevices = [];
+        const debug1 = account.enableDebugMode ? log(`Network: ${accountName}, Config: ${JSON.stringify(account, null, 2)}`) : false;
 
         //dashboard clients
+        const allDevices = [];
         const dbClientsControl = account.dashboardClientsControl || false;
         if (dbClientsControl) {
           const clientsPolicy = account.clientsPolicy || [];
