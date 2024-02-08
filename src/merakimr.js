@@ -26,7 +26,7 @@ class MerakiMr extends EventEmitter {
             },
             withCredentials: true,
             httpsAgent: new https.Agent({
-                keepAlive: true,
+                keepAlive: false,
                 rejectUnauthorized: false
             })
         });
