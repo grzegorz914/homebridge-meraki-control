@@ -1,5 +1,4 @@
 'use strict';
-const https = require('https');
 const axios = require('axios');
 const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
@@ -22,12 +21,7 @@ class MerakiDb extends EventEmitter {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Cisco-Meraki-API-Key': apiKey
-            },
-            withCredentials: true,
-            httpsAgent: new https.Agent({
-                keepAlive: false,
-                rejectUnauthorized: false
-            })
+            }
         });
 
         this.on('updateDashboardClients', async () => {
