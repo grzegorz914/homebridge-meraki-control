@@ -32,7 +32,13 @@ class MerakiPlatform {
         }
         //debug config
         const debug = account.enableDebugMode ? log(`Network: ${accountName}, did finish launching.`) : false;
-        const debug1 = account.enableDebugMode ? log(`Network: ${accountName}, Config: ${JSON.stringify(account, null, 2)}`) : false;
+        const config = {
+					...account,
+					apiKey: 'removed',
+					organizationId: 'removed',
+					networkId: 'removed'
+				};
+        const debug1 = account.enableDebugMode ? log(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
 
         //dashboard clients
         const allDevices = [];
