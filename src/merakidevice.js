@@ -4,7 +4,7 @@ const MerakiMr = require('./merakimr.js');
 const MerakiMs = require('./merakims.js');
 const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
-let Accessory, Characteristic, Service, Categories, UUID;
+let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class MerakiDevice extends EventEmitter {
     constructor(api, config, deviceType, deviceName, deviceUuid, deviceData) {
@@ -14,7 +14,7 @@ class MerakiDevice extends EventEmitter {
         Characteristic = api.hap.Characteristic;
         Service = api.hap.Service;
         Categories = api.hap.Categories;
-        UUID = api.hap.uuid;
+        AccessoryUUID = api.hap.uuid;
 
         //meraki configuration
         this.networkName = config.name;
@@ -221,7 +221,7 @@ class MerakiDevice extends EventEmitter {
                 //prepare accessory
                 const debug = !this.enableDebugMode ? false : this.emit('debug', `prepare accessory`);
                 const accessoryName = deviceName;
-                const accessoryUUID = UUID.generate(deviceUuid);
+                const accessoryUUID = AccessoryUUID.generate(deviceUuid);
                 const accessoryCategory = Categories.AIRPORT;
                 const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
