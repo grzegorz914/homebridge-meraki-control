@@ -1,7 +1,7 @@
 'use strict';
 const axios = require('axios');
 const EventEmitter = require('events');
-const CONSTANS = require('./constans.json');
+const CONSTANTS = require('./constants.json');
 
 class MerakiMs extends EventEmitter {
     constructor(config) {
@@ -12,7 +12,7 @@ class MerakiMs extends EventEmitter {
         const debugLog = config.debugLog;
         this.refreshInterval = config.refreshInterval;
 
-        const baseUrl = (`${host}${CONSTANS.ApiUrls.Base}`);
+        const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             headers: {
@@ -35,7 +35,7 @@ class MerakiMs extends EventEmitter {
             const debug = debugLog ? this.emit('debug', `requesting data.`) : false;
             try {
                 //get data of switch
-                const portsUrl = CONSTANS.ApiUrls.MsPorts.replace('serialNumber', device.serialNumber);
+                const portsUrl = CONSTANTS.ApiUrls.MsPorts.replace('serialNumber', device.serialNumber);
                 const swData = await this.axiosInstance.get(portsUrl);
                 const debug1 = debugLog ? this.emit('debug', `data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 

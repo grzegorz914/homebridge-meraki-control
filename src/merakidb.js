@@ -1,7 +1,7 @@
 'use strict';
 const axios = require('axios');
 const EventEmitter = require('events');
-const CONSTANS = require('./constans.json');
+const CONSTANTS = require('./constants.json');
 
 class MerakiDb extends EventEmitter {
     constructor(config) {
@@ -13,8 +13,8 @@ class MerakiDb extends EventEmitter {
         const debugLog = config.debugLog;
         this.refreshInterval = config.refreshInterval;
 
-        const baseUrl = (`${host}${CONSTANS.ApiUrls.Base}`);
-        const dashboardClientsUrl = CONSTANS.ApiUrls.DbClients.replace('networkId', networkId);
+        const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
+        const dashboardClientsUrl = CONSTANTS.ApiUrls.DbClients.replace('networkId', networkId);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             headers: {

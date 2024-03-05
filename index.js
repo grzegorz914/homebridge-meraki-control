@@ -2,13 +2,13 @@
 const path = require('path');
 const fs = require('fs');
 const MerakiDevice = require('./src/merakidevice.js');
-const CONSTANS = require('./src/constans.json');
+const CONSTANTS = require('./src/constants.json');
 
 class MerakiPlatform {
   constructor(log, config, api) {
     // only load if configured
     if (!config || !Array.isArray(config.devices)) {
-      log.warn(`No configuration found for ${CONSTANS.PluginName}`);
+      log.warn(`No configuration found for ${CONSTANTS.PluginName}`);
       return;
     }
     this.accessories = [];
@@ -30,15 +30,17 @@ class MerakiPlatform {
           log.warn(`Name: ${accountName ? 'OK' : accountName}, api key: ${apiKey ? 'OK' : apiKey}, organization Id: ${organizationId ? 'OK' : organizationId}, network Id: ${networkId ? 'OK' : networkId} in config missing.`);
           return;
         }
+
         //debug config
-        const debug = account.enableDebugMode ? log(`Network: ${accountName}, did finish launching.`) : false;
+        const enableDebugMode = account.enableDebugMode;
+        const debug = enableDebugMode ? log(`Network: ${accountName}, did finish launching.`) : false;
         const config = {
-					...account,
-					apiKey: 'removed',
-					organizationId: 'removed',
-					networkId: 'removed'
-				};
-        const debug1 = account.enableDebugMode ? log(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
+          ...account,
+          apiKey: 'removed',
+          organizationId: 'removed',
+          networkId: 'removed'
+        };
+        const debug1 = enableDebugMode ? log(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
 
         //dashboard clients
         const allDevices = [];
@@ -114,20 +116,20 @@ class MerakiPlatform {
           merakiDevice.on('publishAccessory', (accessory) => {
 
             //publish devices
-            api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
-            const debug = account.enableDebugMode ? log(`${accountName}, ${deviceName}, published as external accessory.`) : false;
+            api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+            const debug = enableDebugMode ? log(`${accountName}, ${deviceName}, published as external accessory.`) : false;
           })
             .on('devInfo', (devInfo) => {
               log(devInfo);
             })
             .on('message', (message) => {
-              log(accountName, deviceName, message);
+              log(`${accountName}, ${deviceName}. ${message}`);
             })
             .on('debug', (debug) => {
               log(`${accountName}, ${deviceName}. debug: ${debug}`);
             })
             .on('error', (error) => {
-              log.error(accountName, deviceName, error);
+              log.error(`${accountName}, ${deviceName}. ${error}`);
             });
         };
       };
@@ -140,5 +142,5 @@ class MerakiPlatform {
 }
 
 module.exports = (api) => {
-  api.registerPlatform(CONSTANS.PluginName, CONSTANS.PlatformName, MerakiPlatform, true);
+  api.registerPlatform(CONSTANTS.PluginName, CONSTANTS.PlatformName, MerakiPlatform, true);
 }

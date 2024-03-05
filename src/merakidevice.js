@@ -3,7 +3,7 @@ const MerakiDb = require('./merakidb.js');
 const MerakiMr = require('./merakimr.js');
 const MerakiMs = require('./merakims.js');
 const EventEmitter = require('events');
-const CONSTANS = require('./constans.json');
+const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class MerakiDevice extends EventEmitter {
@@ -257,7 +257,7 @@ class MerakiDevice extends EventEmitter {
                                 .onSet(async (state) => {
                                     try {
                                         const policy = state ? client.policyType : 'Blocked';
-                                        const policyUrl = `${CONSTANS.ApiUrls.DbClients.replace('networkId', this.networkId)}/${client.id}/policy`;
+                                        const policyUrl = `${CONSTANTS.ApiUrls.DbClients.replace('networkId', this.networkId)}/${client.id}/policy`;
                                         const policyData = {
                                             'devicePolicy': policy
                                         }
@@ -307,7 +307,7 @@ class MerakiDevice extends EventEmitter {
                                 .onSet(async (state) => {
                                     try {
                                         state = state ? true : false;
-                                        const mrUrl = `${CONSTANS.ApiUrls.MrSsids.replace('networkId', this.networkId)}/${ssid.number}`;
+                                        const mrUrl = `${CONSTANTS.ApiUrls.MrSsids.replace('networkId', this.networkId)}/${ssid.number}`;
                                         const mrData = {
                                             'enabled': state
                                         };
