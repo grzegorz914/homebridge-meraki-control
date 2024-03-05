@@ -47,7 +47,7 @@ class MerakiDevice extends EventEmitter {
             if (!this.disableLogDeviceInfo && this.startPrepareAccessory) {
                 this.emit('devInfo', `---- ${deviceName} ----`);
                 this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                this.emit('devInfo', `Network: ${config.networkName}`);
+                this.emit('devInfo', `Network: ${config.name}`);
                 this.emit('devInfo', `Network Id: ${config.networkId}`);
                 this.emit('devInfo', `Organization Id: ${config.organizationId}`);
                 this.emit('devInfo', `Exposed SSIDs: ${ssidsCount}`);

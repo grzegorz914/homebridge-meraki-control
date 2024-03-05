@@ -158,7 +158,7 @@ class MerakiPlatform {
                   log.error(`${accountName}, ${deviceName}. ${error}`);
                 });
               break
-            case 2: // switch
+            case 2: //switch
               const msDevice = new DeviceMs(api, account, deviceName, deviceUuid, deviceData);
               msDevice.on('publishAccessory', (accessory) => {
 
