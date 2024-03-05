@@ -1,7 +1,9 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
-const MerakiDevice = require('./src/merakidevice.js');
+const DeviceDb = require('./src/devicedb.js');
+const DeviceMr = require('./src/devicemr.js');
+const DeviceMs = require('./src/devicems.js');
 const CONSTANTS = require('./src/constants.json');
 
 class MerakiPlatform {
@@ -112,25 +114,75 @@ class MerakiPlatform {
           const deviceName = device.name;
           const deviceUuid = device.uuid;
           const deviceData = device.deviceData;
-          const merakiDevice = new MerakiDevice(api, account, deviceType, deviceName, deviceUuid, deviceData);
-          merakiDevice.on('publishAccessory', (accessory) => {
 
-            //publish devices
-            api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
-            const debug = enableDebugMode ? log(`${accountName}, ${deviceName}, published as external accessory.`) : false;
-          })
-            .on('devInfo', (devInfo) => {
-              log(devInfo);
-            })
-            .on('message', (message) => {
-              log(`${accountName}, ${deviceName}. ${message}`);
-            })
-            .on('debug', (debug) => {
-              log(`${accountName}, ${deviceName}. debug: ${debug}`);
-            })
-            .on('error', (error) => {
-              log.error(`${accountName}, ${deviceName}. ${error}`);
-            });
+          switch (deviceType) {
+            case 0: //dashboard clients
+              const dbDevice = new DeviceDb(api, account, deviceName, deviceUuid, deviceData);
+              dbDevice.on('publishAccessory', (accessory) => {
+
+                //publish devices
+                api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+                const debug = enableDebugMode ? log(`${accountName}, ${deviceName}, published as external accessory.`) : false;
+              })
+                .on('devInfo', (devInfo) => {
+                  log(devInfo);
+                })
+                .on('message', (message) => {
+                  log(`${accountName}, ${deviceName}. ${message}`);
+                })
+                .on('debug', (debug) => {
+                  log(`${accountName}, ${deviceName}. debug: ${debug}`);
+                })
+                .on('error', (error) => {
+                  log.error(`${accountName}, ${deviceName}. ${error}`);
+                });
+              break
+            case 1: //access point
+              const mrDevice = new DeviceMr(api, account, deviceName, deviceUuid, deviceData);
+              mrDevice.on('publishAccessory', (accessory) => {
+
+                //publish devices
+                api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+                const debug = enableDebugMode ? log(`${accountName}, ${deviceName}, published as external accessory.`) : false;
+              })
+                .on('devInfo', (devInfo) => {
+                  log(devInfo);
+                })
+                .on('message', (message) => {
+                  log(`${accountName}, ${deviceName}. ${message}`);
+                })
+                .on('debug', (debug) => {
+                  log(`${accountName}, ${deviceName}. debug: ${debug}`);
+                })
+                .on('error', (error) => {
+                  log.error(`${accountName}, ${deviceName}. ${error}`);
+                });
+              break
+            case 2: // switch
+              const msDevice = new DeviceMs(api, account, deviceName, deviceUuid, deviceData);
+              msDevice.on('publishAccessory', (accessory) => {
+
+                //publish devices
+                api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+                const debug = enableDebugMode ? log(`${accountName}, ${deviceName}, published as external accessory.`) : false;
+              })
+                .on('devInfo', (devInfo) => {
+                  log(devInfo);
+                })
+                .on('message', (message) => {
+                  log(`${accountName}, ${deviceName}. ${message}`);
+                })
+                .on('debug', (debug) => {
+                  log(`${accountName}, ${deviceName}. debug: ${debug}`);
+                })
+                .on('error', (error) => {
+                  log.error(`${accountName}, ${deviceName}. ${error}`);
+                });
+              break
+            default:
+              log(`Unknown device type: ${deviceType},`);
+              break;
+          };
         };
       };
     });
