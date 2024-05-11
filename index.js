@@ -53,11 +53,11 @@ class MerakiPlatform {
           //configured clients policy
           const configuredClientsPolicy = [];
           for (const clientPolicy of clientsPolicy) {
-            const policyName = clientPolicy.name;
-            const policyMac = (clientPolicy.mac).split(':').join('');
-            const policyType = clientPolicy.type;
+            const policyName = clientPolicy.name ?? false;
+            const policyMac = (clientPolicy.mac).split(':').join('') ?? false;
+            const policyType = clientPolicy.type ?? false;
             const policyEnabled = clientPolicy.mode || false;
-            const push = policyEnabled && policyName && policyMac && policyType ? configuredClientsPolicy.push(clientPolicy) : false;
+            const push = policyName && policyMac && policyType && policyEnabled ? configuredClientsPolicy.push(clientPolicy) : false;
           };
 
           const clientsPolicyExist = configuredClientsPolicy.length > 0;
@@ -71,41 +71,47 @@ class MerakiPlatform {
         };
 
         //access points
-        const mrPointsControl = account.accessPointsControl || false;
-        if (mrPointsControl) {
+        const mrAccessPointsControl = account.accessPointsControl || false;
+        if (mrAccessPointsControl) {
           const hideSsids = account.hideSsids || [];
 
           //hidde ssids by name
           const configuredHidenSsidsName = [];
           for (const hideSsid of hideSsids) {
-            const hideSsidName = hideSsid.name;
+            const hideSsidName = hideSsid.name ?? false;
             const hideSsidEnabled = hideSsid.mode || false;
-            const push = hideSsidEnabled && hideSsidName ? configuredHidenSsidsName.push(hideSsidName) : false;
+            const push = hideSsidName && hideSsidEnabled ? configuredHidenSsidsName.push(hideSsidName) : false;
           };
 
+          const hideSsidNameExist = configuredHidenSsidsName.length > 0;
           const obj = {
             'type': 1,
             'name': 'Access Points',
             'uuid': networkId,
             'deviceData': configuredHidenSsidsName
           };
-          allDevices.push(obj);
+          const push = hideSsidNameExist ? allDevices.push(obj) : false;
         };
 
         //switches
-        const switches = account.switches || [];
-        for (const sw of switches) {
-          const swSerialNumber = sw.serialNumber || false;
-          const swEnabled = sw.mode || false;
+        const msSwitchesControl = account.switchesControl || false;
+        if (msSwitchesControl) {
+          const switches = account.switches || [];
 
-          const swControl = swSerialNumber && swEnabled;
-          const obj = {
-            'type': 2,
-            'name': sw.name,
-            'uuid': sw.serialNumber,
-            'deviceData': sw
+          //data
+          for (const sw of switches) {
+            const swSerialNumber = sw.serialNumber ?? false;
+            const swEnabled = sw.mode || false;
+
+            const msSwitchExist = swSerialNumber && swEnabled;
+            const obj = {
+              'type': 2,
+              'name': sw.name,
+              'uuid': sw.serialNumber,
+              'deviceData': sw
+            };
+            const push = msSwitchExist ? allDevices.push(obj) : false;
           };
-          const push = swControl ? allDevices.push(obj) : false;
         };
 
         //meraki devices
