@@ -42,7 +42,6 @@ class MerakiMr extends EventEmitter {
             const debug = debugLog ? this.emit('debug', `requesting SSIDs status.`) : false;
             try {
                 const exposedSsids = [];
-
                 for (const ssid of ssidsData) {
                     const ssidName = ssid.name;
 

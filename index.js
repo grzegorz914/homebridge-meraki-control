@@ -60,14 +60,17 @@ class MerakiPlatform {
             const push = policyName && policyMac && policyType && policyEnabled ? configuredClientsPolicy.push(clientPolicy) : false;
           };
 
+          //push configured clients policy to device
           const clientsPolicyExist = configuredClientsPolicy.length > 0;
-          const obj = {
-            'type': 0,
-            'name': 'Dashboard',
-            'uuid': organizationId,
-            'deviceData': configuredClientsPolicy
+          if (clientsPolicyExist) {
+            const obj = {
+              'type': 0,
+              'name': 'Dashboard',
+              'uuid': organizationId,
+              'deviceData': configuredClientsPolicy
+            };
+            allDevices.push(obj);
           };
-          const push = clientsPolicyExist ? allDevices.push(obj) : false;
         };
 
         //access points
@@ -83,14 +86,17 @@ class MerakiPlatform {
             const push = hideSsidName && hideSsidEnabled ? configuredHidenSsidsName.push(hideSsidName) : false;
           };
 
+          //push configured ssids to devices
           const hideSsidNameExist = configuredHidenSsidsName.length > 0;
-          const obj = {
-            'type': 1,
-            'name': 'Access Points',
-            'uuid': networkId,
-            'deviceData': configuredHidenSsidsName
+          if (hideSsidNameExist) {
+            const obj = {
+              'type': 1,
+              'name': 'Access Points',
+              'uuid': networkId,
+              'deviceData': configuredHidenSsidsName
+            };
+            allDevices.push(obj);
           };
-          const push = hideSsidNameExist ? allDevices.push(obj) : false;
         };
 
         //switches
@@ -98,19 +104,22 @@ class MerakiPlatform {
         if (msSwitchesControl) {
           const switches = account.switches || [];
 
-          //data
+          //configured switches
           for (const sw of switches) {
             const swSerialNumber = sw.serialNumber ?? false;
             const swEnabled = sw.mode || false;
 
+            //push configured switch to array
             const msSwitchExist = swSerialNumber && swEnabled;
-            const obj = {
-              'type': 2,
-              'name': sw.name,
-              'uuid': sw.serialNumber,
-              'deviceData': sw
+            if (msSwitchExist) {
+              const obj = {
+                'type': 2,
+                'name': sw.name,
+                'uuid': sw.serialNumber,
+                'deviceData': sw
+              };
+              allDevices.push(obj);
             };
-            const push = msSwitchExist ? allDevices.push(obj) : false;
           };
         };
 

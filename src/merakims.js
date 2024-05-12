@@ -26,7 +26,7 @@ class MerakiMs extends EventEmitter {
         const swHidenPortsByName = [];
         const hidePorts = device.hidePorts || [];
         for (const hidePort of hidePorts) {
-            const hidePortName = hidePort.name;
+            const hidePortName = hidePort.name ?? false;
             const hidePortEnabled = hidePort.mode || false;
             const pushHiddenPortName = hidePortName && hidePortEnabled ? swHidenPortsByName.push(hidePortName) : false;
         };

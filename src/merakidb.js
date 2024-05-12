@@ -70,15 +70,16 @@ class MerakiDb extends EventEmitter {
                         const index = dbClients.findIndex(item => item.id === mac);
                         const id = index !== -1 ? dbClients[index].id : -1;
 
-                        const obj = {
-                            "name": clientPolicy.name,
-                            "mac": clientPolicy.mac,
-                            "type": clientPolicy.type,
-                            "id": id
-                        }
-
-                        //check and push existed clients
-                        const push = index !== -1 ? configuredAndExistedClients.push(obj) : false;
+                        //push existed clients
+                        if (index !== -1) {
+                            const obj = {
+                                "name": clientPolicy.name,
+                                "mac": clientPolicy.mac,
+                                "type": clientPolicy.type,
+                                "id": id
+                            }
+                            configuredAndExistedClients.push(obj);
+                        };
                     };
 
                     const configuredAndExistedClientsCount = configuredAndExistedClients.length;
