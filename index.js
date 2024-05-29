@@ -143,13 +143,13 @@ class MerakiPlatform {
                   log(devInfo);
                 })
                 .on('message', (message) => {
-                  log(`${accountName}, ${deviceName}. ${message}`);
+                  log(`${accountName}, ${deviceName}, ${message}`);
                 })
                 .on('debug', (debug) => {
-                  log(`${accountName}, ${deviceName}. debug: ${debug}`);
+                  log(`${accountName}, ${deviceName}, debug: ${debug}`);
                 })
                 .on('error', (error) => {
-                  log.error(`${accountName}, ${deviceName}. ${error}`);
+                  log.error(`${accountName}, ${deviceName}, ${error}`);
                 });
               break
             case 1: //access point
@@ -164,13 +164,13 @@ class MerakiPlatform {
                   log(devInfo);
                 })
                 .on('message', (message) => {
-                  log(`${accountName}, ${deviceName}. ${message}`);
+                  log(`${accountName}, ${deviceName}, ${message}`);
                 })
                 .on('debug', (debug) => {
-                  log(`${accountName}, ${deviceName}. debug: ${debug}`);
+                  log(`${accountName}, ${deviceName}, debug: ${debug}`);
                 })
                 .on('error', (error) => {
-                  log.error(`${accountName}, ${deviceName}. ${error}`);
+                  log.error(`${accountName}, ${deviceName}, ${error}`);
                 });
               break
             case 2: //switch
@@ -185,17 +185,17 @@ class MerakiPlatform {
                   log(devInfo);
                 })
                 .on('message', (message) => {
-                  log(`${accountName}, ${deviceName}. ${message}`);
+                  log(`${accountName}, ${deviceName}, ${message}`);
                 })
                 .on('debug', (debug) => {
-                  log(`${accountName}, ${deviceName}. debug: ${debug}`);
+                  log(`${accountName}, ${deviceName}, debug: ${debug}`);
                 })
                 .on('error', (error) => {
-                  log.error(`${accountName}, ${deviceName}. ${error}`);
+                  log.error(`${accountName}, ${deviceName}, ${error}`);
                 });
               break
             default:
-              log(`Unknown device type: ${deviceType},`);
+              log(`Unknown device type: ${deviceType}.`);
               break;
           };
         };
