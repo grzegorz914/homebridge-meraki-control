@@ -89,7 +89,7 @@ class MerakiMr extends EventEmitter {
         return new Promise(async (resolve, reject) => {
             try {
                 await this.axiosInstance.put(url, payload);
-                await new Promise(resolve => setTimeout(resolve, 750));
+                this.emit('checkDeviceInfo');
                 resolve();
             } catch (error) {
                 reject(error);
