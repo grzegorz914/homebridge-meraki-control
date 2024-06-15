@@ -19,7 +19,7 @@ class MerakiDevice extends EventEmitter {
         this.networkId = config.networkId;
 
         //system configuration
-        this.refreshInterval = config.refreshInterval || 5;
+        this.refreshInterval = config.refreshInterval * 1000 || 5000;
         this.enableDebugMode = config.enableDebugMode || false;
         this.disableLogInfo = config.disableLogInfo || false;
         this.disableLogDeviceInfo = config.disableLogDeviceInfo || false;

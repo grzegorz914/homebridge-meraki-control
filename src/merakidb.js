@@ -1,6 +1,7 @@
 'use strict';
 const axios = require('axios');
 const EventEmitter = require('events');
+const ImpulseGenerator = require('./impulsegenerator.js');
 const CONSTANTS = require('./constants.json');
 
 class MerakiDb extends EventEmitter {
@@ -11,7 +12,7 @@ class MerakiDb extends EventEmitter {
         const networkId = config.networkId;
         const clientsPolicy = config.deviceData;
         const debugLog = config.debugLog;
-        this.refreshInterval = config.refreshInterval;
+        const refreshInterval = config.refreshInterval;
 
         const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
         const dashboardClientsUrl = CONSTANTS.ApiUrls.DbClients.replace('networkId', networkId);
@@ -24,7 +25,12 @@ class MerakiDb extends EventEmitter {
             }
         });
 
-        this.on('updateDashboardClients', async () => {
+        const timers = [
+            { name: 'updateDashboardClients', interval: refreshInterval }
+        ];
+
+        const impulseGenerator = new ImpulseGenerator(timers);
+        impulseGenerator.on('updateDashboardClients', async () => {
             const debug = debugLog ? this.emit('debug', `requesting clients data.`) : false;
             try {
                 const dbClientsData = await this.axiosInstance.get(`${dashboardClientsUrl}?perPage=255&timespan=2592000`);
@@ -52,10 +58,9 @@ class MerakiDb extends EventEmitter {
                     return;
                 };
 
-                this.emit('updateConfiguredAndExistingClients', dbClients);
+                impulseGenerator.emit('updateConfiguredAndExistingClients', dbClients);
             } catch (error) {
                 this.emit('error', `requesting clients data error: ${error}.`);
-                this.refreshData();
             };
         })
             .on('updateConfiguredAndExistingClients', (dbClients) => {
@@ -89,10 +94,9 @@ class MerakiDb extends EventEmitter {
                         return;
                     };
 
-                    this.emit('updateExistedClientsPolicy', configuredAndExistedClients);
+                    impulseGenerator.emit('updateExistedClientsPolicy', configuredAndExistedClients);
                 } catch (error) {
                     this.emit('error', `requestinjg configured clients error: ${error}.`);
-                    this.refreshData();
                 };
             })
             .on('updateExistedClientsPolicy', async (configuredAndExistedClients) => {
@@ -130,26 +134,18 @@ class MerakiDb extends EventEmitter {
                     //emit device info and state
                     this.emit('deviceInfo', clientsCount);
                     this.emit('deviceState', exposedClients, clientsCount);
-                    this.refreshData();
                 } catch (error) {
                     this.emit('error', `existed client policy data error: ${error}.`);
-                    this.refreshData();
                 };
             });
 
-        this.emit('updateDashboardClients');
-    };
-
-    async refreshData() {
-        await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-        this.emit('updateDashboardClients');
+        impulseGenerator.start();
     };
 
     send(url, payload) {
         return new Promise(async (resolve, reject) => {
             try {
                 await this.axiosInstance.put(url, payload);
-                this.emit('updateDashboardClients');
                 resolve();
             } catch (error) {
                 reject(error);

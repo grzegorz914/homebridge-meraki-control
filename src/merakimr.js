@@ -1,6 +1,7 @@
 'use strict';
 const axios = require('axios');
 const EventEmitter = require('events');
+const ImpulseGenerator = require('./impulsegenerator.js');
 const CONSTANTS = require('./constants.json');
 
 class MerakiMr extends EventEmitter {
@@ -12,7 +13,7 @@ class MerakiMr extends EventEmitter {
         const hideUnconfiguredSsid = config.hideUnconfiguredSsid;
         const hidenSsidsName = config.deviceData;
         const debugLog = config.debugLog;
-        this.refreshInterval = config.refreshInterval;
+        const refreshInterval = config.refreshInterval;
 
         const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
         const wirelessUrl = CONSTANTS.ApiUrls.MrSsids.replace('networkId', networkId);
@@ -25,7 +26,12 @@ class MerakiMr extends EventEmitter {
             }
         });
 
-        this.on('checkDeviceInfo', async () => {
+        const timers = [
+            { name: 'checkDeviceInfo', interval: refreshInterval }
+        ];
+
+        const impulseGenerator = new ImpulseGenerator(timers);
+        impulseGenerator.on('checkDeviceInfo', async () => {
             const debug = debugLog ? this.emit('debug', `requesting data.`) : false;
             try {
                 //ap ssids states
@@ -33,10 +39,9 @@ class MerakiMr extends EventEmitter {
                 const debug1 = debugLog ? this.emit('debug', `data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
                 //check device state
-                this.emit('checkDeviceState', ssidsData.data);
+                impulseGenerator.emit('checkDeviceState', ssidsData.data);
             } catch (error) {
                 this.emit('error', ` data error: ${error}.`);
-                this.refreshData();
             };
         }).on('checkDeviceState', (ssidsData) => {
             const debug = debugLog ? this.emit('debug', `requesting SSIDs status.`) : false;
@@ -70,26 +75,18 @@ class MerakiMr extends EventEmitter {
                 //emit device info and state
                 this.emit('deviceInfo', ssidsCount);
                 this.emit('deviceState', exposedSsids, ssidsCount);
-                this.refreshData();
             } catch (error) {
                 this.emit('error', `requesting SSIDs status error: ${error}.`);
-                this.refreshData();
             };
         });
 
-        this.emit('checkDeviceInfo');
-    };
-
-    async refreshData() {
-        await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-        this.emit('checkDeviceInfo');
+        impulseGenerator.start();
     };
 
     send(url, payload) {
         return new Promise(async (resolve, reject) => {
             try {
                 await this.axiosInstance.put(url, payload);
-                this.emit('checkDeviceInfo');
                 resolve();
             } catch (error) {
                 reject(error);

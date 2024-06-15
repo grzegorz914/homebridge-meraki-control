@@ -1,6 +1,7 @@
 'use strict';
 const axios = require('axios');
 const EventEmitter = require('events');
+const ImpulseGenerator = require('./impulsegenerator.js');
 const CONSTANTS = require('./constants.json');
 
 class MerakiMs extends EventEmitter {
@@ -10,7 +11,7 @@ class MerakiMs extends EventEmitter {
         const apiKey = config.apiKey;
         const device = config.deviceData;
         const debugLog = config.debugLog;
-        this.refreshInterval = config.refreshInterval;
+        const refreshInterval = config.refreshInterval;
 
         const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
         this.axiosInstance = axios.create({
@@ -31,7 +32,12 @@ class MerakiMs extends EventEmitter {
             const pushHiddenPortName = hidePortName && hidePortEnabled ? swHidenPortsByName.push(hidePortName) : false;
         };
 
-        this.on('checkDeviceInfo', async () => {
+        const timers = [
+            { name: 'checkDeviceInfo', interval: refreshInterval }
+        ];
+
+        const impulseGenerator = new ImpulseGenerator(timers);
+        impulseGenerator.on('checkDeviceInfo', async () => {
             const debug = debugLog ? this.emit('debug', `requesting data.`) : false;
             try {
                 //get data of switch
@@ -40,10 +46,9 @@ class MerakiMs extends EventEmitter {
                 const debug1 = debugLog ? this.emit('debug', `data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 
                 //check device state
-                this.emit('checkDeviceState', swData.data);
+                impulseGenerator.emit('checkDeviceState', swData.data);
             } catch (error) {
                 this.emit('error', `requesting data error: ${error}.`);
-                this.refreshData();
             };
         }).on('checkDeviceState', (swData) => {
             const debug = debugLog ? this.emit('debug', `requesting ports status.`) : false;
@@ -74,26 +79,18 @@ class MerakiMs extends EventEmitter {
                 //emit device info and state
                 this.emit('deviceInfo', portsCount);
                 this.emit('deviceState', exposedPorts, portsCount);
-                this.refreshData();
             } catch (error) {
                 this.emit('error', `requesting port status error: ${error}.`);
-                this.refreshData();
             };
         });
 
-        this.emit('checkDeviceInfo');
-    };
-
-    async refreshData() {
-        await new Promise(resolve => setTimeout(resolve, this.refreshInterval * 1000));
-        this.emit('checkDeviceInfo');
+        impulseGenerator.start();
     };
 
     send(url, payload) {
         return new Promise(async (resolve, reject) => {
             try {
                 await this.axiosInstance.put(url, payload);
-                this.emit('checkDeviceInfo');
                 resolve();
             } catch (error) {
                 reject(error);
