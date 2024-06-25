@@ -120,7 +120,7 @@ class MerakiDevice extends EventEmitter {
                     const serviceName = this.prefixForSsidName ? `W.${ssidName}` : ssidName;
                     const service = accessory.addService(Service.Outlet, serviceName, `Ssid Service ${ssidName}`);
                     service.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    service.setCharacteristic(Characteristic.ConfiguredName, `${serviceName}`);
+                    service.setCharacteristic(Characteristic.ConfiguredName, serviceName);
                     service.getCharacteristic(Characteristic.On)
                         .onGet(async () => {
                             const state = ssid.state ?? false;
@@ -147,7 +147,7 @@ class MerakiDevice extends EventEmitter {
                         const sensorServiceName = this.prefixForSsidName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
                         const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Ssid Service Sensor ${ssidName}`);
                         sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        sensorService.setCharacteristic(Characteristic.ConfiguredName, `${sensorServiceName}`);
+                        sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
                         sensorService.getCharacteristic(Characteristic.ContactSensorState)
                             .onGet(async () => {
                                 const state = ssid.state ?? false;

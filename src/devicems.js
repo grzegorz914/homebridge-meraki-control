@@ -117,7 +117,7 @@ class MerakiDevice extends EventEmitter {
                     const serviceName = this.prefixForPortName ? `${portId}.${portName}` : portName;
                     const service = accessory.addService(Service.Outlet, serviceName, `Port Service ${portName}`);
                     service.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    service.setCharacteristic(Characteristic.ConfiguredName, `${serviceName}`);
+                    service.setCharacteristic(Characteristic.ConfiguredName, serviceName);
                     service.getCharacteristic(Characteristic.On)
                         .onGet(async () => {
                             const state = port.state ?? false;
@@ -147,7 +147,7 @@ class MerakiDevice extends EventEmitter {
                         const sensorServiceName = this.prefixForPortName ? `Sensor ${portId}.${portName}` : `Sensor ${portName}`;
                         const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Port Service Sensor ${portName}`);
                         sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        sensorService.setCharacteristic(Characteristic.ConfiguredName, `${sensorServiceName}`);
+                        sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
                         sensorService.getCharacteristic(Characteristic.ContactSensorState)
                             .onGet(async () => {
                                 const state = port.state;

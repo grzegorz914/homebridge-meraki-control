@@ -117,7 +117,7 @@ class MerakiDevice extends EventEmitter {
                     const serviceName = this.prefixForClientName ? `C.${clientName}` : clientName;
                     const clientPolicyService = accessory.addService(Service.Outlet, serviceName, `Client Service ${clientName}`);
                     clientPolicyService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    clientPolicyService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName}`);
+                    clientPolicyService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
                     clientPolicyService.getCharacteristic(Characteristic.On)
                         .onGet(async () => {
                             const state = client.policyState ?? false;
@@ -145,7 +145,7 @@ class MerakiDevice extends EventEmitter {
                         const sensorServiceName = this.prefixForClientName ? `Sensor C.${clientName}` : `Sensor ${clientName}`;
                         const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Client Service Sensor ${clientName}`);
                         sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        sensorService.setCharacteristic(Characteristic.ConfiguredName, `${sensorServiceName}`);
+                        sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
                         sensorService.getCharacteristic(Characteristic.ContactSensorState)
                             .onGet(async () => {
                                 const state = client.policyState ?? false;
