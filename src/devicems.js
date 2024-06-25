@@ -100,7 +100,7 @@ class MerakiDevice extends EventEmitter {
                 //prepare information service
                 const debug1 = !this.enableDebugMode ? false : this.emit('debug', `prepare information service`);
                 accessory.getService(Service.AccessoryInformation)
-                    .setCharacteristic(Characteristic.Manufacturer, 'Cisco/Meraki')
+                    .setCharacteristic(Characteristic.Manufacturer, 'Cisco Meraki')
                     .setCharacteristic(Characteristic.Model, accessoryName)
                     .setCharacteristic(Characteristic.SerialNumber, this.networkId)
                     .setCharacteristic(Characteristic.FirmwareRevision, this.organizationId);
