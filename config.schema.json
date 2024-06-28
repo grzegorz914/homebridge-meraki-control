@@ -62,20 +62,20 @@
               "type": "boolean",
               "default": false,
               "description": "This option enable prefix (C.) for client name displayed in HomeKit app.",
-              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
-              }
+              },
+              "required": false
             },
             "enableSonsorClients": {
               "title": "Clients Sensors",
               "type": "boolean",
               "default": false,
               "description": "This option expose Contact Sensor in HomeKit app for all exposed Clients.",
-              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
-              }
+              },
+              "required": false
             },
             "dashboardClientsPolicy": {
               "title": "Clients",
@@ -121,7 +121,7 @@
                         ]
                       }
                     ],
-                    "required": true
+                    "required": false
                   },
                   "mode": {
                     "title": "Enable",
@@ -133,7 +133,8 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
-              }
+              },
+              "required": false
             },
             "accessPointsControl": {
               "title": "Access Points Control",
@@ -147,30 +148,30 @@
               "type": "boolean",
               "default": false,
               "description": "This option hide all unconfigured SSIDs.",
-              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-              }
+              },
+              "required": false
             },
             "enablePrefixForSsidsName": {
               "title": "Prefix For SSIDs Name",
               "type": "boolean",
               "default": false,
               "description": "This option enable prefix (W.) for SSIDs name displayed in HomeKit app.",
-              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-              }
+              },
+              "required": false
             },
             "enableSonsorSsids": {
               "title": "SSIDs Sensors",
               "type": "boolean",
-              "default": false,
               "description": "This option expose Contact Sensor in HomeKit app for all exposed SSIDs.",
               "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-              }
+              },
+              "required": false
             },
             "hideSsids": {
               "title": "SSIDs",
@@ -195,7 +196,8 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-              }
+              },
+              "required": false
             },
             "switchesControl": {
               "title": "Switches Control",
@@ -284,7 +286,8 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].switchesControl === true;"
-              }
+              },
+              "required": false
             },
             "enableDebugMode": {
               "title": "Debug",
