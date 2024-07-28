@@ -121,7 +121,7 @@
                         ]
                       }
                     ],
-                    "required": false
+                    "required": true
                   },
                   "mode": {
                     "title": "Enable",
@@ -147,7 +147,7 @@
               "title": "Hide Unconfigured SSIDs",
               "type": "boolean",
               "default": false,
-              "description": "This option hide all unconfigured SSIDs.",
+              "description": "This option hide all unconfigured SSIDs, the name of this SSId must start with Unconfigured.",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
               },
@@ -167,7 +167,6 @@
               "title": "SSIDs Sensors",
               "type": "boolean",
               "description": "This option expose Contact Sensor in HomeKit app for all exposed SSIDs.",
-              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
               },
@@ -236,7 +235,7 @@
                     "title": "Hide Uplink Ports",
                     "type": "boolean",
                     "default": false,
-                    "description": "This option hide all uplink ports.",
+                    "description": "This option hide all uplink ports, the name of this Port must start with Uplink.",
                     "required": false
                   },
                   "enablePrefixForPortName": {
