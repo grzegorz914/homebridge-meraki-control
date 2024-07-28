@@ -55,13 +55,13 @@ class MerakiMs extends EventEmitter {
             try {
                 const exposedPorts = [];
                 for (const port of swData) {
-                    const portName = port.name;
-                    const uplinkPort = portName.substr(0, 6) === 'Uplink' ?? false;
+                    const portName = port.name ?? false;
+                    const uplinkPort = portName ? portName.substr(0, 6) === 'Uplink' : false;
                     const hideUplinkPort = device.hideUplinkPorts && uplinkPort;
                     const hidePortByName = swHidenPortsByName.includes(portName);
 
                     //push exposed ports to array
-                    if (!hideUplinkPort && !hidePortByName) {
+                    if (portName && !hideUplinkPort && !hidePortByName) {
                         const obj = {
                             'id': port.portId,
                             'name': portName,
