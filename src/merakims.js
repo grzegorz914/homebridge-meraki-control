@@ -58,6 +58,7 @@ class MerakiMs extends EventEmitter {
                     const portName = port.name ?? false;
 
                     if (!portName) {
+                        const debug = debugLog ? this.emit('debug', `Skipped Port: ${port.portId}, Name: ${port.name}.`) : false;
                         continue;
                     }
 

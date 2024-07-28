@@ -147,7 +147,7 @@
               "title": "Hide Unconfigured SSIDs",
               "type": "boolean",
               "default": false,
-              "description": "This option hide all unconfigured SSIDs, the name of this SSId must start with Unconfigured.",
+              "description": "This option hide all unconfigured SSIDs, the name of this SSID must start with Unconfigured.",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
               },

@@ -48,11 +48,17 @@ class MerakiMr extends EventEmitter {
             try {
                 const exposedSsids = [];
                 for (const ssid of ssidsData) {
-                    const ssidName = ssid.name;
+                    const ssidName = ssid.name ?? false;
+
+                    if (!ssidName) {
+                        const debug = debugLog ? this.emit('debug', `Skipped SSID: ${ssid.number}, Name: ${ssid.name}.`) : false;
+                        continue;
+                    }
 
                     //hidde unconfigured and ssids by name
+                    const unconfiguredSsids = ssidName.substr(0, 12) === 'Unconfigured';
+                    const hideUnconfiguredSsids = hideUnconfiguredSsid && unconfiguredSsids;
                     const hideSsidsByName = hidenSsidsName.includes(ssidName);
-                    const hideUnconfiguredSsids = hideUnconfiguredSsid && (ssidName.substr(0, 12) === 'Unconfigured');
 
                     //push exposed ssids to array
                     if (!hideUnconfiguredSsids && !hideSsidsByName) {

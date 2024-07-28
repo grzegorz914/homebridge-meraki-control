@@ -70,7 +70,7 @@
 | `dashboardClientsPolicy.type` | Here choice the policy *Type* to be appiled for this Client. |
 | `dashboardClientsPolicy.mode` | Here *Activate/Deactivate* this Client control. |
 | `accessPointsControl` | This option *Enable/Disable* control of Access Points. |
-| `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden and not exposed to the *Homebridge/HomeKit*, the name of  this `SSId` must start with `Unconfigured`. |
+| `hideUnconfiguredSsids` | If enabled, all *Unconfigured SSIDs* will be hidden and not exposed to the *Homebridge/HomeKit*, the name of  this `SSID` must start with `Unconfigured`. |
 | `enablePrefixForSsidsName` | This option enable prefix `W.` for *SSIDs* name displayed in HomeKit app. |
 | `hideSsids.name` | Here set *SSID Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `hideSsids.mode` | Here *Activate/Deactivate* this SSID control. |
