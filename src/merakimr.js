@@ -56,19 +56,21 @@ class MerakiMr extends EventEmitter {
                     }
 
                     //hidde unconfigured and ssids by name
-                    const unconfiguredSsids = ssidName.substr(0, 12) === 'Unconfigured';
-                    const hideUnconfiguredSsids = hideUnconfiguredSsid && unconfiguredSsids;
-                    const hideSsidsByName = hidenSsidsName.includes(ssidName);
+                    const unconfiguredSsid = ssidName.startsWith('Unconfigured');
+                    const hideUnconfiguredSsid = hideUnconfiguredSsid && unconfiguredSsid;
+                    const hideSsidByName = hidenSsidsName.includes(ssidName);
 
                     //push exposed ssids to array
-                    if (!hideUnconfiguredSsids && !hideSsidsByName) {
-                        const obj = {
-                            'number': ssid.number,
-                            'name': ssidName,
-                            'state': ssid.enabled
-                        };
-                        exposedSsids.push(obj);
+                    if (hideUnconfiguredSsid || hideSsidByName) {
+                        continue;
+                    }
+
+                    const obj = {
+                        'number': ssid.number,
+                        'name': ssidName,
+                        'state': ssid.enabled
                     };
+                    exposedSsids.push(obj);
                 };
 
                 const ssidsCount = exposedSsids.length;

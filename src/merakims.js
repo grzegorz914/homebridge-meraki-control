@@ -62,20 +62,22 @@ class MerakiMs extends EventEmitter {
                         continue;
                     }
 
-                    const uplinkPort = portName.substr(0, 6) === 'Uplink';
+                    const uplinkPort = portName.startsWith('Uplink');
                     const hideUplinkPort = device.hideUplinkPorts && uplinkPort;
                     const hidePortByName = swHidenPortsByName.includes(portName);
 
                     //push exposed ports to array
-                    if (!hideUplinkPort && !hidePortByName) {
-                        const obj = {
-                            'id': port.portId,
-                            'name': portName,
-                            'state': port.enabled,
-                            'poeState': port.poeEnabled
-                        };
-                        exposedPorts.push(obj);
+                    if (hideUplinkPort || hidePortByName) {
+                        continue;
                     }
+
+                    const obj = {
+                        'id': port.portId,
+                        'name': portName,
+                        'state': port.enabled,
+                        'poeState': port.poeEnabled
+                    };
+                    exposedPorts.push(obj);
                 };
                 const portsCount = exposedPorts.length;
                 const debug1 = debugLog ? this.emit('debug', `found: ${portsCount} exposed ports.`) : false;
