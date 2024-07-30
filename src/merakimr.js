@@ -60,11 +60,12 @@ class MerakiMr extends EventEmitter {
                     const hideUnconfiguredSsid = hideUnconfiguredSsid && unconfiguredSsid;
                     const hideSsidByName = hidenSsidsName.includes(ssidName);
 
-                    //push exposed ssids to array
+                    //skip iterate
                     if (hideUnconfiguredSsid || hideSsidByName) {
                         continue;
                     }
 
+                    //push exposed ssid to array
                     const obj = {
                         'number': ssid.number,
                         'name': ssidName,

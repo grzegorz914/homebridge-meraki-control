@@ -57,20 +57,23 @@ class MerakiMs extends EventEmitter {
                 for (const port of swData) {
                     const portName = port.name ?? false;
 
+                    //skip iterate
                     if (!portName) {
                         const debug = debugLog ? this.emit('debug', `Skipped Port: ${port.portId}, Name: ${port.name}.`) : false;
                         continue;
                     }
 
+                    //hidde uplink and port by name
                     const uplinkPort = portName.startsWith('Uplink');
                     const hideUplinkPort = device.hideUplinkPorts && uplinkPort;
                     const hidePortByName = swHidenPortsByName.includes(portName);
 
-                    //push exposed ports to array
+                    //skip iterate
                     if (hideUplinkPort || hidePortByName) {
                         continue;
                     }
 
+                    //push exposed ports to array
                     const obj = {
                         'id': port.portId,
                         'name': portName,
