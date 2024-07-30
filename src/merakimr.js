@@ -10,7 +10,7 @@ class MerakiMr extends EventEmitter {
         const host = config.host;
         const apiKey = config.apiKey;
         const networkId = config.networkId;
-        const hideUnconfiguredSsid = config.hideUnconfiguredSsid;
+        const hideUnconfiguredSsids = config.hideUnconfiguredSsid;
         const hidenSsidsName = config.deviceData;
         const debugLog = config.debugLog;
         const refreshInterval = config.refreshInterval;
@@ -57,7 +57,7 @@ class MerakiMr extends EventEmitter {
 
                     //hidde unconfigured and ssids by name
                     const unconfiguredSsid = ssidName.startsWith('Unconfigured');
-                    const hideUnconfiguredSsid = hideUnconfiguredSsid && unconfiguredSsid;
+                    const hideUnconfiguredSsid = hideUnconfiguredSsids && unconfiguredSsid;
                     const hideSsidByName = hidenSsidsName.includes(ssidName);
 
                     //skip iterate
