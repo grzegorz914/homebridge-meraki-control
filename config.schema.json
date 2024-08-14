@@ -34,6 +34,7 @@
               "type": "string",
               "placeholder": "01032453453421923",
               "description": "Here set the Meraki Api Key.",
+              "format": "password",
               "required": true
             },
             "organizationId": {
@@ -455,7 +456,10 @@
                   "key": "devices[]",
                   "title": "Authorization",
                   "items": [
-                    "devices[].apiKey",
+                    {
+                      "key": "devices[].apiKey",
+                      "type": "password"
+                    },
                     "devices[].organizationId",
                     "devices[].networkId"
                   ]

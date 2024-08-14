@@ -91,76 +91,75 @@ class MerakiDevice extends EventEmitter {
     };
 
     //Prepare accessory
-    prepareAccessory(deviceName, deviceUuid) {
-        return new Promise((resolve, reject) => {
-            try {
-                //prepare accessory
-                const debug = !this.enableDebugMode ? false : this.emit('debug', `prepare accessory`);
-                const accessoryName = deviceName;
-                const accessoryUUID = AccessoryUUID.generate(deviceUuid);
-                const accessoryCategory = Categories.AIRPORT;
-                const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
+    async prepareAccessory(deviceName, deviceUuid) {
+        try {
+            //prepare accessory
+            const debug = !this.enableDebugMode ? false : this.emit('debug', `prepare accessory`);
+            const accessoryName = deviceName;
+            const accessoryUUID = AccessoryUUID.generate(deviceUuid);
+            const accessoryCategory = Categories.AIRPORT;
+            const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
-                //prepare information service
-                const debug1 = !this.enableDebugMode ? false : this.emit('debug', `prepare information service`);
-                accessory.getService(Service.AccessoryInformation)
-                    .setCharacteristic(Characteristic.Manufacturer, 'Cisco Meraki')
-                    .setCharacteristic(Characteristic.Model, accessoryName)
-                    .setCharacteristic(Characteristic.SerialNumber, this.networkId)
-                    .setCharacteristic(Characteristic.FirmwareRevision, this.organizationId);
+            //prepare information service
+            const debug1 = !this.enableDebugMode ? false : this.emit('debug', `prepare information service`);
+            accessory.getService(Service.AccessoryInformation)
+                .setCharacteristic(Characteristic.Manufacturer, 'Cisco Meraki')
+                .setCharacteristic(Characteristic.Model, accessoryName)
+                .setCharacteristic(Characteristic.SerialNumber, this.networkId)
+                .setCharacteristic(Characteristic.FirmwareRevision, this.organizationId);
 
-                const debug2 = !this.enableDebugMode ? false : this.emit('debug', `prepare meraki service`);
-                const exposedSsids = this.exposedSsids;
+            const debug2 = !this.enableDebugMode ? false : this.emit('debug', `prepare meraki service`);
+            const exposedSsids = this.exposedSsids;
 
-                //device
-                this.services = [];
-                this.sensorServices = [];
-                for (const ssid of exposedSsids) {
-                    const ssidName = ssid.name;
-                    const serviceName = this.prefixForSsidName ? `W.${ssidName}` : ssidName;
-                    const service = accessory.addService(Service.Outlet, serviceName, `Ssid Service ${ssidName}`);
-                    service.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    service.setCharacteristic(Characteristic.ConfiguredName, serviceName);
-                    service.getCharacteristic(Characteristic.On)
+            //device
+            this.services = [];
+            this.sensorServices = [];
+            for (const ssid of exposedSsids) {
+                const ssidName = ssid.name;
+                const serviceName = this.prefixForSsidName ? `W.${ssidName}` : ssidName;
+                const service = accessory.addService(Service.Outlet, serviceName, `Ssid Service ${ssidName}`);
+                service.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                service.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                service.getCharacteristic(Characteristic.On)
+                    .onGet(async () => {
+                        const state = ssid.state ?? false;
+                        const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
+                        return state;
+                    })
+                    .onSet(async (state) => {
+                        try {
+                            state = state ? true : false;
+                            const url = `${CONSTANTS.ApiUrls.MrSsids.replace('networkId', this.networkId)}/${ssid.number}`;
+                            const data = {
+                                'enabled': state
+                            };
+                            await this.merakiMr.send(url, data);
+                            const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                        } catch (error) {
+                            this.emit('error', `SSID: ${ssidName}, set state error: ${error}`);
+                        }
+                    });
+                this.services.push(service);
+
+                if (this.ssidsSensor) {
+                    const debug = !this.enableDebugMode && j > 0 ? false : this.emit('debug', `prepare meraki sensor service`);
+                    const sensorServiceName = this.prefixForSsidName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
+                    const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Ssid Service Sensor ${ssidName}`);
+                    sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
+                    sensorService.getCharacteristic(Characteristic.ContactSensorState)
                         .onGet(async () => {
                             const state = ssid.state ?? false;
-                            const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
                             return state;
-                        })
-                        .onSet(async (state) => {
-                            try {
-                                state = state ? true : false;
-                                const url = `${CONSTANTS.ApiUrls.MrSsids.replace('networkId', this.networkId)}/${ssid.number}`;
-                                const data = {
-                                    'enabled': state
-                                };
-                                await this.merakiMr.send(url, data);
-                                const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
-                            } catch (error) {
-                                this.emit('error', `SSID: ${ssidName}, set state error: ${error}`);
-                            }
                         });
-                    this.services.push(service);
-
-                    if (this.ssidsSensor) {
-                        const debug = !this.enableDebugMode && j > 0 ? false : this.emit('debug', `prepare meraki sensor service`);
-                        const sensorServiceName = this.prefixForSsidName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
-                        const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Ssid Service Sensor ${ssidName}`);
-                        sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
-                        sensorService.getCharacteristic(Characteristic.ContactSensorState)
-                            .onGet(async () => {
-                                const state = ssid.state ?? false;
-                                return state;
-                            });
-                        this.sensorServices.push(sensorService);
-                    };
+                    this.sensorServices.push(sensorService);
                 };
-                resolve(accessory);
-            } catch (error) {
-                reject(error);
             };
-        });
+
+            return accessory;
+        } catch (error) {
+            this.emit('error', error);
+        };
     };
 };
 module.exports = MerakiDevice;
