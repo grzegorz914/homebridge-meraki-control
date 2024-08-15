@@ -26,25 +26,23 @@ class MerakiMr extends EventEmitter {
             }
         });
 
-        const timers = [
-            { name: 'checkDeviceInfo', interval: refreshInterval }
-        ];
-
-        const impulseGenerator = new ImpulseGenerator(timers);
-        impulseGenerator.on('checkDeviceInfo', async () => {
-            const debug = debugLog ? this.emit('debug', `requesting data.`) : false;
+        this.impulseGenerator = new ImpulseGenerator();
+        this.impulseGenerator.on('checkDeviceInfo', async () => {
+            const debug = debugLog ? this.emit('debug', `Requesting data.`) : false;
             try {
                 //ap ssids states
                 const ssidsData = await this.axiosInstance.get(wirelessUrl);
-                const debug1 = debugLog ? this.emit('debug', `data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
+                const debug1 = debugLog ? this.emit('debug', `Data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
 
                 //check device state
-                impulseGenerator.emit('checkDeviceState', ssidsData.data);
+                this.impulseGenerator.emit('checkDeviceState', ssidsData.data);
             } catch (error) {
-                this.emit('error', ` data error: ${error}.`);
+                this.emit('error', ` Data error: ${error}, try again in 15s.`);
+                await new Promise(resolve => setTimeout(resolve, 15000));
+                this.impulseGenerator.emit('checkDeviceInfo');
             };
-        }).on('checkDeviceState', (ssidsData) => {
-            const debug = debugLog ? this.emit('debug', `requesting SSIDs status.`) : false;
+        }).on('checkDeviceState', async (ssidsData) => {
+            const debug = debugLog ? this.emit('debug', `Requesting SSIDs status.`) : false;
             try {
                 const exposedSsids = [];
                 for (const ssid of ssidsData) {
@@ -75,7 +73,7 @@ class MerakiMr extends EventEmitter {
                 };
 
                 const ssidsCount = exposedSsids.length;
-                const debug1 = debugLog ? this.emit('debug', `found: ${ssidsCount} exposed SSIDs.`) : false;
+                const debug1 = debugLog ? this.emit('debug', `Found: ${ssidsCount} exposed SSIDs.`) : false;
 
                 if (ssidsCount === 0) {
                     return;
@@ -85,22 +83,22 @@ class MerakiMr extends EventEmitter {
                 this.emit('deviceInfo', ssidsCount);
                 this.emit('deviceState', exposedSsids, ssidsCount);
             } catch (error) {
-                this.emit('error', `requesting SSIDs status error: ${error}.`);
+                this.emit('error', `Requesting SSIDs status error: ${error}, try again in 15s.`);
+                await new Promise(resolve => setTimeout(resolve, 15000));
+                this.impulseGenerator.emit('checkDeviceInfo');
             };
-        });
+        }).on('state', (state) => {});
 
-        impulseGenerator.start();
+        this.impulseGenerator.emit('checkDeviceInfo');
     };
 
-    send(url, payload) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await this.axiosInstance.put(url, payload);
-                resolve();
-            } catch (error) {
-                reject(error);
-            };
-        });
+    async send(url, payload) {
+        try {
+            await this.axiosInstance.put(url, payload);
+            return true;;
+        } catch (error) {
+            this.emit('error', error);
+        };
     };
 };
 module.exports = MerakiMr;

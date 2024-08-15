@@ -65,13 +65,19 @@ class MerakiDevice extends EventEmitter {
                 };
             };
 
+            //start prepare accessory
             if (this.startPrepareAccessory) {
                 try {
                     const accessory = await this.prepareAccessory(deviceName, deviceUuid);
                     this.emit('publishAccessory', accessory);
                     this.startPrepareAccessory = false;
+
+                    //start check state
+                    this.merakiMs.impulseGenerator.start([{ timerName: 'checkState', sampling: this.refreshInterval }]);
                 } catch (error) {
-                    this.emit('error', `prepare accessory error: ${error}`);
+                    this.emit('error', `Prepare accessory error: ${error}. try again in 15s.`);
+                    await new Promise(resolve => setTimeout(resolve, 15000));
+                    this.merakiMs.impulseGenerator.emit('checkDeviceInfo');
                 };
             };
         })

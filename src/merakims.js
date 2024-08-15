@@ -32,26 +32,24 @@ class MerakiMs extends EventEmitter {
             const pushHiddenPortName = hidePortName && hidePortEnabled ? swHidenPortsByName.push(hidePortName) : false;
         };
 
-        const timers = [
-            { name: 'checkDeviceInfo', interval: refreshInterval }
-        ];
-
-        const impulseGenerator = new ImpulseGenerator(timers);
-        impulseGenerator.on('checkDeviceInfo', async () => {
-            const debug = debugLog ? this.emit('debug', `requesting data.`) : false;
+        this.impulseGenerator = new ImpulseGenerator();
+        this.impulseGenerator.on('checkDeviceInfo', async () => {
+            const debug = debugLog ? this.emit('debug', `Requesting data.`) : false;
             try {
                 //get data of switch
                 const portsUrl = CONSTANTS.ApiUrls.MsPorts.replace('serialNumber', device.serialNumber);
                 const swData = await this.axiosInstance.get(portsUrl);
-                const debug1 = debugLog ? this.emit('debug', `data: ${JSON.stringify(swData.data, null, 2)}`) : false;
+                const debug1 = debugLog ? this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 
                 //check device state
-                impulseGenerator.emit('checkDeviceState', swData.data);
+                this.impulseGenerator.emit('checkDeviceState', swData.data);
             } catch (error) {
-                this.emit('error', `requesting data error: ${error}.`);
+                this.emit('error', `Requesting data error: ${error}, try again in 15s.`);
+                await new Promise(resolve => setTimeout(resolve, 15000));
+                this.impulseGenerator.emit('checkDeviceInfo');
             };
-        }).on('checkDeviceState', (swData) => {
-            const debug = debugLog ? this.emit('debug', `requesting ports status.`) : false;
+        }).on('checkDeviceState', async (swData) => {
+            const debug = debugLog ? this.emit('debug', `Requesting ports status.`) : false;
             try {
                 const exposedPorts = [];
                 for (const port of swData) {
@@ -83,7 +81,7 @@ class MerakiMs extends EventEmitter {
                     exposedPorts.push(obj);
                 };
                 const portsCount = exposedPorts.length;
-                const debug1 = debugLog ? this.emit('debug', `found: ${portsCount} exposed ports.`) : false;
+                const debug1 = debugLog ? this.emit('debug', `Found: ${portsCount} exposed ports.`) : false;
 
                 if (portsCount === 0) {
                     return;
@@ -93,22 +91,22 @@ class MerakiMs extends EventEmitter {
                 this.emit('deviceInfo', portsCount);
                 this.emit('deviceState', exposedPorts, portsCount);
             } catch (error) {
-                this.emit('error', `requesting port status error: ${error}.`);
+                this.emit('error', `Requesting port status error: ${error}, try again in 15s.`);
+                await new Promise(resolve => setTimeout(resolve, 15000));
+                this.impulseGenerator.emit('checkDeviceInfo');
             };
-        });
+        }).on('state', (state) => { });
 
-        impulseGenerator.start();
+        this.impulseGenerator.emit('checkDeviceInfo');
     };
 
-    send(url, payload) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await this.axiosInstance.put(url, payload);
-                resolve();
-            } catch (error) {
-                reject(error);
-            };
-        });
+    async send(url, payload) {
+        try {
+            await this.axiosInstance.put(url, payload);
+            return true;;
+        } catch (error) {
+            this.emit('error', error);
+        };
     };
 };
 module.exports = MerakiMs;
