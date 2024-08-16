@@ -13,7 +13,6 @@ class MerakiMr extends EventEmitter {
         const hideUnconfiguredSsids = config.hideUnconfiguredSsid;
         const hidenSsidsName = config.deviceData;
         const debugLog = config.debugLog;
-        const refreshInterval = config.refreshInterval;
 
         const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
         const wirelessUrl = CONSTANTS.ApiUrls.MrSsids.replace('networkId', networkId);

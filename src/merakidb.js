@@ -12,7 +12,6 @@ class MerakiDb extends EventEmitter {
         const networkId = config.networkId;
         const clientsPolicy = config.deviceData;
         const debugLog = config.debugLog;
-        const refreshInterval = config.refreshInterval;
 
         const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
         const dashboardClientsUrl = CONSTANTS.ApiUrls.DbClients.replace('networkId', networkId);

@@ -38,8 +38,7 @@ class MerakiDevice extends EventEmitter {
             networkId: config.networkId,
             deviceData: deviceData,
             hideUnconfiguredSsid: hideUnconfiguredSsids,
-            debugLog: this.enableDebugMode,
-            refreshInterval: this.refreshInterval,
+            debugLog: this.enableDebugMode
         });
 
         this.merakiMr.on('deviceInfo', (ssidsCount) => {
@@ -76,7 +75,7 @@ class MerakiDevice extends EventEmitter {
                     this.startPrepareAccessory = false;
 
                     //start check state
-                    this.merakiMr.impulseGenerator.start([{ timerName: 'checkState', sampling: this.refreshInterval }]);
+                    this.merakiMr.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
                 } catch (error) {
                     this.emit('error', `Prepare accessory error: ${error}. try again in 15s.`);
                     await new Promise(resolve => setTimeout(resolve, 15000));

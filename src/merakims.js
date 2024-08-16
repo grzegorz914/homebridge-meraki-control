@@ -11,7 +11,6 @@ class MerakiMs extends EventEmitter {
         const apiKey = config.apiKey;
         const device = config.deviceData;
         const debugLog = config.debugLog;
-        const refreshInterval = config.refreshInterval;
 
         const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
         this.axiosInstance = axios.create({

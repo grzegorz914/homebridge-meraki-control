@@ -36,8 +36,7 @@ class MerakiDevice extends EventEmitter {
             apiKey: config.apiKey,
             networkId: config.networkId,
             deviceData: deviceData,
-            debugLog: this.enableDebugMode,
-            refreshInterval: this.refreshInterval
+            debugLog: this.enableDebugMode
         });
 
         this.merakiDb.on('deviceInfo', (clientsCount) => {
@@ -73,7 +72,7 @@ class MerakiDevice extends EventEmitter {
                     this.startPrepareAccessory = false;
 
                     //start check state
-                    this.merakiDb.impulseGenerator.start([{ timerName: 'checkState', sampling: this.refreshInterval }]);
+                    this.merakiDb.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
                 } catch (error) {
                     this.emit('error', `Prepare accessory error: ${error}. try again in 15s.`);
                     await new Promise(resolve => setTimeout(resolve, 15000));
