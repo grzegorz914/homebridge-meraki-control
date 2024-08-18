@@ -148,7 +148,7 @@ class MerakiDb extends EventEmitter {
             await this.axiosInstance.put(url, payload);
             return true;;
         } catch (error) {
-            this.emit('error', error);
+            throw new Error(error);
         };
     };
 };

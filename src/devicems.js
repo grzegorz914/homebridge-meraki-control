@@ -86,6 +86,9 @@ class MerakiDevice extends EventEmitter {
             .on('debug', (debug) => {
                 this.emit('debug', debug);
             })
+            .on('warn', (warn) => {
+                this.emit('warn', warn);
+            })
             .on('error', (error) => {
                 this.emit('error', error);
             });
@@ -163,7 +166,7 @@ class MerakiDevice extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            this.emit('error', error);
+            throw new Error(error);
         };
     };
 };

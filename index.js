@@ -35,14 +35,14 @@ class MerakiPlatform {
 
         //debug config
         const enableDebugMode = account.enableDebugMode;
-        const debug = enableDebugMode ? log(`Network: ${accountName}, did finish launching.`) : false;
+        const debug = enableDebugMode ? log.info(`Network: ${accountName}, did finish launching.`) : false;
         const config = {
           ...account,
           apiKey: 'removed',
           organizationId: 'removed',
           networkId: 'removed'
         };
-        const debug1 = enableDebugMode ? log(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
+        const debug1 = enableDebugMode ? log.info(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
 
         //dashboard clients
         const allDevices = [];
@@ -137,16 +137,19 @@ class MerakiPlatform {
 
                 //publish devices
                 api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
-                const debug = enableDebugMode ? log(`${accountName}, ${deviceName}, published as external accessory.`) : false;
+                log.success(`${accountName}, ${deviceName}, published as external accessory.`);
               })
                 .on('devInfo', (devInfo) => {
-                  log(devInfo);
+                  log.info(devInfo);
                 })
                 .on('message', (message) => {
-                  log(`${accountName}, ${deviceName}, ${message}`);
+                  log.info(`${accountName}, ${deviceName}, ${message}`);
                 })
                 .on('debug', (debug) => {
-                  log(`${accountName}, ${deviceName}, debug: ${debug}`);
+                  log.info(`${accountName}, ${deviceName}, debug: ${debug}`);
+                })
+                .on('warn', (warn) => {
+                  log.warn(`${accountName}, ${deviceName}, debug: ${warn}`);
                 })
                 .on('error', (error) => {
                   log.error(`${accountName}, ${deviceName}, ${error}`);
@@ -158,16 +161,19 @@ class MerakiPlatform {
 
                 //publish devices
                 api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
-                const debug = enableDebugMode ? log(`${accountName}, ${deviceName}, published as external accessory.`) : false;
+                log.success(`${accountName}, ${deviceName}, published as external accessory.`);
               })
                 .on('devInfo', (devInfo) => {
-                  log(devInfo);
+                  log.info(devInfo);
                 })
                 .on('message', (message) => {
-                  log(`${accountName}, ${deviceName}, ${message}`);
+                  log.info(`${accountName}, ${deviceName}, ${message}`);
                 })
                 .on('debug', (debug) => {
-                  log(`${accountName}, ${deviceName}, debug: ${debug}`);
+                  log.info(`${accountName}, ${deviceName}, debug: ${debug}`);
+                })
+                .on('warn', (warn) => {
+                  log.warn(`${accountName}, ${deviceName}, debug: ${warn}`);
                 })
                 .on('error', (error) => {
                   log.error(`${accountName}, ${deviceName}, ${error}`);
@@ -179,23 +185,26 @@ class MerakiPlatform {
 
                 //publish devices
                 api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
-                const debug = enableDebugMode ? log(`${accountName}, ${deviceName}, published as external accessory.`) : false;
+                log.success(`${accountName}, ${deviceName}, published as external accessory.`);
               })
                 .on('devInfo', (devInfo) => {
-                  log(devInfo);
+                  log.info(devInfo);
                 })
                 .on('message', (message) => {
-                  log(`${accountName}, ${deviceName}, ${message}`);
+                  log.info(`${accountName}, ${deviceName}, ${message}`);
                 })
                 .on('debug', (debug) => {
-                  log(`${accountName}, ${deviceName}, debug: ${debug}`);
+                  log.info(`${accountName}, ${deviceName}, debug: ${debug}`);
+                })
+                .on('warn', (warn) => {
+                  log.warn(`${accountName}, ${deviceName}, debug: ${warn}`);
                 })
                 .on('error', (error) => {
                   log.error(`${accountName}, ${deviceName}, ${error}`);
                 });
               break
             default:
-              log(`Unknown device type: ${deviceType}.`);
+              log.warn(`Unknown device type: ${deviceType}.`);
               break;
           };
         };
