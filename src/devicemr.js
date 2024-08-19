@@ -143,7 +143,7 @@ class MerakiDevice extends EventEmitter {
                             await this.merakiMr.send(url, data);
                             const logInfo = this.disableLogInfo ? false : this.emit('message', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
                         } catch (error) {
-                            this.emit('error', `SSID: ${ssidName}, set state error: ${error}`);
+                            this.emit('warn', `SSID: ${ssidName}, set state error: ${error}`);
                         }
                     });
                 this.services.push(service);

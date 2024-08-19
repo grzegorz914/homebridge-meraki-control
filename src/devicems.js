@@ -144,7 +144,7 @@ class MerakiDevice extends EventEmitter {
                             await this.merakiMs.send(switchPortUrl, switchPortData);
                             const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${portId}, Name: ${portName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
                         } catch (error) {
-                            this.emit('error', `Port: ${portId}, Name: ${portName}, set state error: %${error}`);
+                            this.emit('warn', `Port: ${portId}, Name: ${portName}, set state error: %${error}`);
                         }
                     });
                 this.services.push(service);

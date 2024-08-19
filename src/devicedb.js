@@ -141,7 +141,7 @@ class MerakiDevice extends EventEmitter {
                             await this.merakiDb.send(policyUrl, policyData);
                             const logInfo = this.disableLogInfo ? false : this.emit('message', `Client: ${clientName}, Policy: ${policy}`);
                         } catch (error) {
-                            this.emit('error', `Client: ${clientName}, set Policy error: ${error}`);
+                            this.emit('warn', `Client: ${clientName}, set Policy error: ${error}`);
                         }
                     });
                 this.services.push(clientPolicyService);
