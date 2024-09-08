@@ -142,6 +142,9 @@ class MerakiPlatform {
                 .on('devInfo', (devInfo) => {
                   log.info(devInfo);
                 })
+                .on('success', (message) => {
+                  log.success(`${accountName}, ${deviceName}, ${message}`);
+                })
                 .on('message', (message) => {
                   log.info(`${accountName}, ${deviceName}, ${message}`);
                 })
@@ -166,6 +169,9 @@ class MerakiPlatform {
                 .on('devInfo', (devInfo) => {
                   log.info(devInfo);
                 })
+                .on('success', (message) => {
+                  log.success(`${accountName}, ${deviceName}, ${message}`);
+                })
                 .on('message', (message) => {
                   log.info(`${accountName}, ${deviceName}, ${message}`);
                 })
@@ -189,6 +195,9 @@ class MerakiPlatform {
               })
                 .on('devInfo', (devInfo) => {
                   log.info(devInfo);
+                })
+                .on('success', (message) => {
+                  log.success(`${accountName}, ${deviceName}, ${message}`);
                 })
                 .on('message', (message) => {
                   log.info(`${accountName}, ${deviceName}, ${message}`);

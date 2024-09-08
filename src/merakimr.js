@@ -78,6 +78,9 @@ class MerakiMr extends EventEmitter {
                     return;
                 }
 
+                //connect to deice success
+                this.emit('success', `Connect Success.`)
+
                 //emit device info and state
                 this.emit('deviceInfo', ssidsCount);
                 this.emit('deviceState', exposedSsids, ssidsCount);
@@ -86,7 +89,7 @@ class MerakiMr extends EventEmitter {
                 await new Promise(resolve => setTimeout(resolve, 15000));
                 this.impulseGenerator.emit('checkDeviceInfo');
             };
-        }).on('state', (state) => {});
+        }).on('state', (state) => { });
 
         this.impulseGenerator.emit('checkDeviceInfo');
     };

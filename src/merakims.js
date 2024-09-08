@@ -86,6 +86,9 @@ class MerakiMs extends EventEmitter {
                     return;
                 }
 
+                //connect to deice success
+                this.emit('success', `Connect Success.`)
+
                 //emit device info and state
                 this.emit('deviceInfo', portsCount);
                 this.emit('deviceState', exposedPorts, portsCount);

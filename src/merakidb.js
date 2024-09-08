@@ -130,6 +130,9 @@ class MerakiDb extends EventEmitter {
                         return;
                     };
 
+                    //connect to deice success
+                    this.emit('success', `Connect Success.`)
+
                     //emit device info and state
                     this.emit('deviceInfo', clientsCount);
                     this.emit('deviceState', exposedClients, clientsCount);
@@ -138,7 +141,7 @@ class MerakiDb extends EventEmitter {
                     await new Promise(resolve => setTimeout(resolve, 15000));
                     this.impulseGenerator.emit('updateDashboardClients');
                 };
-            }).on('state', (state) => {});
+            }).on('state', (state) => { });
 
         this.impulseGenerator.emit('updateDashboardClients');
     };

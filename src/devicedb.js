@@ -72,7 +72,7 @@ class MerakiDevice extends EventEmitter {
                     this.startPrepareAccessory = false;
 
                     //start check state
-                    this.merakiDb.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
+                    await this.merakiDb.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
                 } catch (error) {
                     this.emit('error', `Prepare accessory error: ${error}. try again in 15s.`);
                     await new Promise(resolve => setTimeout(resolve, 15000));
@@ -80,6 +80,9 @@ class MerakiDevice extends EventEmitter {
                 };
             };
         })
+            .on('success', (message) => {
+                this.emit('success', message);
+            })
             .on('message', (message) => {
                 this.emit('message', message);
             })
