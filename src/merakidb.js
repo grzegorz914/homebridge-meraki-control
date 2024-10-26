@@ -55,9 +55,7 @@ class MerakiDb extends EventEmitter {
 
                 this.impulseGenerator.emit('updateConfiguredAndExistingClients', dbClients);
             } catch (error) {
-                this.emit('error', `Requesting clients data error: ${error}, try again in 15s.`);
-                await new Promise(resolve => setTimeout(resolve, 15000));
-                this.impulseGenerator.emit('updateDashboardClients');
+                this.emit('error', `Requesting clients data error: ${error}`);
             };
         })
             .on('updateConfiguredAndExistingClients', async (dbClients) => {
@@ -93,9 +91,7 @@ class MerakiDb extends EventEmitter {
 
                     this.impulseGenerator.emit('updateExistedClientsPolicy', configuredAndExistedClients);
                 } catch (error) {
-                    this.emit('error', `Requestinjg configured clients error: ${error}, try again in 15s.`);
-                    await new Promise(resolve => setTimeout(resolve, 15000));
-                    this.impulseGenerator.emit('updateDashboardClients');
+                    this.emit('error', `Requestinjg configured clients error: ${error}`);
                 };
             })
             .on('updateExistedClientsPolicy', async (configuredAndExistedClients) => {
@@ -130,26 +126,31 @@ class MerakiDb extends EventEmitter {
                         return;
                     };
 
-                    //connect to deice success
-                    this.emit('success', `Connect Success.`)
-
                     //emit device info and state
                     this.emit('deviceInfo', clientsCount);
                     this.emit('deviceState', exposedClients, clientsCount);
+                    this.emit('prepareAccessory');
                 } catch (error) {
-                    this.emit('error', `Existed client policy data error: ${error}, try again in 15s.`);
-                    await new Promise(resolve => setTimeout(resolve, 15000));
-                    this.impulseGenerator.emit('updateDashboardClients');
+                    this.emit('error', `Existed client policy data error: ${error}`);
                 };
-            }).on('state', (state) => { });
+            }).on('state', (state) => {
+                const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`); js
+            });
+    };
 
-        this.impulseGenerator.emit('updateDashboardClients');
+    async connect() {
+        try {
+            this.impulseGenerator.emit('updateDashboardClients');
+            return true;
+        } catch (error) {
+            throw new Error(error);
+        };
     };
 
     async send(url, payload) {
         try {
             await this.axiosInstance.put(url, payload);
-            return true;;
+            return true;
         } catch (error) {
             throw new Error(error);
         };

@@ -36,9 +36,7 @@ class MerakiMr extends EventEmitter {
                 //check device state
                 this.impulseGenerator.emit('checkDeviceState', ssidsData.data);
             } catch (error) {
-                this.emit('error', ` Data error: ${error}, try again in 15s.`);
-                await new Promise(resolve => setTimeout(resolve, 15000));
-                this.impulseGenerator.emit('checkDeviceInfo');
+                this.emit('error', ` Data error: ${error}`);
             };
         }).on('checkDeviceState', async (ssidsData) => {
             const debug = debugLog ? this.emit('debug', `Requesting SSIDs status.`) : false;
@@ -78,26 +76,31 @@ class MerakiMr extends EventEmitter {
                     return;
                 }
 
-                //connect to deice success
-                this.emit('success', `Connect Success.`)
-
                 //emit device info and state
                 this.emit('deviceInfo', ssidsCount);
                 this.emit('deviceState', exposedSsids, ssidsCount);
+                this.emit('prepareAccessory');
             } catch (error) {
-                this.emit('error', `Requesting SSIDs status error: ${error}, try again in 15s.`);
-                await new Promise(resolve => setTimeout(resolve, 15000));
-                this.impulseGenerator.emit('checkDeviceInfo');
+                this.emit('error', `Requesting SSIDs status error: ${error}`);
             };
-        }).on('state', (state) => { });
+        }).on('state', (state) => {
+            const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`);
+        });
+    };
 
-        this.impulseGenerator.emit('checkDeviceInfo');
+    async connect() {
+        try {
+            this.impulseGenerator.emit('checkDeviceInfo');
+            return true;
+        } catch (error) {
+            throw new Error(error);
+        };
     };
 
     async send(url, payload) {
         try {
             await this.axiosInstance.put(url, payload);
-            return true;;
+            return true;
         } catch (error) {
             throw new Error(error);
         };

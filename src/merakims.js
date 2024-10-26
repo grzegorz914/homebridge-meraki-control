@@ -43,9 +43,7 @@ class MerakiMs extends EventEmitter {
                 //check device state
                 this.impulseGenerator.emit('checkDeviceState', swData.data);
             } catch (error) {
-                this.emit('error', `Requesting data error: ${error}, try again in 15s.`);
-                await new Promise(resolve => setTimeout(resolve, 15000));
-                this.impulseGenerator.emit('checkDeviceInfo');
+                this.emit('error', `Requesting data error: ${error}`);
             };
         }).on('checkDeviceState', async (swData) => {
             const debug = debugLog ? this.emit('debug', `Requesting ports status.`) : false;
@@ -86,20 +84,25 @@ class MerakiMs extends EventEmitter {
                     return;
                 }
 
-                //connect to deice success
-                this.emit('success', `Connect Success.`)
-
                 //emit device info and state
                 this.emit('deviceInfo', portsCount);
                 this.emit('deviceState', exposedPorts, portsCount);
+                this.emit('prepareAccessory');
             } catch (error) {
-                this.emit('error', `Requesting port status error: ${error}, try again in 15s.`);
-                await new Promise(resolve => setTimeout(resolve, 15000));
-                this.impulseGenerator.emit('checkDeviceInfo');
+                this.emit('error', `Requesting port status error: ${error}.`);
             };
-        }).on('state', (state) => { });
+        }).on('state', (state) => {
+            const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`);
+        });
+    };
 
-        this.impulseGenerator.emit('checkDeviceInfo');
+    async connect() {
+        try {
+            this.impulseGenerator.emit('checkDeviceInfo');
+            return true;
+        } catch (error) {
+            throw new Error(error);
+        };
     };
 
     async send(url, payload) {
