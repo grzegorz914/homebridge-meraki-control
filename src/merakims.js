@@ -9,8 +9,8 @@ class MerakiMs extends EventEmitter {
         super();
         const host = config.host;
         const apiKey = config.apiKey;
-        const device = config.deviceData;
-        const debugLog = config.debugLog;
+        this.device = config.deviceData;
+        this.debugLog = config.debugLog;
 
         const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
         this.axiosInstance = axios.create({
@@ -23,73 +23,20 @@ class MerakiMs extends EventEmitter {
         });
 
         //hidde port by name
-        const swHidenPortsByName = [];
-        const hidePorts = device.hidePorts || [];
+        this.swHidenPortsByName = [];
+        const hidePorts = this.device.hidePorts || [];
         for (const hidePort of hidePorts) {
             const hidePortName = hidePort.name ?? false;
             const hidePortEnabled = hidePort.mode || false;
-            const pushHiddenPortName = hidePortName && hidePortEnabled ? swHidenPortsByName.push(hidePortName) : false;
+            const pushHiddenPortName = hidePortName && hidePortEnabled ? this.swHidenPortsByName.push(hidePortName) : false;
         };
 
         this.impulseGenerator = new ImpulseGenerator();
         this.impulseGenerator.on('checkDeviceInfo', async () => {
-            const debug = debugLog ? this.emit('debug', `Requesting data.`) : false;
             try {
-                //get data of switch
-                const portsUrl = CONSTANTS.ApiUrls.MsPorts.replace('serialNumber', device.serialNumber);
-                const swData = await this.axiosInstance.get(portsUrl);
-                const debug1 = debugLog ? this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`) : false;
-
-                //check device state
-                this.impulseGenerator.emit('checkDeviceState', swData.data);
+                await this.connect();
             } catch (error) {
-                this.emit('error', `Requesting data error: ${error}`);
-            };
-        }).on('checkDeviceState', async (swData) => {
-            const debug = debugLog ? this.emit('debug', `Requesting ports status.`) : false;
-            try {
-                const exposedPorts = [];
-                for (const port of swData) {
-                    const portName = port.name ?? false;
-
-                    //skip iterate
-                    if (!portName) {
-                        const debug = debugLog ? this.emit('debug', `Skipped Port: ${port.portId}, Name: ${port.name}.`) : false;
-                        continue;
-                    }
-
-                    //hidde uplink and port by name
-                    const uplinkPort = portName.startsWith('Uplink');
-                    const hideUplinkPort = device.hideUplinkPorts && uplinkPort;
-                    const hidePortByName = swHidenPortsByName.includes(portName);
-
-                    //skip iterate
-                    if (hideUplinkPort || hidePortByName) {
-                        continue;
-                    }
-
-                    //push exposed ports to array
-                    const obj = {
-                        'id': port.portId,
-                        'name': portName,
-                        'state': port.enabled,
-                        'poeState': port.poeEnabled
-                    };
-                    exposedPorts.push(obj);
-                };
-                const portsCount = exposedPorts.length;
-                const debug1 = debugLog ? this.emit('debug', `Found: ${portsCount} exposed ports.`) : false;
-
-                if (portsCount === 0) {
-                    return;
-                }
-
-                //emit device info and state
-                this.emit('deviceInfo', portsCount);
-                this.emit('deviceState', exposedPorts, portsCount);
-                this.emit('prepareAccessory');
-            } catch (error) {
-                this.emit('error', `Requesting port status error: ${error}.`);
+                this.emit('error', `Inpulse generator error: ${error}`);
             };
         }).on('state', (state) => {
             const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`);
@@ -97,11 +44,69 @@ class MerakiMs extends EventEmitter {
     };
 
     async connect() {
+        const debug = this.debugLog ? this.emit('debug', `Requesting data.`) : false;
         try {
-            this.impulseGenerator.emit('checkDeviceInfo');
+            //get data of switch
+            const portsUrl = CONSTANTS.ApiUrls.MsPorts.replace('serialNumber', this.device.serialNumber);
+            const swData = await this.axiosInstance.get(portsUrl);
+            const debug1 = this.debugLog ? this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`) : false;
+
+            //check device state
+            await this.checkDeviceState(swData.data);
+
             return true;
         } catch (error) {
-            throw new Error(error);
+            throw new Error(`Requesting data error: ${error}`);
+        };
+    };
+
+    async checkDeviceState(swData) {
+        const debug = this.debugLog ? this.emit('debug', `Requesting ports status.`) : false;
+        try {
+            const exposedPorts = [];
+            for (const port of swData) {
+                const portName = port.name ?? false;
+
+                //skip iterate
+                if (!portName) {
+                    const debug1 = this.debugLog ? this.emit('debug', `Skipped Port: ${port.portId}, Name: ${port.name}.`) : false;
+                    continue;
+                }
+
+                //hidde uplink and port by name
+                const uplinkPort = portName.startsWith('Uplink');
+                const hideUplinkPort = this.device.hideUplinkPorts && uplinkPort;
+                const hidePortByName = this.swHidenPortsByName.includes(portName);
+
+                //skip iterate
+                if (hideUplinkPort || hidePortByName) {
+                    continue;
+                }
+
+                //push exposed ports to array
+                const obj = {
+                    'id': port.portId,
+                    'name': portName,
+                    'state': port.enabled,
+                    'poeState': port.poeEnabled
+                };
+                exposedPorts.push(obj);
+            };
+            const portsCount = exposedPorts.length;
+            const debug2 = this.debugLog ? this.emit('debug', `Found: ${portsCount} exposed ports.`) : false;
+
+            if (portsCount === 0) {
+                return;
+            }
+
+            //emit device info and state
+            this.emit('deviceInfo', portsCount);
+            this.emit('deviceState', exposedPorts, portsCount);
+            this.emit('prepareAccessory');
+
+            return true;
+        } catch (error) {
+            throw new Error(`Requesting port status error: ${error}.`);
         };
     };
 
