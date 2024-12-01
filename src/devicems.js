@@ -1,4 +1,3 @@
-'use strict';
 import MerakiMs from './merakims.js';
 import EventEmitter from 'events';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;

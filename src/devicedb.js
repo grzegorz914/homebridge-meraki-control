@@ -1,4 +1,3 @@
-'use strict';
 import MerakiDb from './merakidb.js';
 import EventEmitter from 'events';
 import { ApiUrls } from './constants.js';

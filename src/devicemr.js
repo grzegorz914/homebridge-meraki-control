@@ -1,4 +1,3 @@
-'use strict';
 import MerakiMr from './merakimr.js';
 import EventEmitter from 'events';
 import { ApiUrls } from './constants.js';

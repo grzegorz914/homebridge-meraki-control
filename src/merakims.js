@@ -1,4 +1,3 @@
-'use strict';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
