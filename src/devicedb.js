@@ -1,7 +1,7 @@
 'use strict';
-const MerakiDb = require('./merakidb.js');
-const EventEmitter = require('events');
-const CONSTANTS = require('./constants.json');
+import MerakiDb from './merakidb.js';
+import EventEmitter from 'events';
+import { ApiUrls } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class MerakiDevice extends EventEmitter {
@@ -157,7 +157,7 @@ class MerakiDevice extends EventEmitter {
                     .onSet(async (state) => {
                         try {
                             const policy = state ? client.policyType : 'Blocked';
-                            const policyUrl = `${CONSTANTS.ApiUrls.DbClients.replace('networkId', this.networkId)}/${client.id}/policy`;
+                            const policyUrl = `${ApiUrls.DbClients.replace('networkId', this.networkId)}/${client.id}/policy`;
                             const policyData = {
                                 'devicePolicy': policy
                             }
@@ -190,4 +190,4 @@ class MerakiDevice extends EventEmitter {
         };
     };
 };
-module.exports = MerakiDevice;
+export default MerakiDevice;

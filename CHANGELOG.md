@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Warning!!! - After update to v1.0.0 and above all automations and scenes will not work and the accessory must be added to the HomeKit again
 
+## [1.2.0] - (01.12.2024)
+
+## Changes
+
+- move from commonJS to esm module
+- moved constants.json to constants.js
+- cleanup
+
 ## [1.1.20] - (14.08.2024)
 
 ## Changes

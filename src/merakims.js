@@ -1,8 +1,8 @@
 'use strict';
-const axios = require('axios');
-const EventEmitter = require('events');
-const ImpulseGenerator = require('./impulsegenerator.js');
-const CONSTANTS = require('./constants.json');
+import axios from 'axios';
+import EventEmitter from 'events';
+import ImpulseGenerator from './impulsegenerator.js';
+import { ApiUrls } from './constants.js';
 
 class MerakiMs extends EventEmitter {
     constructor(config) {
@@ -12,7 +12,7 @@ class MerakiMs extends EventEmitter {
         this.device = config.deviceData;
         this.debugLog = config.debugLog;
 
-        const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
+        const baseUrl = (`${host}${ApiUrls.Base}`);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             headers: {
@@ -47,7 +47,7 @@ class MerakiMs extends EventEmitter {
         const debug = this.debugLog ? this.emit('debug', `Requesting data.`) : false;
         try {
             //get data of switch
-            const portsUrl = CONSTANTS.ApiUrls.MsPorts.replace('serialNumber', this.device.serialNumber);
+            const portsUrl = ApiUrls.MsPorts.replace('serialNumber', this.device.serialNumber);
             const swData = await this.axiosInstance.get(portsUrl);
             const debug1 = this.debugLog ? this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 
@@ -119,4 +119,4 @@ class MerakiMs extends EventEmitter {
         };
     };
 };
-module.exports = MerakiMs;
+export default MerakiMs;

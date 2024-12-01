@@ -1,6 +1,6 @@
 'use strict';
-const MerakiMs = require('./merakims.js');
-const EventEmitter = require('events');
+import MerakiMs from './merakims.js';
+import EventEmitter from 'events';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class MerakiDevice extends EventEmitter {
@@ -193,4 +193,4 @@ class MerakiDevice extends EventEmitter {
         };
     };
 };
-module.exports = MerakiDevice;
+export default MerakiDevice;

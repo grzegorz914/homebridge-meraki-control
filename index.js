@@ -1,26 +1,29 @@
 'use strict';
-const path = require('path');
-const fs = require('fs');
-const DeviceDb = require('./src/devicedb.js');
-const DeviceMr = require('./src/devicemr.js');
-const DeviceMs = require('./src/devicems.js');
-const ImpulseGenerator = require('./src/impulsegenerator.js');
-const CONSTANTS = require('./src/constants.json');
+import { join } from 'path';
+import { mkdirSync, existsSync, writeFileSync } from 'fs';
+import DeviceDb from './src/devicedb.js';
+import DeviceMr from './src/devicemr.js';
+import DeviceMs from './src/devicems.js';
+import ImpulseGenerator from './src/impulsegenerator.js';
+import { PluginName, PlatformName } from './src/constants.js';
 
 class MerakiPlatform {
   constructor(log, config, api) {
     // only load if configured
     if (!config || !Array.isArray(config.devices)) {
-      log.warn(`No configuration found for ${CONSTANTS.PluginName}`);
+      log.warn(`No configuration found for ${PluginName}`);
       return;
     }
     this.accessories = [];
 
     //check if prefs directory exist
-    const prefDir = path.join(api.user.storagePath(), 'meraki');
-    if (!fs.existsSync(prefDir)) {
-      fs.mkdirSync(prefDir);
-    };
+    const prefDir = join(api.user.storagePath(), 'meraki');
+    try {
+      mkdirSync(prefDir, { recursive: true });
+    } catch (error) {
+      log.error(`Prepare directory error: ${error.message ?? error}`);
+      return;
+    }
 
     api.on('didFinishLaunching', () => {
       for (const account of config.devices) {
@@ -138,7 +141,7 @@ class MerakiPlatform {
                 dbDevice.on('publishAccessory', (accessory) => {
 
                   //publish devices
-                  api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+                  api.publishExternalAccessories(PluginName, [accessory]);
                   log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
                 })
                   .on('devInfo', (devInfo) => {
@@ -185,7 +188,7 @@ class MerakiPlatform {
                 mrDevice.on('publishAccessory', (accessory) => {
 
                   //publish devices
-                  api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+                  api.publishExternalAccessories(PluginName, [accessory]);
                   log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
                 })
                   .on('devInfo', (devInfo) => {
@@ -232,7 +235,7 @@ class MerakiPlatform {
                 msDevice.on('publishAccessory', (accessory) => {
 
                   //publish devices
-                  api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+                  api.publishExternalAccessories(PluginName, [accessory]);
                   log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
                 })
                   .on('devInfo', (devInfo) => {
@@ -287,6 +290,6 @@ class MerakiPlatform {
   }
 }
 
-module.exports = (api) => {
-  api.registerPlatform(CONSTANTS.PluginName, CONSTANTS.PlatformName, MerakiPlatform, true);
+export default (api) => {
+  api.registerPlatform(PluginName, PlatformName, MerakiPlatform, true);
 }

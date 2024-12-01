@@ -1,8 +1,8 @@
 'use strict';
-const axios = require('axios');
-const EventEmitter = require('events');
-const ImpulseGenerator = require('./impulsegenerator.js');
-const CONSTANTS = require('./constants.json');
+import axios from 'axios';
+import EventEmitter from 'events';
+import ImpulseGenerator from './impulsegenerator.js';
+import { ApiUrls } from './constants.js';
 
 class MerakiMr extends EventEmitter {
     constructor(config) {
@@ -14,8 +14,8 @@ class MerakiMr extends EventEmitter {
         this.hidenSsidsName = config.deviceData;
         this.debugLog = config.debugLog;
 
-        const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
-        this.wirelessUrl = CONSTANTS.ApiUrls.MrSsids.replace('networkId', networkId);
+        const baseUrl = (`${host}${ApiUrls.Base}`);
+        this.wirelessUrl = ApiUrls.MrSsids.replace('networkId', networkId);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             headers: {
@@ -109,4 +109,4 @@ class MerakiMr extends EventEmitter {
         };
     };
 };
-module.exports = MerakiMr;
+export default MerakiMr;

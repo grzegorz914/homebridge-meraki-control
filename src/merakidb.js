@@ -1,8 +1,8 @@
 'use strict';
-const axios = require('axios');
-const EventEmitter = require('events');
-const ImpulseGenerator = require('./impulsegenerator.js');
-const CONSTANTS = require('./constants.json');
+import axios from 'axios';
+import EventEmitter from 'events';
+import ImpulseGenerator from './impulsegenerator.js';
+import { ApiUrls } from './constants.js';
 
 class MerakiDb extends EventEmitter {
     constructor(config) {
@@ -13,8 +13,8 @@ class MerakiDb extends EventEmitter {
         this.clientsPolicy = config.deviceData;
         this.debugLog = config.debugLog;
 
-        const baseUrl = (`${host}${CONSTANTS.ApiUrls.Base}`);
-        this.dashboardClientsUrl = CONSTANTS.ApiUrls.DbClients.replace('networkId', networkId);
+        const baseUrl = (`${host}${ApiUrls.Base}`);
+        this.dashboardClientsUrl = ApiUrls.DbClients.replace('networkId', networkId);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             headers: {
@@ -161,4 +161,4 @@ class MerakiDb extends EventEmitter {
         };
     };
 };
-module.exports = MerakiDb;
+export default MerakiDb;

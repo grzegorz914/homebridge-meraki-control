@@ -1,7 +1,7 @@
 'use strict';
-const MerakiMr = require('./merakimr.js');
-const EventEmitter = require('events');
-const CONSTANTS = require('./constants.json');
+import MerakiMr from './merakimr.js';
+import EventEmitter from 'events';
+import { ApiUrls } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class MerakiDevice extends EventEmitter {
@@ -159,7 +159,7 @@ class MerakiDevice extends EventEmitter {
                     .onSet(async (state) => {
                         try {
                             state = state ? true : false;
-                            const url = `${CONSTANTS.ApiUrls.MrSsids.replace('networkId', this.networkId)}/${ssid.number}`;
+                            const url = `${ApiUrls.MrSsids.replace('networkId', this.networkId)}/${ssid.number}`;
                             const data = {
                                 'enabled': state
                             };
@@ -192,4 +192,4 @@ class MerakiDevice extends EventEmitter {
         };
     };
 };
-module.exports = MerakiDevice;
+export default MerakiDevice;
