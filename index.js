@@ -24,7 +24,7 @@ class MerakiPlatform {
       return;
     }
 
-    api.on('didFinishLaunching', () => {
+    api.on('didFinishLaunching', async () => {
       for (const account of config.devices) {
         const accountName = account.name;
         const apiKey = account.apiKey;
@@ -166,8 +166,8 @@ class MerakiPlatform {
                 const impulseGenerator = new ImpulseGenerator();
                 impulseGenerator.on('start', async () => {
                   try {
-                    await dbDevice.start();
-                    impulseGenerator.stop();
+                    const startDone = await dbDevice.start();
+                    const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
                   } catch (error) {
                     log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
                   };
@@ -176,7 +176,7 @@ class MerakiPlatform {
                 });
 
                 //start impulse generator
-                impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
+                await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
               } catch (error) {
                 log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}`);
               }
@@ -213,8 +213,8 @@ class MerakiPlatform {
                 const impulseGenerator = new ImpulseGenerator();
                 impulseGenerator.on('start', async () => {
                   try {
-                    await mrDevice.start();
-                    impulseGenerator.stop();
+                    const startDone = await mrDevice.start();
+                    const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
                   } catch (error) {
                     log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
                   };
@@ -223,7 +223,7 @@ class MerakiPlatform {
                 });
 
                 //start impulse generator
-                impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
+                await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
               } catch (error) {
                 log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}`);
               }
@@ -260,8 +260,8 @@ class MerakiPlatform {
                 const impulseGenerator = new ImpulseGenerator();
                 impulseGenerator.on('start', async () => {
                   try {
-                    await msDevice.start();
-                    impulseGenerator.stop();
+                    const startDone = await msDevice.start();
+                    const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
                   } catch (error) {
                     log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
                   };
@@ -270,7 +270,7 @@ class MerakiPlatform {
                 });
 
                 //start impulse generator
-                impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
+                await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
               } catch (error) {
                 log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}`);
               }

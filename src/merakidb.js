@@ -143,7 +143,6 @@ class MerakiDb extends EventEmitter {
             //emit device info and state
             this.emit('deviceInfo', clientsCount);
             this.emit('deviceState', exposedClients, clientsCount);
-            this.emit('prepareAccessory');
 
             return true;
         } catch (error) {

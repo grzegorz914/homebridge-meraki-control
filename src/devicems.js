@@ -35,6 +35,84 @@ class MerakiDevice extends EventEmitter {
         this.poePortsControl = deviceData.enablePoePortsControl || false;
     };
 
+    //prepare accessory
+    async prepareAccessory() {
+        try {
+            //prepare accessory
+            const debug = !this.enableDebugMode ? false : this.emit('debug', `prepare accessory`);
+            const accessoryName = this.deviceName;
+            const accessoryUUID = AccessoryUUID.generate(this.deviceUuid);
+            const accessoryCategory = Categories.AIRPORT;
+            const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
+
+            //prepare information service
+            const debug1 = !this.enableDebugMode ? false : this.emit('debug', `prepare information service`);
+            accessory.getService(Service.AccessoryInformation)
+                .setCharacteristic(Characteristic.Manufacturer, 'Cisco Meraki')
+                .setCharacteristic(Characteristic.Model, accessoryName)
+                .setCharacteristic(Characteristic.SerialNumber, this.networkId)
+                .setCharacteristic(Characteristic.FirmwareRevision, this.organizationId)
+                .setCharacteristic(Characteristic.ConfiguredName, accessoryName);
+
+            const debug2 = !this.enableDebugMode ? false : this.emit('debug', `prepare meraki service`);
+            const exposedPorts = this.exposedPorts;
+
+            //device
+            this.services = [];
+            this.sensorServices = [];
+            for (const port of exposedPorts) {
+                const portName = port.name;
+                const portId = port.id;
+                const serviceName = this.prefixForPortName ? `${portId}.${portName}` : portName;
+                const service = accessory.addService(Service.Outlet, serviceName, `Port Service ${portName}`);
+                service.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                service.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                service.getCharacteristic(Characteristic.On)
+                    .onGet(async () => {
+                        const state = port.state ?? false;
+                        const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${portId}, Name: ${portName}, State: ${state ? 'Enabled' : 'Disabled'}`);
+                        return state;
+                    })
+                    .onSet(async (state) => {
+                        try {
+                            state = state ? true : false;
+                            const switchPortUrl = `/devices/${this.deviceUuid}/switch/ports/${portId}`;
+                            const switchPortData = this.poePortControl ? {
+                                'enabled': state,
+                                'poeEnabled': state
+                            } : {
+                                'enabled': state
+                            };
+                            await this.merakiMs.send(switchPortUrl, switchPortData);
+                            const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${portId}, Name: ${portName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                        } catch (error) {
+                            this.emit('warn', `Port: ${portId}, Name: ${portName}, set state error: %${error}`);
+                        }
+                    });
+                this.services.push(service);
+
+                if (this.portsSensor) {
+                    const debug = !this.enableDebugMode && k > 0 ? false : this.emit('debug', `prepare meraki sensor service`);
+                    const sensorServiceName = this.prefixForPortName ? `Sensor ${portId}.${portName}` : `Sensor ${portName}`;
+                    const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Port Service Sensor ${portName}`);
+                    sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
+                    sensorService.getCharacteristic(Characteristic.ContactSensorState)
+                        .onGet(async () => {
+                            const state = port.state;
+                            return state;
+                        });
+                    this.sensorServices.push(sensorService);
+                };
+            };
+
+            return accessory;
+        } catch (error) {
+            throw new Error(error);
+        };
+    };
+
+    //start
     async start() {
         try {
             this.merakiMs = new MerakiMs({
@@ -74,22 +152,6 @@ class MerakiDevice extends EventEmitter {
                     };
                 };
             })
-                .on('prepareAccessory', async () => {
-                    if (!this.startPrepareAccessory) {
-                        return;
-                    }
-
-                    try {
-                        const accessory = await this.prepareAccessory(this.deviceName, this.deviceUuid);
-                        this.emit('publishAccessory', accessory);
-                        this.startPrepareAccessory = false;
-
-                        //start check state
-                        await this.merakiMs.impulseGenerator.start([{ name: 'checkDeviceInfo', sampling: this.refreshInterval }]);
-                    } catch (error) {
-                        this.emit('error', `Prepare accessory error: ${error.message || error}}`);
-                    };
-                })
                 .on('success', (message) => {
                     this.emit('success', message);
                 })
@@ -109,86 +171,19 @@ class MerakiDevice extends EventEmitter {
             //connect
             await this.merakiMs.connect();
 
+            //prepare accessory
+            if (this.startPrepareAccessory) {
+                const accessory = await this.prepareAccessory();
+                this.emit('publishAccessory', accessory);
+                this.startPrepareAccessory = false;
+
+                //start impulse generator 
+                await this.merakiMs.impulseGenerator.start([{ name: 'checkDeviceInfo', sampling: this.refreshInterval }]);
+            }
+
             return true;
         } catch (error) {
             throw new Error(`Start error: ${error.message || error}}.`);
-        };
-    };
-
-    //Prepare accessory
-    async prepareAccessory(deviceName, deviceUuid) {
-        try {
-            //prepare accessory
-            const debug = !this.enableDebugMode ? false : this.emit('debug', `prepare accessory`);
-            const accessoryName = deviceName;
-            const accessoryUUID = AccessoryUUID.generate(deviceUuid);
-            const accessoryCategory = Categories.AIRPORT;
-            const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
-
-            //prepare information service
-            const debug1 = !this.enableDebugMode ? false : this.emit('debug', `prepare information service`);
-            accessory.getService(Service.AccessoryInformation)
-                .setCharacteristic(Characteristic.Manufacturer, 'Cisco Meraki')
-                .setCharacteristic(Characteristic.Model, accessoryName)
-                .setCharacteristic(Characteristic.SerialNumber, this.networkId)
-                .setCharacteristic(Characteristic.FirmwareRevision, this.organizationId)
-                .setCharacteristic(Characteristic.ConfiguredName, accessoryName);
-
-            const debug2 = !this.enableDebugMode ? false : this.emit('debug', `prepare meraki service`);
-            const exposedPorts = this.exposedPorts;
-
-            //device
-            this.services = [];
-            this.sensorServices = [];
-            for (const port of exposedPorts) {
-                const portName = port.name;
-                const portId = port.id;
-                const serviceName = this.prefixForPortName ? `${portId}.${portName}` : portName;
-                const service = accessory.addService(Service.Outlet, serviceName, `Port Service ${portName}`);
-                service.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                service.setCharacteristic(Characteristic.ConfiguredName, serviceName);
-                service.getCharacteristic(Characteristic.On)
-                    .onGet(async () => {
-                        const state = port.state ?? false;
-                        const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${portId}, Name: ${portName}, State: ${state ? 'Enabled' : 'Disabled'}`);
-                        return state;
-                    })
-                    .onSet(async (state) => {
-                        try {
-                            state = state ? true : false;
-                            const switchPortUrl = `/devices/${deviceUuid}/switch/ports/${portId}`;
-                            const switchPortData = this.poePortControl ? {
-                                'enabled': state,
-                                'poeEnabled': state
-                            } : {
-                                'enabled': state
-                            };
-                            await this.merakiMs.send(switchPortUrl, switchPortData);
-                            const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${portId}, Name: ${portName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
-                        } catch (error) {
-                            this.emit('warn', `Port: ${portId}, Name: ${portName}, set state error: %${error}`);
-                        }
-                    });
-                this.services.push(service);
-
-                if (this.portsSensor) {
-                    const debug = !this.enableDebugMode && k > 0 ? false : this.emit('debug', `prepare meraki sensor service`);
-                    const sensorServiceName = this.prefixForPortName ? `Sensor ${portId}.${portName}` : `Sensor ${portName}`;
-                    const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Port Service Sensor ${portName}`);
-                    sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
-                    sensorService.getCharacteristic(Characteristic.ContactSensorState)
-                        .onGet(async () => {
-                            const state = port.state;
-                            return state;
-                        });
-                    this.sensorServices.push(sensorService);
-                };
-            };
-
-            return accessory;
-        } catch (error) {
-            throw new Error(error);
         };
     };
 };

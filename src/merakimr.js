@@ -91,7 +91,6 @@ class MerakiMr extends EventEmitter {
             //emit device info and state
             this.emit('deviceInfo', ssidsCount);
             this.emit('deviceState', exposedSsids, ssidsCount);
-            this.emit('prepareAccessory');
 
             return true;
         } catch (error) {

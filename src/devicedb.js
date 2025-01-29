@@ -35,93 +35,13 @@ class MerakiDevice extends EventEmitter {
         this.clientsSensor = config.enableSonsorClients || false;
     };
 
-    async start() {
-        try {
-            this.merakiDb = new MerakiDb({
-                host: this.host,
-                apiKey: this.apiKey,
-                networkId: this.networkId,
-                deviceData: this.deviceData,
-                debugLog: this.enableDebugMode
-            });
-
-            this.merakiDb.on('deviceInfo', (clientsCount) => {
-                //meraki info
-                if (this.startPrepareAccessory) {
-                    //connect to deice success
-                    this.emit('success', `Connect Success.`)
-                    if (!this.disableLogDeviceInfo) {
-                        this.emit('devInfo', `---- ${this.deviceName} ----`);
-                        this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                        this.emit('devInfo', `Network: ${this.networkName}`);
-                        this.emit('devInfo', `Network Id: ${this.networkId}`);
-                        this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                        this.emit('devInfo', `Exposed Clients: ${clientsCount}`);
-                        this.emit('devInfo', `----------------------------------`)
-                    };
-                };
-            }).on('deviceState', async (exposedClients, clientsCount) => {
-                this.exposedClients = exposedClients;
-
-                for (let i = 0; i < clientsCount; i++) {
-                    const state = exposedClients[i].policyState;
-                    if (this.services) {
-                        this.services[i].updateCharacteristic(Characteristic.On, state);
-                    }
-
-                    if (this.sensorServices && this.clientsSensor) {
-                        this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
-                    };
-                }
-            })
-                .on('prepareAccessory', async () => {
-                    if (!this.startPrepareAccessory) {
-                        return;
-                    }
-
-                    try {
-                        const accessory = await this.prepareAccessory(this.deviceName, this.deviceUuid);
-                        this.emit('publishAccessory', accessory);
-                        this.startPrepareAccessory = false;
-
-                        //start check state
-                        await this.merakiDb.impulseGenerator.start([{ name: 'updateDashboardClients', sampling: this.refreshInterval }]);
-                    } catch (error) {
-                        this.emit('error', `Prepare accessory error: ${error.message || error}}`);
-                    };
-                })
-                .on('success', (message) => {
-                    this.emit('success', message);
-                })
-                .on('message', (message) => {
-                    this.emit('message', message);
-                })
-                .on('debug', (debug) => {
-                    this.emit('debug', debug);
-                })
-                .on('warn', (warn) => {
-                    this.emit('warn', warn);
-                })
-                .on('error', (error) => {
-                    this.emit('error', error);
-                });
-
-            //connect
-            await this.merakiDb.connect();
-
-            return true;
-        } catch (error) {
-            throw new Error(`Start error: ${error.message || error}}.`);
-        };
-    };
-
-    //Prepare accessory
-    async prepareAccessory(deviceName, deviceUuid) {
+    //prepare accessory
+    async prepareAccessory() {
         try {
             //prepare accessory
             const debug = !this.enableDebugMode ? false : this.emit('debug', `prepare accessory`);
-            const accessoryName = deviceName;
-            const accessoryUUID = AccessoryUUID.generate(deviceUuid);
+            const accessoryName = this.deviceName;
+            const accessoryUUID = AccessoryUUID.generate(this.deviceUuid);
             const accessoryCategory = Categories.AIRPORT;
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
@@ -186,6 +106,81 @@ class MerakiDevice extends EventEmitter {
             return accessory;
         } catch (error) {
             throw new Error(error);
+        };
+    };
+
+    //start
+    async start() {
+        try {
+            this.merakiDb = new MerakiDb({
+                host: this.host,
+                apiKey: this.apiKey,
+                networkId: this.networkId,
+                deviceData: this.deviceData,
+                debugLog: this.enableDebugMode
+            });
+
+            this.merakiDb.on('deviceInfo', (clientsCount) => {
+                //meraki info
+                if (this.startPrepareAccessory) {
+                    //connect to deice success
+                    this.emit('success', `Connect Success.`)
+                    if (!this.disableLogDeviceInfo) {
+                        this.emit('devInfo', `---- ${this.deviceName} ----`);
+                        this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
+                        this.emit('devInfo', `Network: ${this.networkName}`);
+                        this.emit('devInfo', `Network Id: ${this.networkId}`);
+                        this.emit('devInfo', `Organization Id: ${this.organizationId}`);
+                        this.emit('devInfo', `Exposed Clients: ${clientsCount}`);
+                        this.emit('devInfo', `----------------------------------`)
+                    };
+                };
+            }).on('deviceState', async (exposedClients, clientsCount) => {
+                this.exposedClients = exposedClients;
+
+                for (let i = 0; i < clientsCount; i++) {
+                    const state = exposedClients[i].policyState;
+                    if (this.services) {
+                        this.services[i].updateCharacteristic(Characteristic.On, state);
+                    }
+
+                    if (this.sensorServices && this.clientsSensor) {
+                        this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
+                    };
+                }
+            })
+                .on('success', (message) => {
+                    this.emit('success', message);
+                })
+                .on('message', (message) => {
+                    this.emit('message', message);
+                })
+                .on('debug', (debug) => {
+                    this.emit('debug', debug);
+                })
+                .on('warn', (warn) => {
+                    this.emit('warn', warn);
+                })
+                .on('error', (error) => {
+                    this.emit('error', error);
+                });
+
+            //connect
+            await this.merakiDb.connect();
+
+            //prepare accessory
+            if (this.startPrepareAccessory) {
+                const accessory = await this.prepareAccessory();
+                this.emit('publishAccessory', accessory);
+                this.startPrepareAccessory = false;
+
+                //start impulse generator 
+                await this.merakiDb.impulseGenerator.start([{ name: 'checkDeviceInfo', sampling: this.refreshInterval }]);
+            }
+
+            return true;
+        } catch (error) {
+            throw new Error(`Start error: ${error.message || error}}.`);
         };
     };
 };

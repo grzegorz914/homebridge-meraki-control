@@ -101,7 +101,6 @@ class MerakiMs extends EventEmitter {
             //emit device info and state
             this.emit('deviceInfo', portsCount);
             this.emit('deviceState', exposedPorts, portsCount);
-            this.emit('prepareAccessory');
 
             return true;
         } catch (error) {
