@@ -36,8 +36,13 @@ class MerakiPlatform {
           return;
         }
 
-        //debug config
-        const enableDebugMode = account.enableDebugMode;
+        //log config
+        const enableDebugMode = account.enableDebugMode || false;
+        const disableLogDeviceInfo = account.disableLogDeviceInfo || false;
+        const disableLogInfo = account.disableLogInfo || false;
+        const disableLogSuccess = account.disableLogSuccess || false;
+        const disableLogWarn = account.disableLogWarn || false;
+        const disableLogError = account.disableLogError || false;
         const debug = enableDebugMode ? log.info(`Network: ${accountName}, did finish launching.`) : false;
         const config = {
           ...account,
@@ -45,7 +50,7 @@ class MerakiPlatform {
           organizationId: 'removed',
           networkId: 'removed'
         };
-        const debug1 = enableDebugMode ? log.info(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
+        const debug1 = !enableDebugMode ? false : log.info(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`);
 
         //dashboard clients
         const allDevices = [];
@@ -141,25 +146,25 @@ class MerakiPlatform {
 
                   //publish devices
                   api.publishExternalAccessories(PluginName, [accessory]);
-                  log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
+                  const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
                 })
                   .on('devInfo', (devInfo) => {
-                    log.info(devInfo);
+                    const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
                   })
-                  .on('success', (message) => {
-                    log.success(`${accountName}, ${deviceName}, ${message}`);
+                  .on('success', (success) => {
+                    const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, ${success}.`);
                   })
-                  .on('message', (message) => {
-                    log.info(`${accountName}, ${deviceName}, ${message}`);
+                  .on('info', (info) => {
+                    const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceName}, ${info}.`);
                   })
                   .on('debug', (debug) => {
-                    log.info(`${accountName}, ${deviceName}, debug: ${debug}`);
+                    const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceName}, debug: ${debug}.`);
                   })
                   .on('warn', (warn) => {
-                    log.warn(`${accountName}, ${deviceName}, debug: ${warn}`);
+                    const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceName}, ${warn}.`);
                   })
                   .on('error', (error) => {
-                    log.error(`${accountName}, ${deviceName}, ${error}`);
+                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}.`);
                   });
 
                 //create impulse generator
@@ -169,16 +174,16 @@ class MerakiPlatform {
                     const startDone = await dbDevice.start();
                     const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
                   } catch (error) {
-                    log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
+                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
                   };
                 }).on('state', (state) => {
-                  const debug = enableDebugMode ? state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`) : false;
+                  const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`);
                 });
 
                 //start impulse generator
                 await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
               } catch (error) {
-                log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}`);
+                throw new Error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
               }
               break
             case 1: //access point
@@ -188,25 +193,25 @@ class MerakiPlatform {
 
                   //publish devices
                   api.publishExternalAccessories(PluginName, [accessory]);
-                  log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
+                  const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
                 })
                   .on('devInfo', (devInfo) => {
-                    log.info(devInfo);
+                    const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
                   })
-                  .on('success', (message) => {
-                    log.success(`${accountName}, ${deviceName}, ${message}`);
+                  .on('success', (success) => {
+                    const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, ${success}.`);
                   })
-                  .on('message', (message) => {
-                    log.info(`${accountName}, ${deviceName}, ${message}`);
+                  .on('info', (info) => {
+                    const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceName}, ${info}.`);
                   })
                   .on('debug', (debug) => {
-                    log.info(`${accountName}, ${deviceName}, debug: ${debug}`);
+                    const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceName}, debug: ${debug}.`);
                   })
                   .on('warn', (warn) => {
-                    log.warn(`${accountName}, ${deviceName}, debug: ${warn}`);
+                    const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceName}, ${warn}.`);
                   })
                   .on('error', (error) => {
-                    log.error(`${accountName}, ${deviceName}, ${error}`);
+                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}.`);
                   });
 
                 //create impulse generator
@@ -216,16 +221,16 @@ class MerakiPlatform {
                     const startDone = await mrDevice.start();
                     const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
                   } catch (error) {
-                    log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
+                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
                   };
                 }).on('state', (state) => {
-                  const debug = enableDebugMode ? state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`) : false;
+                  const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`);
                 });
 
                 //start impulse generator
                 await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
               } catch (error) {
-                log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}`);
+                throw new Error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
               }
               break
             case 2: //switch
@@ -235,25 +240,25 @@ class MerakiPlatform {
 
                   //publish devices
                   api.publishExternalAccessories(PluginName, [accessory]);
-                  log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
+                  const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
                 })
                   .on('devInfo', (devInfo) => {
-                    log.info(devInfo);
+                    const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
                   })
-                  .on('success', (message) => {
-                    log.success(`${accountName}, ${deviceName}, ${message}`);
+                  .on('success', (success) => {
+                    const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, ${success}.`);
                   })
-                  .on('message', (message) => {
-                    log.info(`${accountName}, ${deviceName}, ${message}`);
+                  .on('info', (info) => {
+                    const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceName}, ${info}.`);
                   })
                   .on('debug', (debug) => {
-                    log.info(`${accountName}, ${deviceName}, debug: ${debug}`);
+                    const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceName}, debug: ${debug}.`);
                   })
                   .on('warn', (warn) => {
-                    log.warn(`${accountName}, ${deviceName}, debug: ${warn}`);
+                    const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceName}, ${warn}.`);
                   })
                   .on('error', (error) => {
-                    log.error(`${accountName}, ${deviceName}, ${error}`);
+                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}.`);
                   });
 
                 //create impulse generator
@@ -263,20 +268,20 @@ class MerakiPlatform {
                     const startDone = await msDevice.start();
                     const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
                   } catch (error) {
-                    log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
+                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
                   };
                 }).on('state', (state) => {
-                  const debug = enableDebugMode ? state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`) : false;
+                  const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`);
                 });
 
                 //start impulse generator
                 await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
               } catch (error) {
-                log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}`);
+                throw new Error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
               }
               break
             default:
-              log.warn(`Unknown device type: ${deviceType}.`);
+              const emitLog = disableLogWarn ? false : log.warn(`Unknown device type: ${deviceType}.`);
               break;
           };
         };

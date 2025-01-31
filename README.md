@@ -86,7 +86,10 @@
 | `switches.hidePorts` | Array of hidden Ports. |
 | `switches.hidePorts.name` | Here set *Port Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `switches.hidePorts.mode` | Here *Activate/Deactivate* this Port control. |
-| `enableDebugMode` | This enable deep log in homebridge console. |
-| `disableLogInfo` | This disable display log values and states on every it change. |
-| `disableLogDeviceInfo` | This disable display log device info on plugin start. |
 | `refreshInterval` | Here set the data refresh time in seconds. |
+| `disableLogDeviceInfo` | If enabled, add ability to disable log device info by every connections device to the network. |
+| `disableLogInfo` | If enabled, disable log info, all values and state will not be displayed in Homebridge log console. |
+| `disableLogSuccess` | If enabled, disable logging device success. |
+| `disableLogWarn` | If enabled, disable logging device warnings. |
+| `disableLogError` | If enabled, disable logging device error. |
+| `enableDebugMode` | If enabled, deep log will be present in homebridge console. |

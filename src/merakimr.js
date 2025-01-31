@@ -11,7 +11,7 @@ class MerakiMr extends EventEmitter {
         const networkId = config.networkId;
         this.hideUnconfiguredSsids = config.hideUnconfiguredSsid;
         this.hidenSsidsName = config.deviceData;
-        this.debugLog = config.debugLog;
+        this.enableDebugMode = config.enableDebugMode;
 
         const baseUrl = (`${host}${ApiUrls.Base}`);
         this.wirelessUrl = ApiUrls.MrSsids.replace('networkId', networkId);
@@ -37,28 +37,28 @@ class MerakiMr extends EventEmitter {
     };
 
     async connect() {
-        const debug = this.debugLog ? this.emit('debug', `Requesting data.`) : false;
+        const debug = this.enableDebugMode ? this.emit('debug', `Requesting data.`) : false;
         try {
             //ap ssids states
             const ssidsData = await this.axiosInstance.get(this.wirelessUrl);
-            const debug1 = this.debugLog ? this.emit('debug', `Data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
-            await this.checkDeviceState(ssidsData.data);
+            const debug1 = this.enableDebugMode ? this.emit('debug', `Data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
+            const state = await this.checkDeviceState(ssidsData.data);
 
-            return true;
+            return state;
         } catch (error) {
             throw new Error(`Requesting data error: ${error}`);
         };
     };
 
     async checkDeviceState(ssidsData) {
-        const debug = this.debugLog ? this.emit('debug', `Requesting SSIDs status.`) : false;
+        const debug = this.enableDebugMode ? this.emit('debug', `Requesting SSIDs status.`) : false;
         try {
             const exposedSsids = [];
             for (const ssid of ssidsData) {
                 const ssidName = ssid.name ?? false;
 
                 if (!ssidName) {
-                    const debug1 = this.debugLog ? this.emit('debug', `Skipped SSID: ${ssid.number}, Name: ${ssid.name}.`) : false;
+                    const debug1 = this.enableDebugMode ? this.emit('debug', `Skipped SSID: ${ssid.number}, Name: ${ssid.name}.`) : false;
                     continue;
                 }
 
@@ -82,10 +82,10 @@ class MerakiMr extends EventEmitter {
             };
 
             const ssidsCount = exposedSsids.length;
-            const debug2 = this.debugLog ? this.emit('debug', `Found: ${ssidsCount} exposed SSIDs.`) : false;
+            const debug2 = this.enableDebugMode ? this.emit('debug', `Found: ${ssidsCount} exposed SSIDs.`) : false;
 
             if (ssidsCount === 0) {
-                return;
+                return false;
             }
 
             //emit device info and state

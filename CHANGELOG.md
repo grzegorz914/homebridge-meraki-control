@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Warning!!! - After update to v1.0.0 and above all automations and scenes will not work and the accessory must be added to the HomeKit again
 
+## [1.3.0] - (31.01.2025)
+
+## Changes
+
+- added possibility to disable/enable log success, info, warn, error
+- refactor cnnect code
+- bump dependencies
+- config schema updated
+- redme updated
+- cleanup
+
 ## [1.2.0] - (01.12.2024)
 
 ## Changes

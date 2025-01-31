@@ -63,10 +63,13 @@
                             ]
                         }
                     ],
-                    "enableDebugMode": false,
-                    "disableLogInfo": false,
+                    "refreshInterval": 10,
                     "disableLogDeviceInfo": false,
-                    "refreshInterval": 10
+                    "disableLogInfo": false,
+                    "disableLogSuccess": false,
+                    "disableLogWarn": false,
+                    "disableLogError": false,
+                    "enableDebugMode": false
                 }
             ]
         }

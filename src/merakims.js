@@ -9,7 +9,7 @@ class MerakiMs extends EventEmitter {
         const host = config.host;
         const apiKey = config.apiKey;
         this.device = config.deviceData;
-        this.debugLog = config.debugLog;
+        this.enableDebugMode = config.enableDebugMode;
 
         const baseUrl = (`${host}${ApiUrls.Base}`);
         this.axiosInstance = axios.create({
@@ -43,24 +43,24 @@ class MerakiMs extends EventEmitter {
     };
 
     async connect() {
-        const debug = this.debugLog ? this.emit('debug', `Requesting data.`) : false;
+        const debug = this.enableDebugMode ? this.emit('debug', `Requesting data.`) : false;
         try {
             //get data of switch
             const portsUrl = ApiUrls.MsPorts.replace('serialNumber', this.device.serialNumber);
             const swData = await this.axiosInstance.get(portsUrl);
-            const debug1 = this.debugLog ? this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`) : false;
+            const debug1 = this.enableDebugMode ? this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`) : false;
 
             //check device state
-            await this.checkDeviceState(swData.data);
+            const state = await this.checkDeviceState(swData.data);
 
-            return true;
+            return state;
         } catch (error) {
             throw new Error(`Requesting data error: ${error}`);
         };
     };
 
     async checkDeviceState(swData) {
-        const debug = this.debugLog ? this.emit('debug', `Requesting ports status.`) : false;
+        const debug = this.enableDebugMode ? this.emit('debug', `Requesting ports status.`) : false;
         try {
             const exposedPorts = [];
             for (const port of swData) {
@@ -68,7 +68,7 @@ class MerakiMs extends EventEmitter {
 
                 //skip iterate
                 if (!portName) {
-                    const debug1 = this.debugLog ? this.emit('debug', `Skipped Port: ${port.portId}, Name: ${port.name}.`) : false;
+                    const debug1 = this.enableDebugMode ? this.emit('debug', `Skipped Port: ${port.portId}, Name: ${port.name}.`) : false;
                     continue;
                 }
 
@@ -92,10 +92,10 @@ class MerakiMs extends EventEmitter {
                 exposedPorts.push(obj);
             };
             const portsCount = exposedPorts.length;
-            const debug2 = this.debugLog ? this.emit('debug', `Found: ${portsCount} exposed ports.`) : false;
+            const debug2 = this.enableDebugMode ? this.emit('debug', `Found: ${portsCount} exposed ports.`) : false;
 
             if (portsCount === 0) {
-                return;
+                return false;
             }
 
             //emit device info and state

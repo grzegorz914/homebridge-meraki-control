@@ -117,7 +117,7 @@ class MerakiDevice extends EventEmitter {
                 apiKey: this.apiKey,
                 networkId: this.networkId,
                 deviceData: this.deviceData,
-                debugLog: this.enableDebugMode
+                enableDebugMode: this.enableDebugMode
             });
 
             this.merakiDb.on('deviceInfo', (clientsCount) => {
@@ -149,11 +149,11 @@ class MerakiDevice extends EventEmitter {
                     };
                 }
             })
-                .on('success', (message) => {
-                    this.emit('success', message);
+                .on('success', (success) => {
+                    this.emit('success', success);
                 })
-                .on('message', (message) => {
-                    this.emit('message', message);
+                .on('info', (info) => {
+                    this.emit('message', info);
                 })
                 .on('debug', (debug) => {
                     this.emit('debug', debug);
@@ -166,7 +166,10 @@ class MerakiDevice extends EventEmitter {
                 });
 
             //connect
-            await this.merakiDb.connect();
+            const connect = await this.merakiDb.connect();
+            if (!connect) {
+                return false;
+            };
 
             //prepare accessory
             if (this.startPrepareAccessory) {
