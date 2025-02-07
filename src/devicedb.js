@@ -35,6 +35,16 @@ class MerakiDevice extends EventEmitter {
         this.clientsSensor = config.enableSonsorClients || false;
     };
 
+    async startImpulseGenerator() {
+        try {
+            //start impulse generator 
+            await this.merakiDb.impulseGenerator.start([{ name: 'checkDeviceInfo', sampling: this.refreshInterval }]);
+            return true;
+        } catch (error) {
+            throw new Error(`Impulse generator start error: ${error}`);
+        };
+    }
+
     //prepare accessory
     async prepareAccessory() {
         try {
@@ -176,9 +186,6 @@ class MerakiDevice extends EventEmitter {
                 const accessory = await this.prepareAccessory();
                 this.emit('publishAccessory', accessory);
                 this.startPrepareAccessory = false;
-
-                //start impulse generator 
-                await this.merakiDb.impulseGenerator.start([{ name: 'checkDeviceInfo', sampling: this.refreshInterval }]);
             }
 
             return true;
