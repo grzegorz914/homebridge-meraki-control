@@ -483,6 +483,13 @@
                 },
                 {
                   "key": "devices[]",
+                  "title": "Devices",
+                  "items": [
+                    "devices[].refreshInterval"
+                  ]
+                },
+                {
+                  "key": "devices[]",
                   "title": "Log",
                   "items": [
                     "devices[].disableLogDeviceInfo",
