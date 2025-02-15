@@ -304,5 +304,5 @@ class MerakiPlatform {
 }
 
 export default (api) => {
-  api.registerPlatform(PluginName, PlatformName, MerakiPlatform, true);
+  api.registerPlatform(PluginName, PlatformName, MerakiPlatform);
 }
