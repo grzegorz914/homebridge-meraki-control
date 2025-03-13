@@ -26,6 +26,13 @@ class MerakiPlatform {
 
     api.on('didFinishLaunching', async () => {
       for (const account of config.devices) {
+
+         //check accessory is enabled
+         const disableAccessory = account.disableAccessory || false;
+         if (disableAccessory) {
+           continue;
+         }
+
         const accountName = account.name;
         const apiKey = account.apiKey;
         const organizationId = account.organizationId;

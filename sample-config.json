@@ -21,6 +21,7 @@
                 {
                     "name": "Network Name",
                     "host": "https://123.meraki.com",
+                    "disableAccessory": false,
                     "apiKey": "01032453453421923",
                     "organizationId": "123456789",
                     "networkId": "L_0123456789",

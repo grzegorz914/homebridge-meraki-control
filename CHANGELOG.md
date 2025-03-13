@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Warning!!! - After update to v1.0.0 and above all automations and scenes will not work and the accessory must be added to the HomeKit again
 
+## [1.4.0] - (13.03.2025)
+
+## Changes
+
+- added possibility to disable indyvidual accessory
+- bump dependencies
+- config schema updated
+- redme updated
+- cleanup
+
 ## [1.3.2] - (10.02.2025)
 
 ## Changes

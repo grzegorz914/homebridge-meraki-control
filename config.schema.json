@@ -30,6 +30,13 @@
               "description": "Here set the Meraki Api Path.",
               "required": true
             },
+            "disableAccessory": {
+              "title": "Disable Accessory",
+              "type": "boolean",
+              "default": false,
+              "description": "Here You can disable this accessory.",
+              "required": false
+            },
             "apiKey": {
               "title": "API Key",
               "type": "string",
@@ -349,6 +356,7 @@
       "items": [
         "devices[].name",
         "devices[].host",
+        "devices[].disableAccessory",
         {
           "key": "devices[]",
           "type": "section",
@@ -502,7 +510,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "condition": {
+            "functionBody": "return model.devices[arrayIndices].disableAccessory === false;"
+          }
         }
       ]
     }

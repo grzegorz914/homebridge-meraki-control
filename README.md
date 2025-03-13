@@ -59,6 +59,7 @@
 | --- | --- |
 | `name` | Here set the accessory *Name* to be displayed in *Homebridge/HomeKit*. |
 | `host` | Here set the *API Path* like `https://n123.meraki.com`, do not use `https://api.meraki.com`. |
+| `disableAccessory` | If enabled, the accessory will be disabled. |
 | `apiKey` | Here set the *X-Cisco-Meraki-API-Key*. |
 | `organizationId` | Here set the *Organization Id*. |
 | `networkId` | Here set the *Network Id*. |
