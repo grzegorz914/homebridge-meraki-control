@@ -109,6 +109,7 @@
                   "type": {
                     "title": "Policy",
                     "type": "string",
+                    "default": "Normal",
                     "description": "Here choice the Policy type to be appiled for this Client.",
                     "oneOf": [
                       {
@@ -135,6 +136,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
+                    "default": false,
                     "description": "Here Enable/Disable this Client control.",
                     "required": false
                   }
@@ -142,8 +144,7 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
-              },
-              "required": false
+              }
             },
             "accessPointsControl": {
               "title": "Access Points Control",
@@ -197,6 +198,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
+                    "default": false,
                     "description": "Here Enable/Disable this SSID control.",
                     "required": false
                   }
@@ -204,8 +206,7 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-              },
-              "required": false
+              }
             },
             "switchesControl": {
               "title": "Switches Control",
@@ -237,6 +238,7 @@
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
+                    "default": false,
                     "description": "Here Enable/Disable this Switch control.",
                     "required": false
                   },
@@ -284,6 +286,7 @@
                         "mode": {
                           "title": "Enable",
                           "type": "boolean",
+                          "default": false,
                           "description": "Here Enable/Disable this Port control.",
                           "required": false
                         }
@@ -294,8 +297,7 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].switchesControl === true;"
-              },
-              "required": false
+              }
             },
             "refreshInterval": {
               "title": "Refresh Interval (sec)",
