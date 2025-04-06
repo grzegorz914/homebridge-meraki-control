@@ -27,11 +27,11 @@ class MerakiPlatform {
     api.on('didFinishLaunching', async () => {
       for (const account of config.devices) {
 
-         //check accessory is enabled
-         const disableAccessory = account.disableAccessory || false;
-         if (disableAccessory) {
-           continue;
-         }
+        //check accessory is enabled
+        const disableAccessory = account.disableAccessory || false;
+        if (disableAccessory) {
+          continue;
+        }
 
         const accountName = account.name;
         const apiKey = account.apiKey;
@@ -193,7 +193,7 @@ class MerakiPlatform {
                 //start impulse generator
                 await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
               } catch (error) {
-                throw new Error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
+                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
               }
               break
             case 1: //access point
@@ -243,7 +243,7 @@ class MerakiPlatform {
                 //start impulse generator
                 await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
               } catch (error) {
-                throw new Error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
+                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
               }
               break
             case 2: //switch
@@ -293,7 +293,7 @@ class MerakiPlatform {
                 //start impulse generator
                 await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
               } catch (error) {
-                throw new Error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
+                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
               }
               break
             default:
