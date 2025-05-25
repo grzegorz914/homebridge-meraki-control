@@ -33,6 +33,15 @@ class MerakiDevice extends EventEmitter {
         this.prefixForPortName = deviceData.enablePrefixForPortName || false;
         this.portsSensor = deviceData.enableSensorPorts || false;
         this.poePortsControl = deviceData.enablePoePortsControl || false;
+
+        //hidde port by name
+        this.swHidenPortsByName = [];
+        const hidePorts = deviceData.hidePorts || [];
+        for (const hidePort of hidePorts) {
+            const hidePortName = hidePort.name ?? false;
+            const hidePortEnabled = hidePort.mode || false;
+            const pushHiddenPortName = hidePortName && hidePortEnabled ? this.swHidenPortsByName.push(hidePortName) : false;
+        };
     };
 
     async startImpulseGenerator() {
@@ -143,16 +152,31 @@ class MerakiDevice extends EventEmitter {
                         this.emit('devInfo', `Network: ${this.networkName}`);
                         this.emit('devInfo', `Network Id: ${this.networkId}`);
                         this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                        this.emit('devInfo', `Exposed Ports: ${portsCount}`);
+                        this.emit('devInfo', `Ports: ${portsCount}`);
                         this.emit('devInfo', `----------------------------------`)
                     };
                 };
-            }).on('deviceState', async (exposedPorts, portsCount) => {
-                this.exposedPorts = exposedPorts;
+            }).on('deviceState', async (ports) => {
+                const arr = [];
+                for (const port of ports) {
+
+                    //hidde uplink and port by name
+                    const portName = port.name ?? `Port ${port.portId}`;
+                    const uplinkPort = portName.startsWith('Uplink');
+                    const hideUplinkPort = this.deviceData.hideUplinkPorts && uplinkPort;
+                    const hidePortByName = this.swHidenPortsByName.includes(portName);
+
+                    //skip iterate
+                    if (hideUplinkPort || hidePortByName) {
+                        continue;
+                    }
+                    arr.push(port);
+                };
+                this.exposedPorts = arr;
 
                 //update characteristics of exposed ports
-                for (let i = 0; i < portsCount; i++) {
-                    const state = exposedPorts[i].state;
+                for (let i = 0; i < arr.length; i++) {
+                    const state = arr[i].state;
                     if (this.services) {
                         this.services[i].updateCharacteristic(Characteristic.On, state);
                     };

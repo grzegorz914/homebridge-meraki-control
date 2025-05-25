@@ -23,7 +23,6 @@ class MerakiDevice extends EventEmitter {
         this.apiKey = config.apiKey;
         this.deviceName = deviceName;
         this.deviceUuid = deviceUuid;
-        this.deviceData = deviceData;
         this.refreshInterval = config.refreshInterval * 1000 || 5000;
         this.enableDebugMode = config.enableDebugMode || false;
         this.disableLogInfo = config.disableLogInfo || false;
@@ -34,6 +33,7 @@ class MerakiDevice extends EventEmitter {
         this.prefixForSsidName = config.enablePrefixForSsidsName || false;
         this.ssidsSensor = config.enableSonsorSsids || false;
         this.hideUnconfiguredSsids = config.hideUnconfiguredSsids || false;
+        this.hidenSsidsName = deviceData;
     };
 
     async startImpulseGenerator() {
@@ -126,8 +126,6 @@ class MerakiDevice extends EventEmitter {
                 host: this.host,
                 apiKey: this.apiKey,
                 networkId: this.networkId,
-                deviceData: this.deviceData,
-                hideUnconfiguredSsid: this.hideUnconfiguredSsids,
                 enableDebugMode: this.enableDebugMode
             });
 
@@ -142,16 +140,31 @@ class MerakiDevice extends EventEmitter {
                         this.emit('devInfo', `Network: ${this.networkName}`);
                         this.emit('devInfo', `Network Id: ${this.networkId}`);
                         this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                        this.emit('devInfo', `Exposed SSIDs: ${ssidsCount}`);
+                        this.emit('devInfo', `SSIDs: ${ssidsCount}`);
                         this.emit('devInfo', `----------------------------------`)
                     };
                 };
-            }).on('deviceState', async (exposedSsids, ssidsCount) => {
-                this.exposedSsids = exposedSsids;
+            }).on('deviceState', async (sids) => {
+                const arr = [];
+                for (const ssid of sids) {
+
+                    //hidde unconfigured and ssids by name
+                    const ssidName = ssid.name;
+                    const unconfiguredSsid = ssidName.startsWith('Unconfigured');
+                    const hideUnconfiguredSsid = this.hideUnconfiguredSsids && unconfiguredSsid;
+                    const hideSsidByName = this.hidenSsidsName.includes(ssidName);
+
+                    //skip iterate
+                    if (hideUnconfiguredSsid || hideSsidByName) {
+                        continue;
+                    }
+                    arr.push(ssid);
+                };
+                this.exposedSsids = arr;
 
                 //update characteristics of exposed ssids
-                for (let i = 0; i < ssidsCount; i++) {
-                    const state = exposedSsids[i].state;
+                for (let i = 0; i < arr.length; i++) {
+                    const state = arr[i].state;
                     if (this.services) {
                         this.services[i].updateCharacteristic(Characteristic.On, state);
                     };

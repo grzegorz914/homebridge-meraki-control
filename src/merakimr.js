@@ -9,8 +9,6 @@ class MerakiMr extends EventEmitter {
         const host = config.host;
         const apiKey = config.apiKey;
         const networkId = config.networkId;
-        this.hideUnconfiguredSsids = config.hideUnconfiguredSsid;
-        this.hidenSsidsName = config.deviceData;
         this.enableDebugMode = config.enableDebugMode;
 
         const baseUrl = (`${host}${ApiUrls.Base}`);
@@ -53,44 +51,29 @@ class MerakiMr extends EventEmitter {
     async checkDeviceState(ssidsData) {
         const debug = this.enableDebugMode ? this.emit('debug', `Requesting SSIDs status.`) : false;
         try {
-            const exposedSsids = [];
+            const ssids = [];
             for (const ssid of ssidsData) {
-                const ssidName = ssid.name ?? false;
-
-                if (!ssidName) {
-                    const debug1 = this.enableDebugMode ? this.emit('debug', `Skipped SSID: ${ssid.number}, Name: ${ssid.name}.`) : false;
-                    continue;
-                }
-
-                //hidde unconfigured and ssids by name
-                const unconfiguredSsid = ssidName.startsWith('Unconfigured');
-                const hideUnconfiguredSsid = this.hideUnconfiguredSsids && unconfiguredSsid;
-                const hideSsidByName = this.hidenSsidsName.includes(ssidName);
-
-                //skip iterate
-                if (hideUnconfiguredSsid || hideSsidByName) {
-                    continue;
-                }
 
                 //push exposed ssid to array
                 const obj = {
                     'number': ssid.number,
-                    'name': ssidName,
-                    'state': ssid.enabled
+                    'name': ssid.name ?? `WiFi ${ssid.number}`,
+                    'state': ssid.enabled ?? false
                 };
-                exposedSsids.push(obj);
+                ssids.push(obj);
             };
 
-            const ssidsCount = exposedSsids.length;
+            const ssidsCount = ssids.length;
             const debug2 = this.enableDebugMode ? this.emit('debug', `Found: ${ssidsCount} exposed SSIDs.`) : false;
 
             if (ssidsCount === 0) {
+                this.emit('warn', `Found: ${ssidsCount} ssids.`);
                 return false;
             }
 
             //emit device info and state
             this.emit('deviceInfo', ssidsCount);
-            this.emit('deviceState', exposedSsids, ssidsCount);
+            this.emit('deviceState', ssids);
 
             return true;
         } catch (error) {

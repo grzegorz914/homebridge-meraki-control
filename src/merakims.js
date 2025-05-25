@@ -21,15 +21,6 @@ class MerakiMs extends EventEmitter {
             }
         });
 
-        //hidde port by name
-        this.swHidenPortsByName = [];
-        const hidePorts = this.device.hidePorts || [];
-        for (const hidePort of hidePorts) {
-            const hidePortName = hidePort.name ?? false;
-            const hidePortEnabled = hidePort.mode || false;
-            const pushHiddenPortName = hidePortName && hidePortEnabled ? this.swHidenPortsByName.push(hidePortName) : false;
-        };
-
         this.impulseGenerator = new ImpulseGenerator();
         this.impulseGenerator.on('checkDeviceInfo', async () => {
             try {
@@ -62,45 +53,29 @@ class MerakiMs extends EventEmitter {
     async checkDeviceState(swData) {
         const debug = this.enableDebugMode ? this.emit('debug', `Requesting ports status.`) : false;
         try {
-            const exposedPorts = [];
+            const ports = [];
             for (const port of swData) {
-                const portName = port.name ?? false;
-
-                //skip iterate
-                if (!portName) {
-                    const debug1 = this.enableDebugMode ? this.emit('debug', `Skipped Port: ${port.portId}, Name: ${port.name}.`) : false;
-                    continue;
-                }
-
-                //hidde uplink and port by name
-                const uplinkPort = portName.startsWith('Uplink');
-                const hideUplinkPort = this.device.hideUplinkPorts && uplinkPort;
-                const hidePortByName = this.swHidenPortsByName.includes(portName);
-
-                //skip iterate
-                if (hideUplinkPort || hidePortByName) {
-                    continue;
-                }
 
                 //push exposed ports to array
                 const obj = {
                     'id': port.portId,
-                    'name': portName,
-                    'state': port.enabled,
-                    'poeState': port.poeEnabled
+                    'name': port.name ?? `Port ${port.portId}`,
+                    'state': port.enabled ?? false,
+                    'poeState': port.poeEnabled ?? false
                 };
-                exposedPorts.push(obj);
+                ports.push(obj);
             };
-            const portsCount = exposedPorts.length;
+            const portsCount = ports.length;
             const debug2 = this.enableDebugMode ? this.emit('debug', `Found: ${portsCount} exposed ports.`) : false;
 
             if (portsCount === 0) {
+                this.emit('warn', `Found: ${portsCount} ports.`);
                 return false;
             }
 
             //emit device info and state
             this.emit('deviceInfo', portsCount);
-            this.emit('deviceState', exposedPorts, portsCount);
+            this.emit('deviceState', ports);
 
             return true;
         } catch (error) {
@@ -111,7 +86,7 @@ class MerakiMs extends EventEmitter {
     async send(url, payload) {
         try {
             await this.axiosInstance.put(url, payload);
-            return true;;
+            return true;
         } catch (error) {
             throw new Error(error);
         };
