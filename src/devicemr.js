@@ -144,7 +144,7 @@ class MerakiDevice extends EventEmitter {
                         this.emit('devInfo', `----------------------------------`)
                     };
                 };
-            }).on('deviceState', async (sids) => {
+            }).on('deviceState', (sids) => {
                 const arr = [];
                 for (const ssid of sids) {
 

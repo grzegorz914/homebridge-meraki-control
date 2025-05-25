@@ -145,7 +145,7 @@ class MerakiDevice extends EventEmitter {
                         this.emit('devInfo', `----------------------------------`)
                     };
                 };
-            }).on('deviceState', async (exposedClients, clientsCount) => {
+            }).on('deviceState', (exposedClients, clientsCount) => {
                 this.exposedClients = exposedClients;
 
                 for (let i = 0; i < clientsCount; i++) {

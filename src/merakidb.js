@@ -98,6 +98,7 @@ class MerakiDb extends EventEmitter {
             const debug1 = this.enableDebugMode ? this.emit('debug', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`) : false;
 
             if (configuredAndExistedClientsCount === 0) {
+                this.emit('warn', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
                 return false;
             };
             const state = await this.updateExistedClientsPolicy(configuredAndExistedClients);
@@ -137,6 +138,7 @@ class MerakiDb extends EventEmitter {
             const debug2 = this.enableDebugMode ? this.emit('debug', `Found: ${clientsCount} exposed clients.`) : false;
 
             if (clientsCount === 0) {
+                this.emit('warn', `Found: ${clientsCount} exposed clients.`);
                 return false;
             };
 

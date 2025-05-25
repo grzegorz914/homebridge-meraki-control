@@ -37,9 +37,9 @@ class MerakiDevice extends EventEmitter {
         //hidde port by name
         this.swHidenPortsByName = [];
         const hidePorts = deviceData.hidePorts || [];
-        for (const hidePort of hidePorts) {
-            const hidePortName = hidePort.name ?? false;
-            const hidePortEnabled = hidePort.mode || false;
+        for (const port of hidePorts) {
+            const hidePortName = port.name ?? false;
+            const hidePortEnabled = port.mode || false;
             const pushHiddenPortName = hidePortName && hidePortEnabled ? this.swHidenPortsByName.push(hidePortName) : false;
         };
     };
@@ -156,7 +156,7 @@ class MerakiDevice extends EventEmitter {
                         this.emit('devInfo', `----------------------------------`)
                     };
                 };
-            }).on('deviceState', async (ports) => {
+            }).on('deviceState', (ports) => {
                 const arr = [];
                 for (const port of ports) {
 
