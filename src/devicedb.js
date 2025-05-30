@@ -52,7 +52,7 @@ class MerakiDevice extends EventEmitter {
             const debug = !this.enableDebugMode ? false : this.emit('debug', `prepare accessory`);
             const accessoryName = this.deviceName;
             const accessoryUUID = AccessoryUUID.generate(this.deviceUuid);
-            const accessoryCategory = Categories.AIRPORT;
+            const accessoryCategory = Categories.ROUTER;
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //prepare information service
