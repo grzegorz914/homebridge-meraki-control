@@ -73,7 +73,7 @@ class MerakiPlatform {
             const policyType = clientPolicy.type ?? false;
             const policyEnabled = clientPolicy.mode || false;
             const push = policyName && policyMac && policyType && policyEnabled ? configuredClientsPolicy.push(clientPolicy) : false;
-          };
+          }
 
           //push configured clients policy to device
           const clientsPolicyExist = configuredClientsPolicy.length > 0;
@@ -85,8 +85,8 @@ class MerakiPlatform {
               'deviceData': configuredClientsPolicy
             };
             allDevices.push(obj);
-          };
-        };
+          }
+        }
 
         //access points
         const mrAccessPointsControl = account.accessPointsControl || false;
@@ -99,7 +99,7 @@ class MerakiPlatform {
             const hideSsidName = hideSsid.name ?? false;
             const hideSsidEnabled = hideSsid.mode || false;
             const push = hideSsidName && hideSsidEnabled ? configuredHidenSsidsName.push(hideSsidName) : false;
-          };
+          }
 
           //push configured ssids to devices
           const hideSsidNameExist = configuredHidenSsidsName.length > 0;
@@ -111,8 +111,8 @@ class MerakiPlatform {
               'deviceData': configuredHidenSsidsName
             };
             allDevices.push(obj);
-          };
-        };
+          }
+        }
 
         //switches
         const msSwitchesControl = account.switchesControl || false;
@@ -134,9 +134,9 @@ class MerakiPlatform {
                 'deviceData': sw
               };
               allDevices.push(obj);
-            };
-          };
-        };
+            }
+          }
+        }
 
         //meraki devices
         for (const device of allDevices) {
@@ -145,165 +145,71 @@ class MerakiPlatform {
           const deviceUuid = device.uuid;
           const deviceData = device.deviceData;
 
+          let configuredDevice;
           switch (deviceType) {
             case 0: //dashboard clients
-              try {
-                const dbDevice = new DeviceDb(api, account, deviceName, deviceUuid, deviceData);
-                dbDevice.on('publishAccessory', (accessory) => {
-
-                  //publish devices
-                  api.publishExternalAccessories(PluginName, [accessory]);
-                  const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
-                })
-                  .on('devInfo', (devInfo) => {
-                    const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
-                  })
-                  .on('success', (success) => {
-                    const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, ${success}.`);
-                  })
-                  .on('info', (info) => {
-                    const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceName}, ${info}.`);
-                  })
-                  .on('debug', (debug) => {
-                    const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceName}, debug: ${debug}.`);
-                  })
-                  .on('warn', (warn) => {
-                    const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceName}, ${warn}.`);
-                  })
-                  .on('error', (error) => {
-                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}.`);
-                  });
-
-                //create impulse generator
-                const impulseGenerator = new ImpulseGenerator();
-                impulseGenerator.on('start', async () => {
-                  try {
-                    const startDone = await dbDevice.start();
-                    const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
-
-                    //start impulse generator 
-                    const startImpulseGenerator = startDone ? await dbDevice.startImpulseGenerator() : false
-                  } catch (error) {
-                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
-                  };
-                }).on('state', (state) => {
-                  const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`);
-                });
-
-                //start impulse generator
-                await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
-              } catch (error) {
-                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
-              }
+              configuredDevice = new DeviceDb(api, account, deviceName, deviceUuid, deviceData);
               break
             case 1: //access point
-              try {
-                const mrDevice = new DeviceMr(api, account, deviceName, deviceUuid, deviceData);
-                mrDevice.on('publishAccessory', (accessory) => {
-
-                  //publish devices
-                  api.publishExternalAccessories(PluginName, [accessory]);
-                  const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
-                })
-                  .on('devInfo', (devInfo) => {
-                    const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
-                  })
-                  .on('success', (success) => {
-                    const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, ${success}.`);
-                  })
-                  .on('info', (info) => {
-                    const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceName}, ${info}.`);
-                  })
-                  .on('debug', (debug) => {
-                    const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceName}, debug: ${debug}.`);
-                  })
-                  .on('warn', (warn) => {
-                    const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceName}, ${warn}.`);
-                  })
-                  .on('error', (error) => {
-                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}.`);
-                  });
-
-                //create impulse generator
-                const impulseGenerator = new ImpulseGenerator();
-                impulseGenerator.on('start', async () => {
-                  try {
-                    const startDone = await mrDevice.start();
-                    const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
-
-                    //start impulse generator 
-                    const startImpulseGenerator = startDone ? await mrDevice.startImpulseGenerator() : false
-                  } catch (error) {
-                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
-                  };
-                }).on('state', (state) => {
-                  const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`);
-                });
-
-                //start impulse generator
-                await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
-              } catch (error) {
-                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
-              }
+              configuredDevice = new DeviceMr(api, account, deviceName, deviceUuid, deviceData);
               break
             case 2: //switch
-              try {
-                const msDevice = new DeviceMs(api, account, deviceName, deviceUuid, deviceData);
-                msDevice.on('publishAccessory', (accessory) => {
-
-                  //publish devices
-                  api.publishExternalAccessories(PluginName, [accessory]);
-                  const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
-                })
-                  .on('devInfo', (devInfo) => {
-                    const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
-                  })
-                  .on('success', (success) => {
-                    const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, ${success}.`);
-                  })
-                  .on('info', (info) => {
-                    const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceName}, ${info}.`);
-                  })
-                  .on('debug', (debug) => {
-                    const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceName}, debug: ${debug}.`);
-                  })
-                  .on('warn', (warn) => {
-                    const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceName}, ${warn}.`);
-                  })
-                  .on('error', (error) => {
-                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}.`);
-                  });
-
-                //create impulse generator
-                const impulseGenerator = new ImpulseGenerator();
-                impulseGenerator.on('start', async () => {
-                  try {
-                    const startDone = await msDevice.start();
-                    const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
-
-                    //start impulse generator 
-                    const startImpulseGenerator = startDone ? await msDevice.startImpulseGenerator() : false
-                  } catch (error) {
-                    const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
-                  };
-                }).on('state', (state) => {
-                  const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`);
-                });
-
-                //start impulse generator
-                await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
-              } catch (error) {
-                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
-              }
+              configuredDevice = new DeviceMs(api, account, deviceName, deviceUuid, deviceData);
               break
             default:
               const emitLog = disableLogWarn ? false : log.warn(`Unknown device type: ${deviceType}.`);
               break;
-          };
-        };
-      };
+          }
+
+          try {
+            configuredDevice.on('publishAccessory', (accessory) => {
+              api.publishExternalAccessories(PluginName, [accessory]);
+              const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
+            })
+              .on('devInfo', (devInfo) => {
+                const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
+              })
+              .on('success', (success) => {
+                const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, ${success}.`);
+              })
+              .on('info', (info) => {
+                const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceName}, ${info}.`);
+              })
+              .on('debug', (debug) => {
+                const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceName}, debug: ${debug}.`);
+              })
+              .on('warn', (warn) => {
+                const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceName}, ${warn}.`);
+              })
+              .on('error', (error) => {
+                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}.`);
+              });
+
+            //create impulse generator
+            const impulseGenerator = new ImpulseGenerator();
+            impulseGenerator.on('start', async () => {
+              try {
+                const startDone = await configuredDevice.start();
+                const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
+
+                //start impulse generator 
+                const startImpulseGenerator = startDone ? await configuredDevice.startImpulseGenerator() : false
+              } catch (error) {
+                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
+              }
+            }).on('state', (state) => {
+              const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`);
+            });
+
+            //start impulse generator
+            await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
+          } catch (error) {
+            const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
+          }
+        }
+      }
     });
-  };
+  }
 
   configureAccessory(accessory) {
     this.accessories.push(accessory);
