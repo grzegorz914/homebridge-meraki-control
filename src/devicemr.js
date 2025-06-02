@@ -72,9 +72,10 @@ class MerakiDevice extends EventEmitter {
             this.services = [];
             this.sensorServices = [];
             for (const ssid of exposedSsids) {
+                const ssidNumber = ssid.number;
                 const ssidName = ssid.name;
                 const serviceName = this.prefixForSsidName ? `W.${ssidName}` : ssidName;
-                const service = accessory.addService(Service.Outlet, serviceName, `Ssid Service ${ssidName}`);
+                const service = accessory.addService(Service.Outlet, serviceName, `service${ssidNumber}`);
                 service.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 service.setCharacteristic(Characteristic.ConfiguredName, serviceName);
                 service.getCharacteristic(Characteristic.On)
@@ -101,7 +102,7 @@ class MerakiDevice extends EventEmitter {
                 if (this.ssidsSensor) {
                     const debug = !this.enableDebugMode && j > 0 ? false : this.emit('debug', `prepare meraki sensor service`);
                     const sensorServiceName = this.prefixForSsidName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
-                    const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Ssid Service Sensor ${ssidName}`);
+                    const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `sensorService${ssidNumber}`);
                     sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                     sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
                     sensorService.getCharacteristic(Characteristic.ContactSensorState)
@@ -164,12 +165,17 @@ class MerakiDevice extends EventEmitter {
 
                 //update characteristics of exposed ssids
                 for (let i = 0; i < arr.length; i++) {
+                    const name = arr[i].name;
                     const state = arr[i].state;
                     if (this.services) {
+                        const serviceName = this.prefixForSsidName ? `W.${name}` : name;
+                        this.services[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
                         this.services[i].updateCharacteristic(Characteristic.On, state);
                     };
 
                     if (this.sensorServices && this.ssidsSensor) {
+                        const serviceName = this.prefixForSsidName ? `Sensor W.${name}` : `Sensor ${name}`;
+                        this.sensorServices[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
                         this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
                     };
                 }

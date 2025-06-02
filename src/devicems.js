@@ -83,7 +83,7 @@ class MerakiDevice extends EventEmitter {
                 const portName = port.name;
                 const portId = port.id;
                 const serviceName = this.prefixForPortName ? `${portId}.${portName}` : portName;
-                const service = accessory.addService(Service.Outlet, serviceName, `Port Service ${portName}`);
+                const service = accessory.addService(Service.Outlet, serviceName, `service${portId}`);
                 service.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 service.setCharacteristic(Characteristic.ConfiguredName, serviceName);
                 service.getCharacteristic(Characteristic.On)
@@ -112,10 +112,10 @@ class MerakiDevice extends EventEmitter {
 
                 if (this.portsSensor) {
                     const debug = !this.enableDebugMode && k > 0 ? false : this.emit('debug', `prepare meraki sensor service`);
-                    const sensorServiceName = this.prefixForPortName ? `Sensor ${portId}.${portName}` : `Sensor ${portName}`;
-                    const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Port Service Sensor ${portName}`);
+                    const serviceName = this.prefixForPortName ? `Sensor ${portId}.${portName}` : `Sensor ${portName}`;
+                    const sensorService = accessory.addService(Service.ContactSensor, serviceName, `sensorService${portId}`);
                     sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
+                    sensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
                     sensorService.getCharacteristic(Characteristic.ContactSensorState)
                         .onGet(async () => {
                             const state = port.state;
@@ -176,12 +176,18 @@ class MerakiDevice extends EventEmitter {
 
                 //update characteristics of exposed ports
                 for (let i = 0; i < arr.length; i++) {
+                    const name = arr[i].name;
+                    const portId = arr[i].id;
                     const state = arr[i].state;
                     if (this.services) {
+                        const serviceName = this.prefixForPortName ? `${portId}.${name}` : name;
+                        this.services[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
                         this.services[i].updateCharacteristic(Characteristic.On, state);
                     };
 
                     if (this.sensorServices && this.portsSensor) {
+                        const serviceName = this.prefixForPortName ? `Sensor ${portId}.${name}` : `Sensor ${name}`;
+                        this.sensorServices[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
                         this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
                     };
                 };
