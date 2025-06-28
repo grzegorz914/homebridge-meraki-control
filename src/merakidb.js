@@ -23,11 +23,17 @@ class MerakiDb extends EventEmitter {
             }
         });
 
+        this.call = false;
         this.impulseGenerator = new ImpulseGenerator();
         this.impulseGenerator.on('updateDashboardClients', async () => {
             try {
+                if (this.call) return;
+
+                this.call = true;
                 await this.connect();
+                this.call = false;
             } catch (error) {
+                this.call = false;
                 this.emit('error', `Inpulse generator error: ${error}`);
             };
         }).on('state', (state) => {

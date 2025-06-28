@@ -21,16 +21,23 @@ class MerakiMs extends EventEmitter {
             }
         });
 
+        this.call = false;
         this.impulseGenerator = new ImpulseGenerator();
         this.impulseGenerator.on('checkDeviceInfo', async () => {
             try {
+                if (this.call) return;
+
+                this.call = true;
                 await this.connect();
+                this.call = false;
             } catch (error) {
+                this.call = false;
                 this.emit('error', `Inpulse generator error: ${error}`);
             };
         }).on('state', (state) => {
-            const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`);
+            const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`); js
         });
+
     };
 
     async connect() {
