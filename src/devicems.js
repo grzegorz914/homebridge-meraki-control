@@ -139,59 +139,59 @@ class MerakiDevice extends EventEmitter {
                 apiKey: this.apiKey,
                 deviceData: this.deviceData,
                 enableDebugMode: this.enableDebugMode
-            });
-
-            this.merakiMs.on('deviceInfo', (portsCount) => {
-                //meraki info
-                if (this.startPrepareAccessory) {
-                    //connect to deice success
-                    this.emit('success', `Connect Success.`)
-                    if (!this.disableLogDeviceInfo) {
-                        this.emit('devInfo', `---- ${this.deviceName}: ${this.deviceUuid} ----`);
-                        this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                        this.emit('devInfo', `Network: ${this.networkName}`);
-                        this.emit('devInfo', `Network Id: ${this.networkId}`);
-                        this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                        this.emit('devInfo', `Ports: ${portsCount}`);
-                        this.emit('devInfo', `----------------------------------`)
-                    };
-                };
-            }).on('deviceState', (ports) => {
-                const arr = [];
-                for (const port of ports) {
-
-                    //hidde uplink and port by name
-                    const portName = port.name ?? `Port ${port.portId}`;
-                    const uplinkPort = portName.startsWith('Uplink');
-                    const hideUplinkPort = this.deviceData.hideUplinkPorts && uplinkPort;
-                    const hidePortByName = this.swHidenPortsByName.includes(portName);
-
-                    //skip iterate
-                    if (hideUplinkPort || hidePortByName) {
-                        continue;
-                    }
-                    arr.push(port);
-                };
-                this.exposedPorts = arr;
-
-                //update characteristics of exposed ports
-                for (let i = 0; i < arr.length; i++) {
-                    const name = arr[i].name;
-                    const portId = arr[i].id;
-                    const state = arr[i].state;
-                    if (this.services) {
-                        const serviceName = this.prefixForPortName ? `${portId}.${name}` : name;
-                        this.services[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
-                        this.services[i].updateCharacteristic(Characteristic.On, state);
-                    };
-
-                    if (this.sensorServices && this.portsSensor) {
-                        const serviceName = this.prefixForPortName ? `Sensor ${portId}.${name}` : `Sensor ${name}`;
-                        this.sensorServices[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
-                        this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
-                    };
-                };
             })
+                .on('deviceInfo', (portsCount) => {
+                    //meraki info
+                    if (this.startPrepareAccessory) {
+                        //connect to deice success
+                        this.emit('success', `Connect Success.`)
+                        if (!this.disableLogDeviceInfo) {
+                            this.emit('devInfo', `---- ${this.deviceName}: ${this.deviceUuid} ----`);
+                            this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
+                            this.emit('devInfo', `Network: ${this.networkName}`);
+                            this.emit('devInfo', `Network Id: ${this.networkId}`);
+                            this.emit('devInfo', `Organization Id: ${this.organizationId}`);
+                            this.emit('devInfo', `Ports: ${portsCount}`);
+                            this.emit('devInfo', `----------------------------------`)
+                        };
+                    };
+                })
+                .on('deviceState', (ports) => {
+                    const arr = [];
+                    for (const port of ports) {
+
+                        //hidde uplink and port by name
+                        const portName = port.name ?? `Port ${port.portId}`;
+                        const uplinkPort = portName.startsWith('Uplink');
+                        const hideUplinkPort = this.deviceData.hideUplinkPorts && uplinkPort;
+                        const hidePortByName = this.swHidenPortsByName.includes(portName);
+
+                        //skip iterate
+                        if (hideUplinkPort || hidePortByName) {
+                            continue;
+                        }
+                        arr.push(port);
+                    };
+                    this.exposedPorts = arr;
+
+                    //update characteristics of exposed ports
+                    for (let i = 0; i < arr.length; i++) {
+                        const name = arr[i].name;
+                        const portId = arr[i].id;
+                        const state = arr[i].state;
+                        if (this.services) {
+                            const serviceName = this.prefixForPortName ? `${portId}.${name}` : name;
+                            this.services[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
+                            this.services[i].updateCharacteristic(Characteristic.On, state);
+                        };
+
+                        if (this.sensorServices && this.portsSensor) {
+                            const serviceName = this.prefixForPortName ? `Sensor ${portId}.${name}` : `Sensor ${name}`;
+                            this.sensorServices[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
+                            this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
+                        };
+                    };
+                })
                 .on('success', (success) => {
                     this.emit('success', success);
                 })

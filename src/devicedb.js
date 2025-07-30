@@ -128,37 +128,37 @@ class MerakiDevice extends EventEmitter {
                 networkId: this.networkId,
                 deviceData: this.deviceData,
                 enableDebugMode: this.enableDebugMode
-            });
-
-            this.merakiDb.on('deviceInfo', (clientsCount) => {
-                //meraki info
-                if (this.startPrepareAccessory) {
-                    //connect to deice success
-                    this.emit('success', `Connect Success.`)
-                    if (!this.disableLogDeviceInfo) {
-                        this.emit('devInfo', `---- ${this.deviceName} ----`);
-                        this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                        this.emit('devInfo', `Network: ${this.networkName}`);
-                        this.emit('devInfo', `Network Id: ${this.networkId}`);
-                        this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                        this.emit('devInfo', `Exposed Clients: ${clientsCount}`);
-                        this.emit('devInfo', `----------------------------------`)
-                    };
-                };
-            }).on('deviceState', (exposedClients, clientsCount) => {
-                this.exposedClients = exposedClients;
-
-                for (let i = 0; i < clientsCount; i++) {
-                    const state = exposedClients[i].policyState;
-                    if (this.services) {
-                        this.services[i].updateCharacteristic(Characteristic.On, state);
-                    }
-
-                    if (this.sensorServices && this.clientsSensor) {
-                        this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
-                    };
-                }
             })
+                .on('deviceInfo', (clientsCount) => {
+                    //meraki info
+                    if (this.startPrepareAccessory) {
+                        //connect to deice success
+                        this.emit('success', `Connect Success.`)
+                        if (!this.disableLogDeviceInfo) {
+                            this.emit('devInfo', `---- ${this.deviceName} ----`);
+                            this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
+                            this.emit('devInfo', `Network: ${this.networkName}`);
+                            this.emit('devInfo', `Network Id: ${this.networkId}`);
+                            this.emit('devInfo', `Organization Id: ${this.organizationId}`);
+                            this.emit('devInfo', `Exposed Clients: ${clientsCount}`);
+                            this.emit('devInfo', `----------------------------------`)
+                        };
+                    };
+                })
+                .on('deviceState', (exposedClients, clientsCount) => {
+                    this.exposedClients = exposedClients;
+
+                    for (let i = 0; i < clientsCount; i++) {
+                        const state = exposedClients[i].policyState;
+                        if (this.services) {
+                            this.services[i].updateCharacteristic(Characteristic.On, state);
+                        }
+
+                        if (this.sensorServices && this.clientsSensor) {
+                            this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
+                        };
+                    }
+                })
                 .on('success', (success) => {
                     this.emit('success', success);
                 })

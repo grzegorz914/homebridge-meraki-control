@@ -128,58 +128,58 @@ class MerakiDevice extends EventEmitter {
                 apiKey: this.apiKey,
                 networkId: this.networkId,
                 enableDebugMode: this.enableDebugMode
-            });
-
-            this.merakiMr.on('deviceInfo', (ssidsCount) => {
-                //meraki info
-                if (this.startPrepareAccessory) {
-                    //connect to deice success
-                    this.emit('success', `Connect Success.`)
-                    if (!this.disableLogDeviceInfo) {
-                        this.emit('devInfo', `---- ${this.deviceName} ----`);
-                        this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                        this.emit('devInfo', `Network: ${this.networkName}`);
-                        this.emit('devInfo', `Network Id: ${this.networkId}`);
-                        this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                        this.emit('devInfo', `SSIDs: ${ssidsCount}`);
-                        this.emit('devInfo', `----------------------------------`)
-                    };
-                };
-            }).on('deviceState', (sids) => {
-                const arr = [];
-                for (const ssid of sids) {
-
-                    //hidde unconfigured and ssids by name
-                    const ssidName = ssid.name;
-                    const unconfiguredSsid = ssidName.startsWith('Unconfigured');
-                    const hideUnconfiguredSsid = this.hideUnconfiguredSsids && unconfiguredSsid;
-                    const hideSsidByName = this.hidenSsidsName.includes(ssidName);
-
-                    //skip iterate
-                    if (hideUnconfiguredSsid || hideSsidByName) {
-                        continue;
-                    }
-                    arr.push(ssid);
-                };
-                this.exposedSsids = arr;
-
-                //update characteristics of exposed ssids
-                for (let i = 0; i < arr.length; i++) {
-                    const name = arr[i].name;
-                    const state = arr[i].state;
-                    if (this.services) {
-                        const serviceName = this.prefixForSsidName ? `W.${name}` : name;
-                        this.services[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
-                        this.services[i].updateCharacteristic(Characteristic.On, state);
-                    };
-
-                    if (this.sensorServices && this.ssidsSensor) {
-                        const serviceName = this.prefixForSsidName ? `Sensor W.${name}` : `Sensor ${name}`;
-                        this.sensorServices[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
-                        this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
-                    };
-                }
             })
+                .on('deviceInfo', (ssidsCount) => {
+                    //meraki info
+                    if (this.startPrepareAccessory) {
+                        //connect to deice success
+                        this.emit('success', `Connect Success.`)
+                        if (!this.disableLogDeviceInfo) {
+                            this.emit('devInfo', `---- ${this.deviceName} ----`);
+                            this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
+                            this.emit('devInfo', `Network: ${this.networkName}`);
+                            this.emit('devInfo', `Network Id: ${this.networkId}`);
+                            this.emit('devInfo', `Organization Id: ${this.organizationId}`);
+                            this.emit('devInfo', `SSIDs: ${ssidsCount}`);
+                            this.emit('devInfo', `----------------------------------`)
+                        };
+                    };
+                })
+                .on('deviceState', (sids) => {
+                    const arr = [];
+                    for (const ssid of sids) {
+
+                        //hidde unconfigured and ssids by name
+                        const ssidName = ssid.name;
+                        const unconfiguredSsid = ssidName.startsWith('Unconfigured');
+                        const hideUnconfiguredSsid = this.hideUnconfiguredSsids && unconfiguredSsid;
+                        const hideSsidByName = this.hidenSsidsName.includes(ssidName);
+
+                        //skip iterate
+                        if (hideUnconfiguredSsid || hideSsidByName) {
+                            continue;
+                        }
+                        arr.push(ssid);
+                    };
+                    this.exposedSsids = arr;
+
+                    //update characteristics of exposed ssids
+                    for (let i = 0; i < arr.length; i++) {
+                        const name = arr[i].name;
+                        const state = arr[i].state;
+                        if (this.services) {
+                            const serviceName = this.prefixForSsidName ? `W.${name}` : name;
+                            this.services[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
+                            this.services[i].updateCharacteristic(Characteristic.On, state);
+                        };
+
+                        if (this.sensorServices && this.ssidsSensor) {
+                            const serviceName = this.prefixForSsidName ? `Sensor W.${name}` : `Sensor ${name}`;
+                            this.sensorServices[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
+                            this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
+                        };
+                    }
+                })
                 .on('success', (success) => {
                     this.emit('success', success);
                 })
