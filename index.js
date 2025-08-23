@@ -29,9 +29,7 @@ class MerakiPlatform {
 
         //check accessory is enabled
         const disableAccessory = account.disableAccessory || false;
-        if (disableAccessory) {
-          continue;
-        }
+        if (disableAccessory) continue;
 
         const accountName = account.name;
         const apiKey = account.apiKey;
@@ -44,20 +42,23 @@ class MerakiPlatform {
         }
 
         //log config
-        const enableDebugMode = account.enableDebugMode || false;
-        const disableLogDeviceInfo = account.disableLogDeviceInfo || false;
-        const disableLogInfo = account.disableLogInfo || false;
-        const disableLogSuccess = account.disableLogSuccess || false;
-        const disableLogWarn = account.disableLogWarn || false;
-        const disableLogError = account.disableLogError || false;
-        const debug = enableDebugMode ? log.info(`Network: ${accountName}, did finish launching.`) : false;
+        const logLevel = {
+          debug: account.enableDebugMode,
+          info: !account.disableLogInfo,
+          success: !account.disableLogSuccess,
+          warn: !account.disableLogWarn,
+          error: !account.disableLogError,
+          devInfo: !account.disableLogDeviceInfo,
+        };
+
+        if (logLevel.debug) log.info(`Network: ${accountName}, did finish launching.`);
         const config = {
           ...account,
           apiKey: 'removed',
           organizationId: 'removed',
           networkId: 'removed'
         };
-        const debug1 = !enableDebugMode ? false : log.info(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`);
+        if (logLevel.debug) log.info(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`);
 
         //dashboard clients
         const allDevices = [];
@@ -157,55 +158,45 @@ class MerakiPlatform {
               configuredDevice = new DeviceMs(api, account, deviceName, deviceUuid, deviceData);
               break
             default:
-              const emitLog = disableLogWarn ? false : log.warn(`Unknown device type: ${deviceType}.`);
+              if (logLevel.warn) log.warn(`Unknown device type: ${deviceType}.`);
               break;
           }
 
           try {
-            configuredDevice.on('publishAccessory', (accessory) => {
-              api.publishExternalAccessories(PluginName, [accessory]);
-              const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, Published as external accessory.`);
-            })
-              .on('devInfo', (devInfo) => {
-                const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
-              })
-              .on('success', (success) => {
-                const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceName}, ${success}.`);
-              })
-              .on('info', (info) => {
-                const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceName}, ${info}.`);
-              })
-              .on('debug', (debug) => {
-                const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceName}, debug: ${debug}.`);
-              })
-              .on('warn', (warn) => {
-                const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceName}, ${warn}.`);
-              })
-              .on('error', (error) => {
-                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}.`);
-              });
+            configuredDevice
+              .on('devInfo', (info) => logLevel.devInfo && log.info(info))
+              .on('success', (msg) => logLevel.success && log.success(`${accountName} ${deviceName}, ${msg}`))
+              .on('info', (msg) => logLevel.info && log.info(`${accountName} ${deviceName}, ${msg}`))
+              .on('debug', (msg) => logLevel.debug && log.info(`${accountName} ${deviceName}, debug: ${msg}`))
+              .on('warn', (msg) => logLevel.warn && log.warn(`${accountName} ${deviceName}, ${msg}`))
+              .on('error', (msg) => logLevel.error && log.error(`${accountName} ${deviceName}, ${msg}`));
 
             //create impulse generator
             const impulseGenerator = new ImpulseGenerator();
             impulseGenerator.on('start', async () => {
               try {
-                const startDone = await configuredDevice.start();
-                const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
+                const accessory = await configuredDevice.start();
+                if (accessory) {
+                  api.publishExternalAccessories(PluginName, [accessory]);
+                  if (logLevel.success) log.success(`Device: ${accountName} ${deviceName}, Published as external accessory.`);
 
-                //start impulse generator 
-                const startImpulseGenerator = startDone ? await configuredDevice.startImpulseGenerator() : false
+                  await impulseGenerator.stop();
+                  await configuredDevice.startImpulseGenerator();
+                }
               } catch (error) {
-                const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
+                if (logLevel.error) log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
               }
             }).on('state', (state) => {
-              const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceName}, Start impulse generator stopped.`);
+              if (logLevel.debug) log.info(`Device: ${accountName} ${deviceName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
             });
 
             //start impulse generator
             await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
           } catch (error) {
-            const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
+            if (logLevel.error) log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
           }
+
+          await new Promise((resolve) => setTimeout(resolve, 300));
         }
       }
     });

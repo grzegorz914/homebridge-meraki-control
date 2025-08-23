@@ -10,6 +10,7 @@ class MerakiMr extends EventEmitter {
         const apiKey = config.apiKey;
         const networkId = config.networkId;
         this.enableDebugMode = config.enableDebugMode;
+        this.firstRun = true;
 
         const baseUrl = (`${host}${ApiUrls.Base}`);
         this.wirelessUrl = ApiUrls.MrSsids.replace('networkId', networkId);
@@ -24,29 +25,30 @@ class MerakiMr extends EventEmitter {
 
         //impulse generator
         this.call = false;
-        this.impulseGenerator = new ImpulseGenerator();
-        this.impulseGenerator.on('checkDeviceInfo', async () => {
-            if (this.call) return;
+        this.impulseGenerator = new ImpulseGenerator()
+            .on('checkDeviceInfo', async () => {
+                if (this.call) return;
 
-            try {
-                this.call = true;
-                await this.connect();
-                this.call = false;
-            } catch (error) {
-                this.call = false;
-                this.emit('error', `Inpulse generator error: ${error}`);
-            };
-        }).on('state', (state) => {
-            const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`);
-        });
+                try {
+                    this.call = true;
+                    await this.connect();
+                    this.call = false;
+                } catch (error) {
+                    this.call = false;
+                    this.emit('error', `Inpulse generator error: ${error}`);
+                };
+            })
+            .on('state', (state) => {
+                this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}`);
+            });
     };
 
     async connect() {
-        const debug = this.enableDebugMode ? this.emit('debug', `Requesting data.`) : false;
+        if (this.enableDebugMode) this.emit('debug', `Requesting data.`);
         try {
             //ap ssids states
             const ssidsData = await this.axiosInstance.get(this.wirelessUrl);
-            const debug1 = this.enableDebugMode ? this.emit('debug', `Data: ${JSON.stringify(ssidsData.data, null, 2)}`) : false;
+            if (this.enableDebugMode) this.emit('debug', `Data: ${JSON.stringify(ssidsData.data, null, 2)}`);
             const state = await this.checkDeviceState(ssidsData.data);
 
             return state;
@@ -56,7 +58,7 @@ class MerakiMr extends EventEmitter {
     };
 
     async checkDeviceState(ssidsData) {
-        const debug = this.enableDebugMode ? this.emit('debug', `Requesting SSIDs status.`) : false;
+        if (this.enableDebugMode) this.emit('debug', `Requesting SSIDs status.`);
         try {
             const ssids = [];
             for (const ssid of ssidsData) {
@@ -71,7 +73,7 @@ class MerakiMr extends EventEmitter {
             };
 
             const ssidsCount = ssids.length;
-            const debug2 = this.enableDebugMode ? this.emit('debug', `Found: ${ssidsCount} exposed SSIDs.`) : false;
+            if (this.enableDebugMode) this.emit('debug', `Found: ${ssidsCount} exposed SSIDs.`);
 
             if (ssidsCount === 0) {
                 this.emit('warn', `Found: ${ssidsCount} ssids.`);
@@ -79,7 +81,10 @@ class MerakiMr extends EventEmitter {
             }
 
             //emit device info and state
-            this.emit('deviceInfo', ssidsCount);
+            if (this.firstRun) {
+                this.emit('deviceInfo', ssidsCount);
+                this.firstRun = false;
+            }
             this.emit('deviceState', ssids);
 
             return true;

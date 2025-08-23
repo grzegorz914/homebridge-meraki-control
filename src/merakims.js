@@ -10,6 +10,7 @@ class MerakiMs extends EventEmitter {
         const apiKey = config.apiKey;
         this.device = config.deviceData;
         this.enableDebugMode = config.enableDebugMode;
+        this.firstRun = true;
 
         const baseUrl = (`${host}${ApiUrls.Base}`);
         this.axiosInstance = axios.create({
@@ -23,31 +24,32 @@ class MerakiMs extends EventEmitter {
 
         //impulse generator
         this.call = false;
-        this.impulseGenerator = new ImpulseGenerator();
-        this.impulseGenerator.on('checkDeviceInfo', async () => {
-            if (this.call) return;
+        this.impulseGenerator = new ImpulseGenerator()
+            .on('checkDeviceInfo', async () => {
+                if (this.call) return;
 
-            try {
-                this.call = true;
-                await this.connect();
-                this.call = false;
-            } catch (error) {
-                this.call = false;
-                this.emit('error', `Inpulse generator error: ${error}`);
-            };
-        }).on('state', (state) => {
-            const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`);
-        });
+                try {
+                    this.call = true;
+                    await this.connect();
+                    this.call = false;
+                } catch (error) {
+                    this.call = false;
+                    this.emit('error', `Inpulse generator error: ${error}`);
+                };
+            })
+            .on('state', (state) => {
+                this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}`);
+            });
 
     };
 
     async connect() {
-        const debug = this.enableDebugMode ? this.emit('debug', `Requesting data.`) : false;
+        if (this.enableDebugMode) this.emit('debug', `Requesting data.`);
         try {
             //get data of switch
             const portsUrl = ApiUrls.MsPorts.replace('serialNumber', this.device.serialNumber);
             const swData = await this.axiosInstance.get(portsUrl);
-            const debug1 = this.enableDebugMode ? this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`) : false;
+            if (this.enableDebugMode) this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`);
 
             //check device state
             const state = await this.checkDeviceState(swData.data);
@@ -59,7 +61,7 @@ class MerakiMs extends EventEmitter {
     };
 
     async checkDeviceState(swData) {
-        const debug = this.enableDebugMode ? this.emit('debug', `Requesting ports status.`) : false;
+        if (this.enableDebugMode) this.emit('debug', `Requesting ports status.`);
         try {
             const ports = [];
             for (const port of swData) {
@@ -74,7 +76,7 @@ class MerakiMs extends EventEmitter {
                 ports.push(obj);
             };
             const portsCount = ports.length;
-            const debug2 = this.enableDebugMode ? this.emit('debug', `Found: ${portsCount} exposed ports.`) : false;
+            if (this.enableDebugMode) this.emit('debug', `Found: ${portsCount} exposed ports.`);
 
             if (portsCount === 0) {
                 this.emit('warn', `Found: ${portsCount} ports.`);
@@ -82,7 +84,10 @@ class MerakiMs extends EventEmitter {
             }
 
             //emit device info and state
-            this.emit('deviceInfo', portsCount);
+            if (this.firstRun) {
+                this.emit('deviceInfo', portsCount);
+                this.firstRun = false;
+            }
             this.emit('deviceState', ports);
 
             return true;

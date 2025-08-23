@@ -29,7 +29,6 @@ class MerakiDevice extends EventEmitter {
         this.disableLogDeviceInfo = config.disableLogDeviceInfo || false;
 
         //variables
-        this.startPrepareAccessory = true;
         this.prefixForPortName = deviceData.enablePrefixForPortName || false;
         this.portsSensor = deviceData.enableSensorPorts || false;
         this.poePortsControl = deviceData.enablePoePortsControl || false;
@@ -58,14 +57,14 @@ class MerakiDevice extends EventEmitter {
     async prepareAccessory() {
         try {
             //prepare accessory
-            const debug = !this.enableDebugMode ? false : this.emit('debug', `prepare accessory`);
+            if (this.enableDebugMode) this.emit('debug', `prepare accessory`);
             const accessoryName = this.deviceName;
             const accessoryUUID = AccessoryUUID.generate(this.deviceUuid);
             const accessoryCategory = Categories.SWITCH;
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //prepare information service
-            const debug1 = !this.enableDebugMode ? false : this.emit('debug', `prepare information service`);
+            if (this.enableDebugMode) this.emit('debug', `prepare information service`);
             accessory.getService(Service.AccessoryInformation)
                 .setCharacteristic(Characteristic.Manufacturer, 'Cisco Meraki')
                 .setCharacteristic(Characteristic.Model, accessoryName)
@@ -73,7 +72,7 @@ class MerakiDevice extends EventEmitter {
                 .setCharacteristic(Characteristic.FirmwareRevision, this.organizationId)
                 .setCharacteristic(Characteristic.ConfiguredName, accessoryName);
 
-            const debug2 = !this.enableDebugMode ? false : this.emit('debug', `prepare meraki service`);
+            if (this.enableDebugMode) this.emit('debug', `prepare meraki service`);
             const exposedPorts = this.exposedPorts;
 
             //device
@@ -89,7 +88,7 @@ class MerakiDevice extends EventEmitter {
                 service.getCharacteristic(Characteristic.On)
                     .onGet(async () => {
                         const state = port.state ?? false;
-                        const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${portId}, Name: ${portName}, State: ${state ? 'Enabled' : 'Disabled'}`);
+                        if (!this.disableLogInfo) this.emit('message', `Port: ${portId}, Name: ${portName}, State: ${state ? 'Enabled' : 'Disabled'}`);
                         return state;
                     })
                     .onSet(async (state) => {
@@ -103,7 +102,7 @@ class MerakiDevice extends EventEmitter {
                                 'enabled': state
                             };
                             await this.merakiMs.send(switchPortUrl, switchPortData);
-                            const logInfo = this.disableLogInfo ? false : this.emit('message', `Port: ${portId}, Name: ${portName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                            if (!this.disableLogInfo) this.emit('message', `Port: ${portId}, Name: ${portName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
                         } catch (error) {
                             this.emit('warn', `Port: ${portId}, Name: ${portName}, set state error: %${error}`);
                         }
@@ -141,19 +140,15 @@ class MerakiDevice extends EventEmitter {
                 enableDebugMode: this.enableDebugMode
             })
                 .on('deviceInfo', (portsCount) => {
-                    //meraki info
-                    if (this.startPrepareAccessory) {
-                        //connect to deice success
-                        this.emit('success', `Connect Success.`)
-                        if (!this.disableLogDeviceInfo) {
-                            this.emit('devInfo', `---- ${this.deviceName}: ${this.deviceUuid} ----`);
-                            this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
-                            this.emit('devInfo', `Network: ${this.networkName}`);
-                            this.emit('devInfo', `Network Id: ${this.networkId}`);
-                            this.emit('devInfo', `Organization Id: ${this.organizationId}`);
-                            this.emit('devInfo', `Ports: ${portsCount}`);
-                            this.emit('devInfo', `----------------------------------`)
-                        };
+                    this.emit('success', `Connect Success.`)
+                    if (!this.disableLogDeviceInfo) {
+                        this.emit('devInfo', `---- ${this.deviceName}: ${this.deviceUuid} ----`);
+                        this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
+                        this.emit('devInfo', `Network: ${this.networkName}`);
+                        this.emit('devInfo', `Network Id: ${this.networkId}`);
+                        this.emit('devInfo', `Organization Id: ${this.organizationId}`);
+                        this.emit('devInfo', `Ports: ${portsCount}`);
+                        this.emit('devInfo', `----------------------------------`)
                     };
                 })
                 .on('deviceState', (ports) => {
@@ -192,21 +187,11 @@ class MerakiDevice extends EventEmitter {
                         };
                     };
                 })
-                .on('success', (success) => {
-                    this.emit('success', success);
-                })
-                .on('info', (info) => {
-                    this.emit('message', info);
-                })
-                .on('debug', (debug) => {
-                    this.emit('debug', debug);
-                })
-                .on('warn', (warn) => {
-                    this.emit('warn', warn);
-                })
-                .on('error', (error) => {
-                    this.emit('error', error);
-                })
+                .on('success', (success) => this.emit('success', success))
+                .on('info', (info) => this.emit('info', info))
+                .on('debug', (debug) => this.emit('debug', debug))
+                .on('warn', (warn) => this.emit('warn', warn))
+                .on('error', (error) => this.emit('error', error));
 
             //connect
             const connect = await this.merakiMs.connect();
@@ -215,13 +200,8 @@ class MerakiDevice extends EventEmitter {
             };
 
             //prepare accessory
-            if (this.startPrepareAccessory) {
-                const accessory = await this.prepareAccessory();
-                this.emit('publishAccessory', accessory);
-                this.startPrepareAccessory = false;
-            }
-
-            return true;
+            const accessory = await this.prepareAccessory();
+            return accessory;
         } catch (error) {
             throw new Error(`Start error: ${error.message || error}}.`);
         };
