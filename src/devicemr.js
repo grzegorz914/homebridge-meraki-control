@@ -38,7 +38,7 @@ class MerakiDevice extends EventEmitter {
     async startImpulseGenerator() {
         try {
             //start impulse generator 
-            await this.merakiMr.impulseGenerator.start([{ name: 'checkDeviceInfo', sampling: this.refreshInterval }]);
+            await this.merakiMr.impulseGenerator.start([{ name: 'connect', sampling: this.refreshInterval }]);
             return true;
         } catch (error) {
             throw new Error(`Impulse generator start error: ${error}`);
@@ -162,17 +162,17 @@ class MerakiDevice extends EventEmitter {
                     for (let i = 0; i < arr.length; i++) {
                         const name = arr[i].name;
                         const state = arr[i].state;
-                        if (this.services) {
-                            const serviceName = this.prefixForSsidName ? `W.${name}` : name;
-                            this.services[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
-                            this.services[i].updateCharacteristic(Characteristic.On, state);
-                        };
+                        const serviceName = this.prefixForSsidName ? `W.${name}` : name;
+                        this.services?.[i]
+                            ?.updateCharacteristic(Characteristic.ConfiguredName, serviceName)
+                            .updateCharacteristic(Characteristic.On, state);
 
-                        if (this.sensorServices && this.ssidsSensor) {
+                        if (this.ssidsSensor) {
                             const serviceName = this.prefixForSsidName ? `Sensor W.${name}` : `Sensor ${name}`;
-                            this.sensorServices[i].updateCharacteristic(Characteristic.ConfiguredName, serviceName);
-                            this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
-                        };
+                            this.sensorServices?.[i]
+                                ?.updateCharacteristic(Characteristic.ConfiguredName, serviceName)
+                                .updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1);
+                        }
                     }
                 })
                 .on('success', (success) => this.emit('success', success))

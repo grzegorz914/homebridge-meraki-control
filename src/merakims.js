@@ -1,5 +1,6 @@
 import axios from 'axios';
 import EventEmitter from 'events';
+import { Agent } from 'https';
 import ImpulseGenerator from './impulsegenerator.js';
 import { ApiUrls } from './constants.js';
 
@@ -19,46 +20,38 @@ class MerakiMs extends EventEmitter {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Cisco-Meraki-API-Key': apiKey
-            }
+            },
+            httpsAgent: new Agent({
+                keepAlive: true,
+            }),
         });
 
-        //impulse generator
-        this.call = false;
+        //lock flags
+        this.locks = {
+            connect: false,
+        };
         this.impulseGenerator = new ImpulseGenerator()
-            .on('checkDeviceInfo', async () => {
-                if (this.call) return;
-
-                try {
-                    this.call = true;
-                    await this.connect();
-                    this.call = false;
-                } catch (error) {
-                    this.call = false;
-                    this.emit('error', `Inpulse generator error: ${error}`);
-                };
-            })
+            .on('connect', () => this.handleWithLock('connect', async () => {
+                await this.connect();
+            }))
             .on('state', (state) => {
                 this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}`);
             });
 
     };
 
-    async connect() {
-        if (this.enableDebugMode) this.emit('debug', `Requesting data.`);
+    async handleWithLock(lockKey, fn) {
+        if (this.locks[lockKey]) return;
+
+        this.locks[lockKey] = true;
         try {
-            //get data of switch
-            const portsUrl = ApiUrls.MsPorts.replace('serialNumber', this.device.serialNumber);
-            const swData = await this.axiosInstance.get(portsUrl);
-            if (this.enableDebugMode) this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`);
-
-            //check device state
-            const state = await this.checkDeviceState(swData.data);
-
-            return state;
+            await fn();
         } catch (error) {
-            throw new Error(`Requesting data error: ${error}`);
-        };
-    };
+            this.emit('error', `Inpulse generator error: ${error}`);
+        } finally {
+            this.locks[lockKey] = false;
+        }
+    }
 
     async checkDeviceState(swData) {
         if (this.enableDebugMode) this.emit('debug', `Requesting ports status.`);
@@ -93,6 +86,23 @@ class MerakiMs extends EventEmitter {
             return true;
         } catch (error) {
             throw new Error(`Requesting port status error: ${error}.`);
+        };
+    };
+
+    async connect() {
+        if (this.enableDebugMode) this.emit('debug', `Requesting data.`);
+        try {
+            //get data of switch
+            const portsUrl = ApiUrls.MsPorts.replace('serialNumber', this.device.serialNumber);
+            const swData = await this.axiosInstance.get(portsUrl);
+            if (this.enableDebugMode) this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`);
+
+            //check device state
+            const state = await this.checkDeviceState(swData.data);
+
+            return state;
+        } catch (error) {
+            throw new Error(`Requesting data error: ${error}`);
         };
     };
 

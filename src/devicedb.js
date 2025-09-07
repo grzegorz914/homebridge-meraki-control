@@ -37,7 +37,7 @@ class MerakiDevice extends EventEmitter {
     async startImpulseGenerator() {
         try {
             //start impulse generator 
-            await this.merakiDb.impulseGenerator.start([{ name: 'checkDeviceInfo', sampling: this.refreshInterval }]);
+            await this.merakiDb.impulseGenerator.start([{ name: 'connect', sampling: this.refreshInterval }]);
             return true;
         } catch (error) {
             throw new Error(`Impulse generator start error: ${error}`);
@@ -145,12 +145,10 @@ class MerakiDevice extends EventEmitter {
 
                     for (let i = 0; i < clientsCount; i++) {
                         const state = exposedClients[i].policyState;
-                        if (this.services) {
-                            this.services[i].updateCharacteristic(Characteristic.On, state);
-                        }
+                        this.services?.[i]?.updateCharacteristic(Characteristic.On, state);
 
-                        if (this.sensorServices && this.clientsSensor) {
-                            this.sensorServices[i].updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
+                        if (this.clientsSensor) {
+                            this.sensorServices?.[i]?.updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
                         };
                     }
                 })

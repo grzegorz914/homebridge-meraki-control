@@ -12,6 +12,10 @@ class ImpulseGenerator extends EventEmitter {
             return true;
         }
 
+        //update state
+        if (timers.length > 0) this.state(true);
+
+        //add timers
         this.timers = [];
         for (const timer of timers) {
             this.emit(timer.name);
@@ -20,10 +24,8 @@ class ImpulseGenerator extends EventEmitter {
                 this.emit(timer.name);
             }, timer.sampling);
             this.timers.push(newTimer);
-        };
+        }
 
-        //update state
-        this.state(true);
         return true;
     }
 
@@ -36,6 +38,7 @@ class ImpulseGenerator extends EventEmitter {
         //update state
         this.timers.forEach(timer => clearInterval(timer));
         this.timers = [];
+
         this.state(false);
         return true
     }

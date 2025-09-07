@@ -1,5 +1,6 @@
 import axios from 'axios';
 import EventEmitter from 'events';
+import { Agent } from 'https';
 import ImpulseGenerator from './impulsegenerator.js';
 import { ApiUrls } from './constants.js';
 
@@ -21,103 +22,38 @@ class MerakiDb extends EventEmitter {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Cisco-Meraki-API-Key': apiKey
-            }
+            },
+            httpsAgent: new Agent({
+                keepAlive: true,
+            }),
         });
 
 
-        //impulse generator
-        this.call = false;
+        //lock flags
+        this.locks = {
+            connect: false,
+        };
         this.impulseGenerator = new ImpulseGenerator()
-            .on('updateDashboardClients', async () => {
-                if (this.call) return;
-
-                try {
-                    this.call = true;
-                    await this.connect();
-                    this.call = false;
-                } catch (error) {
-                    this.call = false;
-                    this.emit('error', `Inpulse generator error: ${error}`);
-                };
-            })
+            .on('connect', () => this.handleWithLock('connect', async () => {
+                await this.connect();
+            }))
             .on('state', (state) => {
                 this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}`);
             });
     };
 
-    async connect() {
-        if (this.enableDebugMode) this.emit('debug', `Requesting clients data.`);
+    async handleWithLock(lockKey, fn) {
+        if (this.locks[lockKey]) return;
+
+        this.locks[lockKey] = true;
         try {
-            const dbClientsData = await this.axiosInstance.get(`${this.dashboardClientsUrl}?perPage=255&timespan=2592000`);
-            if (this.enableDebugMode) this.emit('debug', `Clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`);
-
-            const dbClients = [];
-            for (const dbClient of dbClientsData.data) {
-                const id = dbClient.id;
-                const mac = (dbClient.mac).split(':').join('');
-                const description = dbClient.description;
-
-                const obj = {
-                    "id": id,
-                    "mac": mac,
-                    "description": description
-                }
-                dbClients.push(obj);
-            }
-
-            //exposed existings and configured clients
-            const dbClientsCount = dbClients.length;
-            if (this.enableDebugMode) this.emit('debug', `Found: ${dbClientsCount} clients.`);
-
-            if (dbClientsCount === 0) {
-                return false;
-            };
-            const state = await this.updateConfiguredAndExistingClients(dbClients);
-
-            return state;
+            await fn();
         } catch (error) {
-            throw new Error(`Requesting clients data error: ${error}`);
-        };
-    };
-
-    async updateConfiguredAndExistingClients(dbClients) {
-        if (this.enableDebugMode) this.emit('debug', `Check configured and activ clients.`);
-        try {
-            //create exposed clientsPolicy
-            const configuredAndExistedClients = [];
-            for (const clientPolicy of this.clientsPolicy) {
-                const mac = (clientPolicy.mac).split(':').join('');
-
-                //check if configured client exist in dashboard
-                const index = dbClients.findIndex(item => item.id === mac);
-                const id = index !== -1 ? dbClients[index].id : -1;
-
-                //push existed clients
-                if (index !== -1) {
-                    const obj = {
-                        "name": clientPolicy.name,
-                        "mac": clientPolicy.mac,
-                        "type": clientPolicy.type,
-                        "id": id
-                    }
-                    configuredAndExistedClients.push(obj);
-                };
-            };
-
-            const configuredAndExistedClientsCount = configuredAndExistedClients.length;
-            if (this.enableDebugMode) this.emit('debug', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
-
-            if (configuredAndExistedClientsCount === 0) {
-                this.emit('warn', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
-                return false;
-            };
-            const state = await this.updateExistedClientsPolicy(configuredAndExistedClients);
-
-            return state;
-        } catch (error) {
-            throw new Error(`Requestinjg configured clients error: ${error}`);
-        };
-    };
+            this.emit('error', `Inpulse generator error: ${error}`);
+        } finally {
+            this.locks[lockKey] = false;
+        }
+    }
 
     async updateExistedClientsPolicy(configuredAndExistedClients) {
         if (this.enableDebugMode) this.emit('debug', `Requesting existed client policy data.`);
@@ -163,6 +99,80 @@ class MerakiDb extends EventEmitter {
             return true;
         } catch (error) {
             throw new Error(`Existed client policy data error: ${error}`);
+        };
+    };
+
+    async updateConfiguredAndExistingClients(dbClients) {
+        if (this.enableDebugMode) this.emit('debug', `Check configured and activ clients.`);
+        try {
+            //create exposed clientsPolicy
+            const configuredAndExistedClients = [];
+            for (const clientPolicy of this.clientsPolicy) {
+                const mac = (clientPolicy.mac).split(':').join('');
+
+                //check if configured client exist in dashboard
+                const index = dbClients.findIndex(item => item.id === mac);
+                const id = index !== -1 ? dbClients[index].id : -1;
+
+                //push existed clients
+                if (index !== -1) {
+                    const obj = {
+                        "name": clientPolicy.name,
+                        "mac": clientPolicy.mac,
+                        "type": clientPolicy.type,
+                        "id": id
+                    }
+                    configuredAndExistedClients.push(obj);
+                };
+            };
+
+            const configuredAndExistedClientsCount = configuredAndExistedClients.length;
+            if (this.enableDebugMode) this.emit('debug', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
+
+            if (configuredAndExistedClientsCount === 0) {
+                this.emit('warn', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
+                return false;
+            };
+            const state = await this.updateExistedClientsPolicy(configuredAndExistedClients);
+
+            return state;
+        } catch (error) {
+            throw new Error(`Requestinjg configured clients error: ${error}`);
+        };
+    };
+
+    async connect() {
+        if (this.enableDebugMode) this.emit('debug', `Requesting clients data.`);
+        try {
+            const dbClientsData = await this.axiosInstance.get(`${this.dashboardClientsUrl}?perPage=255&timespan=2592000`);
+            if (this.enableDebugMode) this.emit('debug', `Clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`);
+
+            const dbClients = [];
+            for (const dbClient of dbClientsData.data) {
+                const id = dbClient.id;
+                const mac = (dbClient.mac).split(':').join('');
+                const description = dbClient.description;
+
+                const obj = {
+                    "id": id,
+                    "mac": mac,
+                    "description": description
+                }
+                dbClients.push(obj);
+            }
+
+            //exposed existings and configured clients
+            const dbClientsCount = dbClients.length;
+            if (this.enableDebugMode) this.emit('debug', `Found: ${dbClientsCount} clients.`);
+
+            if (dbClientsCount === 0) {
+                return false;
+            };
+            const state = await this.updateConfiguredAndExistingClients(dbClients);
+
+            return state;
+        } catch (error) {
+            throw new Error(`Requesting clients data error: ${error}`);
         };
     };
 
