@@ -38,7 +38,7 @@ class MerakiPlatform {
 
         if (!accountName || !apiKey || !organizationId || !networkId) {
           log.warn(`Name: ${accountName ? 'OK' : accountName}, api key: ${apiKey ? 'OK' : apiKey}, organization Id: ${organizationId ? 'OK' : organizationId}, network Id: ${networkId ? 'OK' : networkId} in config missing.`);
-          return;
+          continue;
         }
 
         //log config
@@ -52,13 +52,13 @@ class MerakiPlatform {
         };
 
         if (logLevel.debug) log.info(`Network: ${accountName}, did finish launching.`);
-        const config = {
+        const safeConfig = {
           ...account,
           apiKey: 'removed',
           organizationId: 'removed',
           networkId: 'removed'
         };
-        if (logLevel.debug) log.info(`Network: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`);
+        if (logLevel.debug) log.info(`Network: ${accountName}, Config: ${JSON.stringify(safeConfig, null, 2)}`);
 
         //dashboard clients
         const allDevices = [];
@@ -70,10 +70,10 @@ class MerakiPlatform {
           const configuredClientsPolicy = [];
           for (const clientPolicy of clientsPolicy) {
             const policyName = clientPolicy.name ?? false;
-            const policyMac = (clientPolicy.mac).split(':').join('') ?? false;
+            const policyMac = clientPolicy.mac ? clientPolicy.mac.split(':').join('') : false;
             const policyType = clientPolicy.type ?? false;
             const policyEnabled = clientPolicy.mode || false;
-            const push = policyName && policyMac && policyType && policyEnabled ? configuredClientsPolicy.push(clientPolicy) : false;
+            if (policyName && policyMac && policyType && policyEnabled) configuredClientsPolicy.push(clientPolicy);
           }
 
           //push configured clients policy to device
@@ -99,7 +99,7 @@ class MerakiPlatform {
           for (const hideSsid of hideSsids) {
             const hideSsidName = hideSsid.name ?? false;
             const hideSsidEnabled = hideSsid.mode || false;
-            const push = hideSsidName && hideSsidEnabled ? configuredHidenSsidsName.push(hideSsidName) : false;
+            if (hideSsidName && hideSsidEnabled) configuredHidenSsidsName.push(hideSsidName);
           }
 
           //push configured ssids to devices
@@ -159,7 +159,7 @@ class MerakiPlatform {
               break
             default:
               if (logLevel.warn) log.warn(`Unknown device type: ${deviceType}.`);
-              break;
+              continue;
           }
 
           try {
@@ -184,7 +184,7 @@ class MerakiPlatform {
                   await configuredDevice.startImpulseGenerator();
                 }
               } catch (error) {
-                if (logLevel.error) log.error(`${accountName}, ${deviceName}, ${error}, trying again.`);
+                if (logLevel.error) log.error(`${accountName}, ${deviceName}, ${error.message ?? error}, trying again.`);
               }
             }).on('state', (state) => {
               if (logLevel.debug) log.info(`Device: ${accountName} ${deviceName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
@@ -193,10 +193,8 @@ class MerakiPlatform {
             //start impulse generator
             await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
           } catch (error) {
-            if (logLevel.error) log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error}.`);
+            if (logLevel.error) log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error.message ?? error}.`);
           }
-
-          await new Promise((resolve) => setTimeout(resolve, 300));
         }
       }
     });
