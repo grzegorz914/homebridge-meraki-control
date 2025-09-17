@@ -68,7 +68,6 @@ class MerakiDevice extends EventEmitter {
             const exposedClients = this.exposedClients;
 
             this.services = [];
-            this.sensorServices = [];
             for (const client of exposedClients) {
                 const clientName = client.name;
                 const serviceName = this.prefixForClientName ? `C.${clientName}` : clientName;
@@ -98,7 +97,9 @@ class MerakiDevice extends EventEmitter {
                 this.services.push(clientPolicyService);
 
                 if (this.clientsSensor) {
-                    const debug = !this.enableDebugMode && i > 0 ? false : this.emit('debug', `prepare meraki sensor service`);
+                    if (this.enableDebugMode && i > 0) this.emit('debug', `prepare meraki sensor service`);
+
+                    this.sensorServices = [];
                     const sensorServiceName = this.prefixForClientName ? `Sensor C.${clientName}` : `Sensor ${clientName}`;
                     const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Client Service Sensor ${clientName}`);
                     sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -145,11 +146,16 @@ class MerakiDevice extends EventEmitter {
 
                     for (let i = 0; i < clientsCount; i++) {
                         const state = exposedClients[i].policyState;
-                        this.services?.[i]?.updateCharacteristic(Characteristic.On, state);
+                        const name = exposedClients[i].name;
+                        const serviceName = this.prefixForClientName ? `C.${name}` : name;
+                        this.services?.[i]
+                            ?.setCharacteristic(Characteristic.ConfiguredName, serviceName)
+                            .updateCharacteristic(Characteristic.On, state);
 
-                        if (this.clientsSensor) {
-                            this.sensorServices?.[i]?.updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
-                        };
+                        const sensorServiceName = this.prefixForClientName ? `Sensor C.${name}` : `Sensor ${name}`;
+                        this.sensorServices?.[i]
+                            ?.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName)
+                            .updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1)
                     }
                 })
                 .on('success', (success) => this.emit('success', success))

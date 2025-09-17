@@ -27,11 +27,9 @@ class MerakiMs extends EventEmitter {
         });
 
         //lock flags
-        this.locks = {
-            connect: false,
-        };
+        this.locks = false;
         this.impulseGenerator = new ImpulseGenerator()
-            .on('connect', () => this.handleWithLock('connect', async () => {
+            .on('connect', () => this.handleWithLock(async () => {
                 await this.connect();
             }))
             .on('state', (state) => {
@@ -40,16 +38,16 @@ class MerakiMs extends EventEmitter {
 
     };
 
-    async handleWithLock(lockKey, fn) {
-        if (this.locks[lockKey]) return;
+    async handleWithLock(fn) {
+        if (this.locks) return;
 
-        this.locks[lockKey] = true;
+        this.locks = true;
         try {
             await fn();
         } catch (error) {
             this.emit('error', `Inpulse generator error: ${error}`);
         } finally {
-            this.locks[lockKey] = false;
+            this.locks = false;
         }
     }
 

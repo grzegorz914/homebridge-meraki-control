@@ -39,7 +39,7 @@ class MerakiDevice extends EventEmitter {
         for (const port of hidePorts) {
             const hidePortName = port.name ?? false;
             const hidePortEnabled = port.mode || false;
-            const pushHiddenPortName = hidePortName && hidePortEnabled ? this.swHidenPortsByName.push(hidePortName) : false;
+            if (hidePortName && hidePortEnabled) this.swHidenPortsByName.push(hidePortName);
         };
     };
 
@@ -77,7 +77,6 @@ class MerakiDevice extends EventEmitter {
 
             //device
             this.services = [];
-            this.sensorServices = [];
             for (const port of exposedPorts) {
                 const portName = port.name;
                 const portId = port.id;
@@ -110,7 +109,9 @@ class MerakiDevice extends EventEmitter {
                 this.services.push(service);
 
                 if (this.portsSensor) {
-                    const debug = !this.enableDebugMode && k > 0 ? false : this.emit('debug', `prepare meraki sensor service`);
+                    if (this.enableDebugMode && k > 0) this.emit('debug', `prepare meraki sensor service`);
+
+                    this.sensorServices = [];
                     const serviceName = this.prefixForPortName ? `Sensor ${portId}.${portName}` : `Sensor ${portName}`;
                     const sensorService = accessory.addService(Service.ContactSensor, serviceName, `sensorService${portId}`);
                     sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -162,9 +163,7 @@ class MerakiDevice extends EventEmitter {
                         const hidePortByName = this.swHidenPortsByName.includes(portName);
 
                         //skip iterate
-                        if (hideUplinkPort || hidePortByName) {
-                            continue;
-                        }
+                        if (hideUplinkPort || hidePortByName) continue;
                         arr.push(port);
                     };
                     this.exposedPorts = arr;
@@ -176,15 +175,13 @@ class MerakiDevice extends EventEmitter {
                         const state = arr[i].state;
                         const serviceName = this.prefixForPortName ? `${portId}.${name}` : name;
                         this.services?.[i]
-                            ?.updateCharacteristic(Characteristic.ConfiguredName, serviceName)
+                            ?.setCharacteristic(Characteristic.ConfiguredName, serviceName)
                             .updateCharacteristic(Characteristic.On, state);
 
-                        if (this.portsSensor) {
-                            const serviceName = this.prefixForPortName ? `Sensor ${portId}.${name}` : `Sensor ${name}`;
-                            this.sensorServices?.[i]
-                                ?.updateCharacteristic(Characteristic.ConfiguredName, serviceName)
-                                .updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1);
-                        };
+                        const sensorServiceName = this.prefixForPortName ? `Sensor ${portId}.${name}` : `Sensor ${name}`;
+                        this.sensorServices?.[i]
+                            ?.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName)
+                            .updateCharacteristic(Characteristic.ContactSensorState, state ? 0 : 1);
                     };
                 })
                 .on('success', (success) => this.emit('success', success))

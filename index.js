@@ -172,23 +172,23 @@ class MerakiPlatform {
               .on('error', (msg) => logLevel.error && log.error(`${accountName} ${deviceName}, ${msg}`));
 
             //create impulse generator
-            const impulseGenerator = new ImpulseGenerator();
-            impulseGenerator.on('start', async () => {
-              try {
-                const accessory = await configuredDevice.start();
-                if (accessory) {
-                  api.publishExternalAccessories(PluginName, [accessory]);
-                  if (logLevel.success) log.success(`Device: ${accountName} ${deviceName}, Published as external accessory.`);
+            const impulseGenerator = new ImpulseGenerator()
+              .on('start', async () => {
+                try {
+                  const accessory = await configuredDevice.start();
+                  if (accessory) {
+                    api.publishExternalAccessories(PluginName, [accessory]);
+                    if (logLevel.success) log.success(`Device: ${accountName} ${deviceName}, Published as external accessory.`);
 
-                  await impulseGenerator.stop();
-                  await configuredDevice.startImpulseGenerator();
+                    await impulseGenerator.stop();
+                    await configuredDevice.startImpulseGenerator();
+                  }
+                } catch (error) {
+                  if (logLevel.error) log.error(`${accountName}, ${deviceName}, ${error.message ?? error}, trying again.`);
                 }
-              } catch (error) {
-                if (logLevel.error) log.error(`${accountName}, ${deviceName}, ${error.message ?? error}, trying again.`);
-              }
-            }).on('state', (state) => {
-              if (logLevel.debug) log.info(`Device: ${accountName} ${deviceName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
-            });
+              }).on('state', (state) => {
+                if (logLevel.debug) log.info(`Device: ${accountName} ${deviceName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
+              });
 
             //start impulse generator
             await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
