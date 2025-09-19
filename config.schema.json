@@ -26,7 +26,7 @@
               "title": "API Path",
               "type": "string",
               "placeholder": "https://n123.meraki.com",
-              "format": "hostname",
+              "format": "uri",
               "description": "Here set the Meraki Api Path.",
               "required": true
             },
@@ -109,7 +109,6 @@
                   "type": {
                     "title": "Policy",
                     "type": "string",
-                    "default": "Normal",
                     "description": "Here choice the Policy type to be appiled for this Client.",
                     "oneOf": [
                       {
@@ -158,29 +157,29 @@
               "type": "boolean",
               "default": false,
               "description": "This option hide all unconfigured SSIDs, the name of this SSID must start with Unconfigured.",
+              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-              },
-              "required": false
+              }
             },
             "enablePrefixForSsidsName": {
               "title": "Prefix For SSIDs Name",
               "type": "boolean",
               "default": false,
               "description": "This option enable prefix (W.) for SSIDs name displayed in HomeKit app.",
+              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-              },
-              "required": false
+              }
             },
             "enableSonsorSsids": {
               "title": "SSIDs Sensors",
               "type": "boolean",
               "description": "This option expose Contact Sensor in HomeKit app for all exposed SSIDs.",
+              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
-              },
-              "required": false
+              }
             },
             "hideSsids": {
               "title": "SSIDs",
@@ -207,13 +206,6 @@
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
               }
-            },
-            "switchesControl": {
-              "title": "Switches Control",
-              "type": "boolean",
-              "default": false,
-              "description": "This option enable control of Switches.",
-              "required": false
             },
             "switches": {
               "title": "Switches",
@@ -294,9 +286,6 @@
                     }
                   }
                 }
-              },
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].switchesControl === true;"
               }
             },
             "refreshInterval": {
@@ -306,7 +295,7 @@
               "maximum": 60,
               "default": 5,
               "description": "Here set the data refresh time in (sec).",
-              "required": true
+              "required": false
             },
             "disableLogDeviceInfo": {
               "title": "Disable Log Device Info",
@@ -389,9 +378,6 @@
                           "key": "devices[].dashboardClientsPolicy",
                           "type": "tabarray",
                           "title": "{{ value.name || 'client' }}",
-                          "expandable": true,
-                          "expanded": true,
-                          "orderable": false,
                           "items": [
                             "devices[].dashboardClientsPolicy[].name",
                             "devices[].dashboardClientsPolicy[].mac",
@@ -422,9 +408,6 @@
                           "key": "devices[].hideSsids",
                           "type": "tabarray",
                           "title": "{{ value.name || 'SSID' }}",
-                          "expandable": true,
-                          "expanded": true,
-                          "orderable": false,
                           "items": [
                             "devices[].hideSsids[].name",
                             "devices[].hideSsids[].mode"
@@ -438,14 +421,10 @@
                   "key": "devices[]",
                   "title": "Switches",
                   "items": [
-                    "devices[].switchesControl",
                     {
                       "key": "devices[].switches",
                       "type": "tabarray",
                       "title": "{{ value.name || 'switch' }}",
-                      "expandable": true,
-                      "expanded": true,
-                      "orderable": false,
                       "items": [
                         "devices[].switches[].name",
                         "devices[].switches[].serialNumber",
@@ -465,9 +444,6 @@
                               "key": "devices[].switches[].hidePorts",
                               "type": "tabarray",
                               "title": "{{ value.name || 'port' }}",
-                              "expandable": true,
-                              "expanded": true,
-                              "orderable": false,
                               "items": [
                                 "devices[].switches[].hidePorts[].name",
                                 "devices[].switches[].hidePorts[].mode"

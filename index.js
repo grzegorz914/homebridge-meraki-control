@@ -116,26 +116,23 @@ class MerakiPlatform {
         }
 
         //switches
-        const msSwitchesControl = account.switchesControl || false;
-        if (msSwitchesControl) {
-          const switches = account.switches || [];
+        const switches = account.switches || [];
 
-          //configured switches
-          for (const sw of switches) {
-            const swSerialNumber = sw.serialNumber ?? false;
-            const swEnabled = sw.mode || false;
+        //configured switches
+        for (const sw of switches) {
+          const swSerialNumber = sw.serialNumber ?? false;
+          const swEnabled = sw.mode || false;
 
-            //push configured switch to array
-            const msSwitchExist = swSerialNumber && swEnabled;
-            if (msSwitchExist) {
-              const obj = {
-                'type': 2,
-                'name': sw.name,
-                'uuid': sw.serialNumber,
-                'deviceData': sw
-              };
-              allDevices.push(obj);
-            }
+          //push configured switch to array
+          const msSwitchExist = swSerialNumber && swEnabled;
+          if (msSwitchExist) {
+            const obj = {
+              'type': 2,
+              'name': sw.name,
+              'uuid': sw.serialNumber,
+              'deviceData': sw
+            };
+            allDevices.push(obj);
           }
         }
 
