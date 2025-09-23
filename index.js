@@ -136,42 +136,44 @@ class MerakiPlatform {
           }
         }
 
-        //meraki devices
-        for (const device of allDevices) {
-          const deviceType = device.type;
-          const deviceName = device.name;
-          const deviceUuid = device.uuid;
-          const deviceData = device.deviceData;
+        if (allDevices.length === 0) continue;
 
-          let configuredDevice;
-          switch (deviceType) {
-            case 0: //dashboard clients
-              configuredDevice = new DeviceDb(api, account, deviceName, deviceUuid, deviceData);
-              break
-            case 1: //access point
-              configuredDevice = new DeviceMr(api, account, deviceName, deviceUuid, deviceData);
-              break
-            case 2: //switch
-              configuredDevice = new DeviceMs(api, account, deviceName, deviceUuid, deviceData);
-              break
-            default:
-              if (logLevel.warn) log.warn(`Unknown device type: ${deviceType}.`);
-              continue;
-          }
+        try {
+          //create impulse generator
+          const impulseGenerator = new ImpulseGenerator()
+            .on('start', async () => {
+              try {
+                //meraki devices
+                for (const device of allDevices) {
+                  const deviceType = device.type;
+                  const deviceName = device.name;
+                  const deviceUuid = device.uuid;
+                  const deviceData = device.deviceData
 
-          try {
-            configuredDevice
-              .on('devInfo', (info) => logLevel.devInfo && log.info(info))
-              .on('success', (msg) => logLevel.success && log.success(`${accountName} ${deviceName}, ${msg}`))
-              .on('info', (msg) => logLevel.info && log.info(`${accountName} ${deviceName}, ${msg}`))
-              .on('debug', (msg) => logLevel.debug && log.info(`${accountName} ${deviceName}, debug: ${msg}`))
-              .on('warn', (msg) => logLevel.warn && log.warn(`${accountName} ${deviceName}, ${msg}`))
-              .on('error', (msg) => logLevel.error && log.error(`${accountName} ${deviceName}, ${msg}`));
+                  let configuredDevice;
+                  switch (deviceType) {
+                    case 0: //dashboard clients
+                      configuredDevice = new DeviceDb(api, account, deviceName, deviceUuid, deviceData);
+                      break
+                    case 1: //access point
+                      configuredDevice = new DeviceMr(api, account, deviceName, deviceUuid, deviceData);
+                      break
+                    case 2: //switch
+                      configuredDevice = new DeviceMs(api, account, deviceName, deviceUuid, deviceData);
+                      break
+                    default:
+                      if (logLevel.warn) log.warn(`Unknown device type: ${deviceType}.`);
+                      return;
+                  }
 
-            //create impulse generator
-            const impulseGenerator = new ImpulseGenerator()
-              .on('start', async () => {
-                try {
+                  configuredDevice
+                    .on('devInfo', (info) => logLevel.devInfo && log.info(info))
+                    .on('success', (msg) => logLevel.success && log.success(`${accountName} ${deviceName}, ${msg}`))
+                    .on('info', (msg) => logLevel.info && log.info(`${accountName} ${deviceName}, ${msg}`))
+                    .on('debug', (msg) => logLevel.debug && log.info(`${accountName} ${deviceName}, debug: ${msg}`))
+                    .on('warn', (msg) => logLevel.warn && log.warn(`${accountName} ${deviceName}, ${msg}`))
+                    .on('error', (msg) => logLevel.error && log.error(`${accountName} ${deviceName}, ${msg}`));
+
                   const accessory = await configuredDevice.start();
                   if (accessory) {
                     api.publishExternalAccessories(PluginName, [accessory]);
@@ -180,18 +182,18 @@ class MerakiPlatform {
                     await impulseGenerator.stop();
                     await configuredDevice.startImpulseGenerator();
                   }
-                } catch (error) {
-                  if (logLevel.error) log.error(`${accountName}, ${deviceName}, ${error.message ?? error}, trying again.`);
                 }
-              }).on('state', (state) => {
-                if (logLevel.debug) log.info(`Device: ${accountName} ${deviceName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
-              });
+              } catch (error) {
+                if (logLevel.error) log.error(`${accountName}, , Start impulse generator error: ${error.message ?? error}, trying again.`);
+              }
+            }).on('state', (state) => {
+              if (logLevel.debug) log.info(`Device: ${accountName} , Start impulse generator ${state ? 'started' : 'stopped'}.`);
+            });
 
-            //start impulse generator
-            await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
-          } catch (error) {
-            if (logLevel.error) log.error(`${accountName}, ${deviceName}, Did finish launching error: ${error.message ?? error}.`);
-          }
+          //start impulse generator
+          await impulseGenerator.start([{ name: 'start', sampling: 60000 }]);
+        } catch (error) {
+          if (logLevel.error) log.error(`${accountName}, Did finish launching error: ${error.message ?? error}.`);
         }
       }
     });
