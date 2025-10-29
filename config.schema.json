@@ -19,52 +19,45 @@
               "title": "Network",
               "type": "string",
               "placeholder": "Network Name",
-              "description": "Here set the Name to be displayed in Homebridge/HomeKit for this Accessory.",
-              "required": true
+              "description": "Here set the Name to be displayed in Homebridge/HomeKit for this Accessory."
             },
             "host": {
               "title": "API Path",
               "type": "string",
               "placeholder": "https://n123.meraki.com",
               "format": "uri",
-              "description": "Here set the Meraki Api Path.",
-              "required": true
+              "description": "Here set the Meraki Api Path."
             },
             "disableAccessory": {
               "title": "Disable Accessory",
               "type": "boolean",
               "default": false,
-              "description": "Here You can disable this accessory.",
-              "required": false
+              "description": "Here You can disable this accessory."
             },
             "apiKey": {
               "title": "API Key",
               "type": "string",
               "placeholder": "01032453453421923",
               "description": "Here set the Meraki Api Key.",
-              "format": "password",
-              "required": true
+              "format": "password"
             },
             "organizationId": {
               "title": "Organization Id",
               "type": "string",
               "placeholder": "123456789",
-              "description": "Here set the Organization Id.",
-              "required": true
+              "description": "Here set the Organization Id."
             },
             "networkId": {
               "title": "Network Id",
               "type": "string",
               "placeholder": "L_0123456789",
-              "description": "Here set the Network Id.",
-              "required": true
+              "description": "Here set the Network Id."
             },
             "dashboardClientsControl": {
               "title": "Dashboard Clients Control",
               "type": "boolean",
               "default": false,
-              "description": "This option enable control of dashboard clients.",
-              "required": false
+              "description": "This option enable control of dashboard clients."
             },
             "enablePrefixForClientName": {
               "title": "Prefix For Client Name",
@@ -73,8 +66,7 @@
               "description": "This option enable prefix (C.) for client name displayed in HomeKit app.",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
-              },
-              "required": false
+              }
             },
             "enableSonsorClients": {
               "title": "Clients Sensors",
@@ -83,8 +75,7 @@
               "description": "This option expose Contact Sensor in HomeKit app for all exposed Clients.",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
-              },
-              "required": false
+              }
             },
             "dashboardClientsPolicy": {
               "title": "Clients",
@@ -96,15 +87,13 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "Name",
-                    "description": "Here set the Name to be displayed in Homebridge/HomeKit for this Client.",
-                    "required": false
+                    "description": "Here set the Name to be displayed in Homebridge/HomeKit for this Client."
                   },
                   "mac": {
                     "title": "Mac",
                     "type": "string",
                     "placeholder": "Mac Address",
-                    "description": "Here set the Mac Address of the Client to be exposed in Homebridge/HomeKit.",
-                    "required": false
+                    "description": "Here set the Mac Address of the Client to be exposed in Homebridge/HomeKit."
                   },
                   "type": {
                     "title": "Policy",
@@ -129,15 +118,13 @@
                           "Group policy"
                         ]
                       }
-                    ],
-                    "required": false
+                    ]
                   },
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
                     "default": false,
-                    "description": "Here Enable/Disable this Client control.",
-                    "required": false
+                    "description": "Here Enable/Disable this Client control."
                   }
                 }
               },
@@ -149,15 +136,13 @@
               "title": "Access Points Control",
               "type": "boolean",
               "default": false,
-              "description": "This option enable control of Access Points.",
-              "required": false
+              "description": "This option enable control of Access Points."
             },
             "hideUnconfiguredSsids": {
               "title": "Hide Unconfigured SSIDs",
               "type": "boolean",
               "default": false,
               "description": "This option hide all unconfigured SSIDs, the name of this SSID must start with Unconfigured.",
-              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
               }
@@ -167,7 +152,6 @@
               "type": "boolean",
               "default": false,
               "description": "This option enable prefix (W.) for SSIDs name displayed in HomeKit app.",
-              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
               }
@@ -176,7 +160,6 @@
               "title": "SSIDs Sensors",
               "type": "boolean",
               "description": "This option expose Contact Sensor in HomeKit app for all exposed SSIDs.",
-              "required": false,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
               }
@@ -191,15 +174,13 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "SSID Name",
-                    "description": "Here set the SSID Name to be not exposed in Homebridge/HomeKit.",
-                    "required": false
+                    "description": "Here set the SSID Name to be not exposed in Homebridge/HomeKit."
                   },
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
                     "default": false,
-                    "description": "Here Enable/Disable this SSID control.",
-                    "required": false
+                    "description": "Here Enable/Disable this SSID control."
                   }
                 }
               },
@@ -217,50 +198,43 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "Switch Name",
-                    "description": "Here set the Switch Name.",
-                    "required": false
+                    "description": "Here set the Switch Name."
                   },
                   "serialNumber": {
                     "title": "Serial Number",
                     "type": "string",
                     "placeholder": "Serial Number",
-                    "description": "Here set the Serial Number of the Switch to be exposed in Homebridge/HomeKit.",
-                    "required": false
+                    "description": "Here set the Serial Number of the Switch to be exposed in Homebridge/HomeKit."
                   },
                   "mode": {
                     "title": "Enable",
                     "type": "boolean",
                     "default": false,
-                    "description": "Here Enable/Disable this Switch control.",
-                    "required": false
+                    "description": "Here Enable/Disable this Switch control."
                   },
                   "hideUplinkPorts": {
                     "title": "Hide Uplink Ports",
                     "type": "boolean",
                     "default": false,
-                    "description": "This option hide all uplink ports, the name of this Port must start with Uplink.",
-                    "required": false
+                    "description": "This option hide all uplink ports, the name of this Port must start with Uplink."
                   },
                   "enablePrefixForPortName": {
                     "title": "Prefix For Port Name",
                     "type": "boolean",
                     "default": false,
-                    "description": "This option enable prefix (Port Number) for port name displayed in HomeKit app.",
-                    "required": false
+                    "description": "This option enable prefix (Port Number) for port name displayed in HomeKit app."
                   },
                   "enablePoePortsControl": {
                     "title": "POE Ports Control",
                     "type": "boolean",
                     "default": false,
-                    "description": "This option enable POE control for controled ports.",
-                    "required": false
+                    "description": "This option enable POE control for controled ports."
                   },
                   "enableSensorPorts": {
                     "title": "Ports Sensors",
                     "type": "boolean",
                     "default": false,
-                    "description": "This option expose Contact Sensor in HomeKit app for all exposed ports.",
-                    "required": false
+                    "description": "This option expose Contact Sensor in HomeKit app for all exposed ports."
                   },
                   "hidePorts": {
                     "title": "Ports",
@@ -272,15 +246,13 @@
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Port Name",
-                          "description": "Here set the Port Name to be not exposed in Homebridge/HomeKit.",
-                          "required": false
+                          "description": "Here set the Port Name to be not exposed in Homebridge/HomeKit."
                         },
                         "mode": {
                           "title": "Enable",
                           "type": "boolean",
                           "default": false,
-                          "description": "Here Enable/Disable this Port control.",
-                          "required": false
+                          "description": "Here Enable/Disable this Port control."
                         }
                       }
                     }
@@ -294,47 +266,48 @@
               "minimum": 0,
               "maximum": 60,
               "default": 5,
-              "description": "Here set the data refresh time in (sec).",
-              "required": false
+              "description": "Here set the data refresh time in (sec)."
             },
             "disableLogDeviceInfo": {
               "title": "Disable Log Device Info",
               "type": "boolean",
               "default": false,
-              "description": "This disable logging device info by every connections device to the network.",
-              "required": false
+              "description": "This disable logging device info by every connections device to the network."
             },
             "disableLogInfo": {
               "title": "Disable Log Info",
               "type": "boolean",
-              "default": false,
-              "required": false
+              "default": false
             },
             "disableLogSuccess": {
               "title": "Disable Log Success",
               "type": "boolean",
-              "default": false,
-              "required": false
+              "default": false
             },
             "disableLogWarn": {
               "title": "Disable Log Warn",
               "type": "boolean",
-              "default": false,
-              "required": false
+              "default": false
             },
             "disableLogError": {
               "title": "Disable Log Error",
               "type": "boolean",
-              "default": false,
-              "required": false
+              "default": false
             },
             "enableDebugMode": {
               "title": "Enable Log Debug",
               "type": "boolean",
-              "default": false,
-              "required": false
+              "default": false
             }
-          }
+          },
+          "required": [
+            "name",
+            "host",
+            "disableAccessory",
+            "apiKey",
+            "organizationId",
+            "networkId"
+          ]
         }
       }
     }

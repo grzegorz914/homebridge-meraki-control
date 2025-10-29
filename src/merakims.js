@@ -1,6 +1,5 @@
 import axios from 'axios';
 import EventEmitter from 'events';
-import { Agent } from 'https';
 import ImpulseGenerator from './impulsegenerator.js';
 import { ApiUrls } from './constants.js';
 
@@ -20,10 +19,7 @@ class MerakiMs extends EventEmitter {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Cisco-Meraki-API-Key': apiKey
-            },
-            httpsAgent: new Agent({
-                keepAlive: true,
-            }),
+            }
         });
 
         //lock flags
