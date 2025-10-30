@@ -99,7 +99,7 @@
                     "title": "Policy",
                     "type": "string",
                     "description": "Here choice the Policy type to be appiled for this Client.",
-                    "oneOf": [
+                    "anyOf": [
                       {
                         "title": "Normal",
                         "enum": [
