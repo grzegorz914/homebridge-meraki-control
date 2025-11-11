@@ -98,7 +98,7 @@ class MerakiDevice extends EventEmitter {
                 this.services.push(service);
 
                 if (this.ssidsSensor) {
-                    if (this.enableDebugMode && j > 0) this.emit('debug', `prepare meraki sensor service`);
+                    if (this.enableDebugMode) this.emit('debug', `prepare meraki sensor service`);
 
                     this.sensorServices = [];
                     const sensorServiceName = this.prefixForSsidName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;

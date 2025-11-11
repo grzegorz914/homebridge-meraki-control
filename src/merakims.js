@@ -29,7 +29,7 @@ class MerakiMs extends EventEmitter {
                 await this.connect();
             }))
             .on('state', (state) => {
-                this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}`);
+                this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
             });
 
     };

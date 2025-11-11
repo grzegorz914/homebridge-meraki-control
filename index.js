@@ -179,15 +179,15 @@ class MerakiPlatform {
                     api.publishExternalAccessories(PluginName, [accessory]);
                     if (logLevel.success) log.success(`Device: ${accountName} ${deviceName}, Published as external accessory.`);
 
-                    await impulseGenerator.stop();
                     await configuredDevice.startImpulseGenerator();
+                    await impulseGenerator.stop();
                   }
                 }
               } catch (error) {
-                if (logLevel.error) log.error(`${accountName}, , Start impulse generator error: ${error.message ?? error}, trying again.`);
+                if (logLevel.error) log.error(`${accountName}, Start impulse generator error: ${error.message ?? error}, trying again.`);
               }
             }).on('state', (state) => {
-              if (logLevel.debug) log.info(`Device: ${accountName} , Start impulse generator ${state ? 'started' : 'stopped'}.`);
+              if (logLevel.debug) log.info(`Device: ${accountName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
             });
 
           //start impulse generator
