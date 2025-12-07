@@ -1,4 +1,3 @@
-import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
 import { ApiUrls } from './constants.js';
@@ -6,21 +5,11 @@ import { ApiUrls } from './constants.js';
 class MerakiMs extends EventEmitter {
     constructor(config) {
         super();
-        const host = config.host;
-        const apiKey = config.apiKey;
         this.device = config.deviceData;
         this.enableDebugMode = config.enableDebugMode;
         this.firstRun = true;
 
-        const baseUrl = (`${host}${ApiUrls.Base}`);
-        this.axiosInstance = axios.create({
-            baseURL: baseUrl,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Cisco-Meraki-API-Key': apiKey
-            }
-        });
+       this.client = config.client;
 
         //lock flags
         this.locks = false;
@@ -88,7 +77,7 @@ class MerakiMs extends EventEmitter {
         try {
             //get data of switch
             const portsUrl = ApiUrls.MsPorts.replace('serialNumber', this.device.serialNumber);
-            const swData = await this.axiosInstance.get(portsUrl);
+            const swData = await this.client.get(portsUrl);
             if (this.enableDebugMode) this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`);
 
             //check device state
@@ -102,7 +91,7 @@ class MerakiMs extends EventEmitter {
 
     async send(url, payload) {
         try {
-            await this.axiosInstance.put(url, payload);
+            await this.client.put(url, payload);
             return true;
         } catch (error) {
             throw new Error(error);

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
 import { ApiUrls } from './constants.js';
@@ -6,22 +5,12 @@ import { ApiUrls } from './constants.js';
 class MerakiMr extends EventEmitter {
     constructor(config) {
         super();
-        const host = config.host;
-        const apiKey = config.apiKey;
         const networkId = config.networkId;
         this.enableDebugMode = config.enableDebugMode;
         this.firstRun = true;
 
-        const baseUrl = (`${host}${ApiUrls.Base}`);
         this.wirelessUrl = ApiUrls.MrSsids.replace('networkId', networkId);
-        this.axiosInstance = axios.create({
-            baseURL: baseUrl,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Cisco-Meraki-API-Key': apiKey
-            }
-        });
+        this.client = config.client;
 
         //lock flags
         this.locks = false;
@@ -87,7 +76,7 @@ class MerakiMr extends EventEmitter {
         if (this.enableDebugMode) this.emit('debug', `Requesting data.`);
         try {
             //ap ssids states
-            const ssidsData = await this.axiosInstance.get(this.wirelessUrl);
+            const ssidsData = await this.client.get(this.wirelessUrl);
             if (this.enableDebugMode) this.emit('debug', `Data: ${JSON.stringify(ssidsData.data, null, 2)}`);
             const state = await this.checkDeviceState(ssidsData.data);
 
@@ -99,7 +88,7 @@ class MerakiMr extends EventEmitter {
 
     async send(url, payload) {
         try {
-            await this.axiosInstance.put(url, payload);
+            await this.client.put(url, payload);
             return true;
         } catch (error) {
             throw new Error(error);

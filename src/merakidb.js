@@ -1,4 +1,3 @@
-import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
 import { ApiUrls } from './constants.js';
@@ -6,24 +5,13 @@ import { ApiUrls } from './constants.js';
 class MerakiDb extends EventEmitter {
     constructor(config) {
         super();
-        const host = config.host;
-        const apiKey = config.apiKey;
         const networkId = config.networkId;
         this.clientsPolicy = config.deviceData;
         this.enableDebugMode = config.enableDebugMode;
         this.firstRun = true;
 
-        const baseUrl = (`${host}${ApiUrls.Base}`);
         this.dashboardClientsUrl = ApiUrls.DbClients.replace('networkId', networkId);
-        this.axiosInstance = axios.create({
-            baseURL: baseUrl,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Cisco-Meraki-API-Key': apiKey
-            }
-        });
-
+        this.client = config.client;
 
         //lock flags
         this.locks = false;
@@ -55,7 +43,7 @@ class MerakiDb extends EventEmitter {
             const exposedClients = [];
             for (const client of configuredAndExistedClients) {
                 const clientId = client.id;
-                const clientPolicyData = await this.axiosInstance.get(`${this.dashboardClientsUrl}/${clientId}/policy`);
+                const clientPolicyData = await this.client.get(`${this.dashboardClientsUrl}/${clientId}/policy`);
                 if (this.enableDebugMode) this.emit('debug', `Existed client policy data: ${JSON.stringify(clientPolicyData.data, null, 2)}`);
                 const clientPolicyMac = clientPolicyData.data.mac;
                 const clientPolicyPolicy = clientPolicyData.data.devicePolicy ?? 'undefined';
@@ -138,7 +126,7 @@ class MerakiDb extends EventEmitter {
     async connect() {
         if (this.enableDebugMode) this.emit('debug', `Requesting clients data.`);
         try {
-            const dbClientsData = await this.axiosInstance.get(`${this.dashboardClientsUrl}?perPage=255&timespan=2592000`);
+            const dbClientsData = await this.client.get(`${this.dashboardClientsUrl}?perPage=255&timespan=2592000`);
             if (this.enableDebugMode) this.emit('debug', `Clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`);
 
             const dbClients = [];
@@ -170,7 +158,7 @@ class MerakiDb extends EventEmitter {
 
     async send(url, payload) {
         try {
-            await this.axiosInstance.put(url, payload);
+            await this.client.put(url, payload);
             return true;
         } catch (error) {
             throw new Error(error);

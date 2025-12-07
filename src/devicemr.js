@@ -4,7 +4,7 @@ import { ApiUrls } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class MerakiDevice extends EventEmitter {
-    constructor(api, config, deviceName, deviceUuid, deviceData) {
+    constructor(api, config, deviceName, deviceUuid, deviceData, client) {
         super();
 
         Accessory = api.platformAccessory;
@@ -19,8 +19,7 @@ class MerakiDevice extends EventEmitter {
         this.networkId = config.networkId;
 
         //system configuration
-        this.host = config.host;
-        this.apiKey = config.apiKey;
+        this.client = client;
         this.deviceName = deviceName;
         this.deviceUuid = deviceUuid;
         this.refreshInterval = (config.refreshInterval ?? 5) * 1000;
@@ -124,8 +123,7 @@ class MerakiDevice extends EventEmitter {
     async start() {
         try {
             this.merakiMr = new MerakiMr({
-                host: this.host,
-                apiKey: this.apiKey,
+                client: this.client,
                 networkId: this.networkId,
                 enableDebugMode: this.enableDebugMode
             })

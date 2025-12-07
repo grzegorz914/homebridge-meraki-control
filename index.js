@@ -1,10 +1,12 @@
 import { join } from 'path';
 import { mkdirSync, existsSync, writeFileSync } from 'fs';
+import axios from 'axios';
 import DeviceDb from './src/devicedb.js';
 import DeviceMr from './src/devicemr.js';
 import DeviceMs from './src/devicems.js';
 import ImpulseGenerator from './src/impulsegenerator.js';
 import { PluginName, PlatformName } from './src/constants.js';
+import { ApiUrls } from './src/constants.js';
 
 class MerakiPlatform {
   constructor(log, config, api) {
@@ -138,6 +140,16 @@ class MerakiPlatform {
 
         if (allDevices.length === 0) continue;
 
+        const baseUrl = (`${account.host}${ApiUrls.Base}`);
+        const client = axios.create({
+          baseURL: baseUrl,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Cisco-Meraki-API-Key': account.apiKey
+          }
+        });
+
         try {
           //create impulse generator
           const impulseGenerator = new ImpulseGenerator()
@@ -153,13 +165,13 @@ class MerakiPlatform {
                   let configuredDevice;
                   switch (deviceType) {
                     case 0: //dashboard clients
-                      configuredDevice = new DeviceDb(api, account, deviceName, deviceUuid, deviceData);
+                      configuredDevice = new DeviceDb(api, account, deviceName, deviceUuid, deviceData, client);
                       break
                     case 1: //access point
-                      configuredDevice = new DeviceMr(api, account, deviceName, deviceUuid, deviceData);
+                      configuredDevice = new DeviceMr(api, account, deviceName, deviceUuid, deviceData, client);
                       break
                     case 2: //switch
-                      configuredDevice = new DeviceMs(api, account, deviceName, deviceUuid, deviceData);
+                      configuredDevice = new DeviceMs(api, account, deviceName, deviceUuid, deviceData, client);
                       break
                     default:
                       if (logLevel.warn) log.warn(`Unknown device type: ${deviceType}.`);
@@ -191,7 +203,7 @@ class MerakiPlatform {
             });
 
           //start impulse generator
-          await impulseGenerator.start([{ name: 'start', sampling: 60000 }]);
+          await impulseGenerator.start([{ name: 'start', sampling: 120000 }]);
         } catch (error) {
           if (logLevel.error) log.error(`${accountName}, Did finish launching error: ${error.message ?? error}.`);
         }
