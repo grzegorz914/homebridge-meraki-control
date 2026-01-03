@@ -7,7 +7,7 @@ class MerakiDb extends EventEmitter {
         super();
         const networkId = config.networkId;
         this.clientsPolicy = config.deviceData;
-        this.enableDebugMode = config.enableDebugMode;
+        this.logDebug = config.logDebug;
         this.firstRun = true;
 
         this.dashboardClientsUrl = ApiUrls.DbClients.replace('networkId', networkId);
@@ -38,13 +38,13 @@ class MerakiDb extends EventEmitter {
     }
 
     async updateExistedClientsPolicy(configuredAndExistedClients) {
-        if (this.enableDebugMode) this.emit('debug', `Requesting existed client policy data.`);
+        if (this.logDebug) this.emit('debug', `Requesting existed client policy data.`);
         try {
             const exposedClients = [];
             for (const client of configuredAndExistedClients) {
                 const clientId = client.id;
                 const clientPolicyData = await this.client.get(`${this.dashboardClientsUrl}/${clientId}/policy`);
-                if (this.enableDebugMode) this.emit('debug', `Existed client policy data: ${JSON.stringify(clientPolicyData.data, null, 2)}`);
+                if (this.logDebug) this.emit('debug', `Existed client policy data: ${JSON.stringify(clientPolicyData.data, null, 2)}`);
                 const clientPolicyMac = clientPolicyData.data.mac;
                 const clientPolicyPolicy = clientPolicyData.data.devicePolicy ?? 'undefined';
                 const clientPolicyState = clientPolicyPolicy !== 'Blocked' ?? false;
@@ -63,7 +63,7 @@ class MerakiDb extends EventEmitter {
 
             //configured clients policy
             const clientsCount = exposedClients.length;
-            if (this.enableDebugMode) this.emit('debug', `Found: ${clientsCount} exposed clients.`);
+            if (this.logDebug) this.emit('debug', `Found: ${clientsCount} exposed clients.`);
 
             if (clientsCount === 0) {
                 this.emit('warn', `Found: ${clientsCount} exposed clients.`);
@@ -85,7 +85,7 @@ class MerakiDb extends EventEmitter {
     };
 
     async updateConfiguredAndExistingClients(dbClients) {
-        if (this.enableDebugMode) this.emit('debug', `Check configured and activ clients.`);
+        if (this.logDebug) this.emit('debug', `Check configured and activ clients.`);
         try {
             //create exposed clientsPolicy
             const configuredAndExistedClients = [];
@@ -109,7 +109,7 @@ class MerakiDb extends EventEmitter {
             };
 
             const configuredAndExistedClientsCount = configuredAndExistedClients.length;
-            if (this.enableDebugMode) this.emit('debug', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
+            if (this.logDebug) this.emit('debug', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
 
             if (configuredAndExistedClientsCount === 0) {
                 this.emit('warn', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
@@ -124,10 +124,10 @@ class MerakiDb extends EventEmitter {
     };
 
     async connect() {
-        if (this.enableDebugMode) this.emit('debug', `Requesting clients data.`);
+        if (this.logDebug) this.emit('debug', `Requesting clients data.`);
         try {
             const dbClientsData = await this.client.get(`${this.dashboardClientsUrl}?perPage=255&timespan=2592000`);
-            if (this.enableDebugMode) this.emit('debug', `Clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `Clients data: ${JSON.stringify(dbClientsData.data, null, 2)}`);
 
             const dbClients = [];
             for (const dbClient of dbClientsData.data) {
@@ -145,7 +145,7 @@ class MerakiDb extends EventEmitter {
 
             //exposed existings and configured clients
             const dbClientsCount = dbClients.length;
-            if (this.enableDebugMode) this.emit('debug', `Found: ${dbClientsCount} clients.`);
+            if (this.logDebug) this.emit('debug', `Found: ${dbClientsCount} clients.`);
 
             if (dbClientsCount === 0) return false;
             const state = await this.updateConfiguredAndExistingClients(dbClients);

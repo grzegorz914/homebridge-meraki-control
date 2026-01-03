@@ -45,12 +45,12 @@ class MerakiPlatform {
 
         //log config
         const logLevel = {
-          debug: account.enableDebugMode,
-          info: !account.disableLogInfo,
-          success: !account.disableLogSuccess,
-          warn: !account.disableLogWarn,
-          error: !account.disableLogError,
-          devInfo: !account.disableLogDeviceInfo,
+          devInfo: account.log?.deviceInfo,
+          success: account.log?.success,
+          info: account.log?.info,
+          warn: account.log?.warn,
+          error: account.log?.error,
+          debug: account.log?.debug
         };
 
         if (logLevel.debug) log.info(`Network: ${accountName}, did finish launching.`);
@@ -179,12 +179,12 @@ class MerakiPlatform {
                   }
 
                   configuredDevice
-                    .on('devInfo', (info) => logLevel.devInfo && log.info(info))
-                    .on('success', (msg) => logLevel.success && log.success(`${accountName} ${deviceName}, ${msg}`))
-                    .on('info', (msg) => logLevel.info && log.info(`${accountName} ${deviceName}, ${msg}`))
-                    .on('debug', (msg) => logLevel.debug && log.info(`${accountName} ${deviceName}, debug: ${msg}`))
-                    .on('warn', (msg) => logLevel.warn && log.warn(`${accountName} ${deviceName}, ${msg}`))
-                    .on('error', (msg) => logLevel.error && log.error(`${accountName} ${deviceName}, ${msg}`));
+                    .on('devInfo', (info) => log.info(info))
+                    .on('success', (msg) => log.success(`${accountName} ${deviceName}, ${msg}`))
+                    .on('info', (msg) => log.info(`${accountName} ${deviceName}, ${msg}`))
+                    .on('debug', (msg) => log.info(`${accountName} ${deviceName}, debug: ${msg}`))
+                    .on('warn', (msg) => log.warn(`${accountName} ${deviceName}, ${msg}`))
+                    .on('error', (msg) => log.error(`${accountName} ${deviceName}, ${msg}`));
 
                   const accessory = await configuredDevice.start();
                   if (accessory) {

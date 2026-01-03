@@ -62,7 +62,6 @@
             "enablePrefixForClientName": {
               "title": "Prefix For Client Name",
               "type": "boolean",
-              "default": false,
               "description": "This option enable prefix (C.) for client name displayed in HomeKit app.",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
@@ -71,7 +70,6 @@
             "enableSonsorClients": {
               "title": "Clients Sensors",
               "type": "boolean",
-              "default": false,
               "description": "This option expose Contact Sensor in HomeKit app for all exposed Clients.",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
@@ -83,6 +81,11 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "mode": {
+                    "title": "Enable",
+                    "type": "boolean",
+                    "description": "Here Enable/Disable this Client control."
+                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
@@ -93,7 +96,10 @@
                     "title": "Mac",
                     "type": "string",
                     "placeholder": "Mac Address",
-                    "description": "Here set the Mac Address of the Client to be exposed in Homebridge/HomeKit."
+                    "description": "Here set the Mac Address of the Client to be exposed in Homebridge/HomeKit.",
+                    "condition": {
+                      "functionBody": "return model.devices[arrayIndices[0]].dashboardClientsPolicy[arrayIndices[1]].mode === true;"
+                    }
                   },
                   "type": {
                     "title": "Policy",
@@ -118,18 +124,32 @@
                           "Group policy"
                         ]
                       }
-                    ]
-                  },
-                  "mode": {
-                    "title": "Enable",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Here Enable/Disable this Client control."
+                    ],
+                    "condition": {
+                      "functionBody": "return model.devices[arrayIndices[0]].dashboardClientsPolicy[arrayIndices[1]].mode === true;"
+                    }
                   }
-                }
-              },
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "required": [
+                        "mode"
+                      ],
+                      "properties": {
+                        "mode": {
+                          "const": true
+                        }
+                      }
+                    },
+                    "then": {
+                      "required": [
+                        "mac",
+                        "type"
+                      ]
+                    }
+                  }
+                ]
               }
             },
             "accessPointsControl": {
@@ -141,7 +161,6 @@
             "hideUnconfiguredSsids": {
               "title": "Hide Unconfigured SSIDs",
               "type": "boolean",
-              "default": false,
               "description": "This option hide all unconfigured SSIDs, the name of this SSID must start with Unconfigured.",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
@@ -150,7 +169,6 @@
             "enablePrefixForSsidsName": {
               "title": "Prefix For SSIDs Name",
               "type": "boolean",
-              "default": false,
               "description": "This option enable prefix (W.) for SSIDs name displayed in HomeKit app.",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
@@ -170,22 +188,37 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "mode": {
+                    "title": "Enable",
+                    "type": "boolean",
+                    "description": "Here Enable/Disable this SSID control."
+                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
                     "placeholder": "SSID Name",
                     "description": "Here set the SSID Name to be not exposed in Homebridge/HomeKit."
-                  },
-                  "mode": {
-                    "title": "Enable",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Here Enable/Disable this SSID control."
                   }
-                }
-              },
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "required": [
+                        "mode"
+                      ],
+                      "properties": {
+                        "mode": {
+                          "const": true
+                        }
+                      }
+                    },
+                    "then": {
+                      "required": [
+                        "name"
+                      ]
+                    }
+                  }
+                ]
               }
             },
             "switches": {
@@ -194,6 +227,12 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "mode": {
+                    "title": "Enable",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Here Enable/Disable this Switch control."
+                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
@@ -204,37 +243,42 @@
                     "title": "Serial Number",
                     "type": "string",
                     "placeholder": "Serial Number",
-                    "description": "Here set the Serial Number of the Switch to be exposed in Homebridge/HomeKit."
-                  },
-                  "mode": {
-                    "title": "Enable",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Here Enable/Disable this Switch control."
+                    "description": "Here set the Serial Number of the Switch to be exposed in Homebridge/HomeKit.",
+                    "condition": {
+                      "functionBody": "return model.devices[arrayIndices[0]].switches[arrayIndices[1]].mode === true;"
+                    }
                   },
                   "hideUplinkPorts": {
                     "title": "Hide Uplink Ports",
                     "type": "boolean",
-                    "default": false,
-                    "description": "This option hide all uplink ports, the name of this Port must start with Uplink."
+                    "description": "This option hide all uplink ports, the name of this Port must start with Uplink.",
+                    "condition": {
+                      "functionBody": "return model.devices[arrayIndices[0]].switches[arrayIndices[1]].mode === true;"
+                    }
                   },
                   "enablePrefixForPortName": {
                     "title": "Prefix For Port Name",
                     "type": "boolean",
-                    "default": false,
-                    "description": "This option enable prefix (Port Number) for port name displayed in HomeKit app."
+                    "description": "This option enable prefix (Port Number) for port name displayed in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.devices[arrayIndices[0]].switches[arrayIndices[1]].mode === true;"
+                    }
                   },
                   "enablePoePortsControl": {
                     "title": "POE Ports Control",
                     "type": "boolean",
-                    "default": false,
-                    "description": "This option enable POE control for controled ports."
+                    "description": "This option enable POE control for controled ports.",
+                    "condition": {
+                      "functionBody": "return model.devices[arrayIndices[0]].switches[arrayIndices[1]].mode === true;"
+                    }
                   },
                   "enableSensorPorts": {
                     "title": "Ports Sensors",
                     "type": "boolean",
-                    "default": false,
-                    "description": "This option expose Contact Sensor in HomeKit app for all exposed ports."
+                    "description": "This option expose Contact Sensor in HomeKit app for all exposed ports.",
+                    "condition": {
+                      "functionBody": "return model.devices[arrayIndices[0]].switches[arrayIndices[1]].mode === true;"
+                    }
                   },
                   "hidePorts": {
                     "title": "Ports",
@@ -242,19 +286,37 @@
                     "items": {
                       "type": "object",
                       "properties": {
+                        "mode": {
+                          "title": "Enable",
+                          "type": "boolean",
+                          "description": "Here Enable/Disable this Port control."
+                        },
                         "name": {
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Port Name",
                           "description": "Here set the Port Name to be not exposed in Homebridge/HomeKit."
-                        },
-                        "mode": {
-                          "title": "Enable",
-                          "type": "boolean",
-                          "default": false,
-                          "description": "Here Enable/Disable this Port control."
                         }
-                      }
+                      },
+                      "allOf": [
+                        {
+                          "if": {
+                            "required": [
+                              "mode"
+                            ],
+                            "properties": {
+                              "mode": {
+                                "const": true
+                              }
+                            }
+                          },
+                          "then": {
+                            "required": [
+                              "name"
+                            ]
+                          }
+                        }
+                      ]
                     }
                   }
                 }
@@ -268,36 +330,42 @@
               "default": 5,
               "description": "Here set the data refresh time in (sec)."
             },
-            "disableLogDeviceInfo": {
-              "title": "Disable Log Device Info",
-              "type": "boolean",
-              "default": false,
-              "description": "This disable logging device info by every connections device to the network."
-            },
-            "disableLogInfo": {
-              "title": "Disable Log Info",
-              "type": "boolean",
-              "default": false
-            },
-            "disableLogSuccess": {
-              "title": "Disable Log Success",
-              "type": "boolean",
-              "default": false
-            },
-            "disableLogWarn": {
-              "title": "Disable Log Warn",
-              "type": "boolean",
-              "default": false
-            },
-            "disableLogError": {
-              "title": "Disable Log Error",
-              "type": "boolean",
-              "default": false
-            },
-            "enableDebugMode": {
-              "title": "Enable Log Debug",
-              "type": "boolean",
-              "default": false
+            "log": {
+              "title": "Log",
+              "type": "object",
+              "properties": {
+                "deviceInfo": {
+                  "title": "Device Info",
+                  "type": "boolean",
+                  "default": true,
+                  "description": "This enable logging device info by every connections device to the network."
+                },
+                "success": {
+                  "title": "Success",
+                  "type": "boolean",
+                  "default": true
+                },
+                "info": {
+                  "title": "Info",
+                  "type": "boolean",
+                  "default": false
+                },
+                "warn": {
+                  "title": "Warn",
+                  "type": "boolean",
+                  "default": true
+                },
+                "error": {
+                  "title": "Error",
+                  "type": "boolean",
+                  "default": true
+                },
+                "debug": {
+                  "title": "Debug",
+                  "type": "boolean",
+                  "default": false
+                }
+              }
             }
           },
           "required": [
@@ -350,15 +418,18 @@
                         {
                           "key": "devices[].dashboardClientsPolicy",
                           "type": "tabarray",
-                          "title": "{{ value.name || 'client' }}",
+                          "title": "{{ value.name || 'Client' }}",
                           "items": [
+                            "devices[].dashboardClientsPolicy[].mode",
                             "devices[].dashboardClientsPolicy[].name",
                             "devices[].dashboardClientsPolicy[].mac",
-                            "devices[].dashboardClientsPolicy[].type",
-                            "devices[].dashboardClientsPolicy[].mode"
+                            "devices[].dashboardClientsPolicy[].type"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].dashboardClientsControl === true;"
+                      }
                     }
                   ]
                 },
@@ -382,11 +453,14 @@
                           "type": "tabarray",
                           "title": "{{ value.name || 'SSID' }}",
                           "items": [
-                            "devices[].hideSsids[].name",
-                            "devices[].hideSsids[].mode"
+                            "devices[].hideSsids[].mode",
+                            "devices[].hideSsids[].name"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].accessPointsControl === true;"
+                      }
                     }
                   ]
                 },
@@ -397,11 +471,11 @@
                     {
                       "key": "devices[].switches",
                       "type": "tabarray",
-                      "title": "{{ value.name || 'switch' }}",
+                      "title": "{{ value.name || 'Switch' }}",
                       "items": [
+                        "devices[].switches[].mode",
                         "devices[].switches[].name",
                         "devices[].switches[].serialNumber",
-                        "devices[].switches[].mode",
                         "devices[].switches[].hideUplinkPorts",
                         "devices[].switches[].enablePrefixForPortName",
                         "devices[].switches[].enablePoePortsControl",
@@ -416,13 +490,16 @@
                             {
                               "key": "devices[].switches[].hidePorts",
                               "type": "tabarray",
-                              "title": "{{ value.name || 'port' }}",
+                              "title": "{{ value.name || 'Port' }}",
                               "items": [
-                                "devices[].switches[].hidePorts[].name",
-                                "devices[].switches[].hidePorts[].mode"
+                                "devices[].switches[].hidePorts[].mode",
+                                "devices[].switches[].hidePorts[].name"
                               ]
                             }
-                          ]
+                          ],
+                          "condition": {
+                            "functionBody": "return model.devices[arrayIndices[0]].switches[arrayIndices[1]].mode === true;"
+                          }
                         }
                       ]
                     }
@@ -448,23 +525,20 @@
                   ]
                 },
                 {
-                  "key": "devices[]",
+                  "key": "devices[].log",
                   "title": "Log",
                   "items": [
-                    "devices[].disableLogDeviceInfo",
-                    "devices[].disableLogInfo",
-                    "devices[].disableLogSuccess",
-                    "devices[].disableLogWarn",
-                    "devices[].disableLogError",
-                    "devices[].enableDebugMode"
+                    "devices[].log.deviceInfo",
+                    "devices[].log.success",
+                    "devices[].log.info",
+                    "devices[].log.warn",
+                    "devices[].log.error",
+                    "devices[].log.debug"
                   ]
                 }
               ]
             }
-          ],
-          "condition": {
-            "functionBody": "return model.devices[arrayIndices].disableAccessory === false;"
-          }
+          ]
         }
       ]
     }

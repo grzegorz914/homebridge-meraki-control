@@ -6,7 +6,7 @@ class MerakiMr extends EventEmitter {
     constructor(config) {
         super();
         const networkId = config.networkId;
-        this.enableDebugMode = config.enableDebugMode;
+        this.logDebug = config.logDebug;
         this.firstRun = true;
 
         this.wirelessUrl = ApiUrls.MrSsids.replace('networkId', networkId);
@@ -37,7 +37,7 @@ class MerakiMr extends EventEmitter {
     }
 
     async checkDeviceState(ssidsData) {
-        if (this.enableDebugMode) this.emit('debug', `Requesting SSIDs status.`);
+        if (this.logDebug) this.emit('debug', `Requesting SSIDs status.`);
         try {
             const ssids = [];
             for (const ssid of ssidsData) {
@@ -52,7 +52,7 @@ class MerakiMr extends EventEmitter {
             };
 
             const ssidsCount = ssids.length;
-            if (this.enableDebugMode) this.emit('debug', `Found: ${ssidsCount} exposed SSIDs.`);
+            if (this.logDebug) this.emit('debug', `Found: ${ssidsCount} exposed SSIDs.`);
 
             if (ssidsCount === 0) {
                 this.emit('warn', `Found: ${ssidsCount} ssids.`);
@@ -73,11 +73,11 @@ class MerakiMr extends EventEmitter {
     };
 
     async connect() {
-        if (this.enableDebugMode) this.emit('debug', `Requesting data.`);
+        if (this.logDebug) this.emit('debug', `Requesting data.`);
         try {
             //ap ssids states
             const ssidsData = await this.client.get(this.wirelessUrl);
-            if (this.enableDebugMode) this.emit('debug', `Data: ${JSON.stringify(ssidsData.data, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `Data: ${JSON.stringify(ssidsData.data, null, 2)}`);
             const state = await this.checkDeviceState(ssidsData.data);
 
             return state;

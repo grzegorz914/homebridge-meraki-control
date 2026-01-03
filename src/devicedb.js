@@ -24,9 +24,9 @@ class MerakiDevice extends EventEmitter {
         this.deviceUuid = deviceUuid;
         this.deviceData = deviceData;
         this.refreshInterval = (config.refreshInterval ?? 5) * 1000;
-        this.enableDebugMode = config.enableDebugMode || false;
-        this.disableLogInfo = config.disableLogInfo || false;
-        this.disableLogDeviceInfo = config.disableLogDeviceInfo || false;
+        this.logDeviceInfo = config.log?.deviceInfo || true;
+        this.logInfo = config.log?.info || false;
+        this.logDebug = config.log?.debug || false;
 
         //variables
         this.prefixForClientName = config.enablePrefixForClientName || false;
@@ -47,14 +47,14 @@ class MerakiDevice extends EventEmitter {
     async prepareAccessory() {
         try {
             //prepare accessory
-            if (this.enableDebugMode) this.emit('debug', `prepare accessory`);
+            if (this.logDebug) this.emit('debug', `prepare accessory`);
             const accessoryName = this.deviceName;
             const accessoryUUID = AccessoryUUID.generate(this.deviceUuid);
             const accessoryCategory = Categories.ROUTER;
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //prepare information service
-            if (this.enableDebugMode) this.emit('debug', `prepare information service`);
+            if (this.logDebug) this.emit('debug', `prepare information service`);
             accessory.getService(Service.AccessoryInformation)
                 .setCharacteristic(Characteristic.Manufacturer, 'Cisco Meraki')
                 .setCharacteristic(Characteristic.Model, accessoryName)
@@ -63,7 +63,7 @@ class MerakiDevice extends EventEmitter {
                 .setCharacteristic(Characteristic.ConfiguredName, accessoryName);
 
             //device
-            if (this.enableDebugMode) this.emit('debug', `repare meraki service`);
+            if (this.logDebug) this.emit('debug', `repare meraki service`);
             const exposedClients = this.exposedClients;
 
             this.services = [];
@@ -77,7 +77,7 @@ class MerakiDevice extends EventEmitter {
                     .onGet(async () => {
                         const state = client.policyState ?? false;
                         const policy = state ? client.policyType : 'Blocked';
-                        if (!this.disableLogInfo) this.emit('message', `Client: ${clientName}, Policy: ${policy}`);
+                        if (this.logInfo) this.emit('message', `Client: ${clientName}, Policy: ${policy}`);
                         return state;
                     })
                     .onSet(async (state) => {
@@ -88,7 +88,7 @@ class MerakiDevice extends EventEmitter {
                                 'devicePolicy': policy
                             }
                             await this.merakiDb.send(policyUrl, policyData);
-                            if (!this.disableLogInfo) this.emit('message', `Client: ${clientName}, Policy: ${policy}`);
+                            if (this.logInfo) this.emit('message', `Client: ${clientName}, Policy: ${policy}`);
                         } catch (error) {
                             this.emit('warn', `Client: ${clientName}, set Policy error: ${error}`);
                         }
@@ -96,7 +96,7 @@ class MerakiDevice extends EventEmitter {
                 this.services.push(clientPolicyService);
 
                 if (this.clientsSensor) {
-                    if (this.enableDebugMode && i > 0) this.emit('debug', `prepare meraki sensor service`);
+                    if (this.logDebug && i > 0) this.emit('debug', `prepare meraki sensor service`);
 
                     this.sensorServices = [];
                     const sensorServiceName = this.prefixForClientName ? `Sensor C.${clientName}` : `Sensor ${clientName}`;
@@ -125,11 +125,11 @@ class MerakiDevice extends EventEmitter {
                 client: this.client,
                 networkId: this.networkId,
                 deviceData: this.deviceData,
-                enableDebugMode: this.enableDebugMode
+                logDebug: this.logDebug
             })
                 .on('deviceInfo', (clientsCount) => {
                     this.emit('success', `Connect Success.`)
-                    if (!this.disableLogDeviceInfo) {
+                    if (this.logDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceName} ----`);
                         this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
                         this.emit('devInfo', `Network: ${this.networkName}`);

@@ -6,7 +6,7 @@ class MerakiMs extends EventEmitter {
     constructor(config) {
         super();
         this.device = config.deviceData;
-        this.enableDebugMode = config.enableDebugMode;
+        this.logDebug = config.logDebug;
         this.firstRun = true;
 
        this.client = config.client;
@@ -37,7 +37,7 @@ class MerakiMs extends EventEmitter {
     }
 
     async checkDeviceState(swData) {
-        if (this.enableDebugMode) this.emit('debug', `Requesting ports status.`);
+        if (this.logDebug) this.emit('debug', `Requesting ports status.`);
         try {
             const ports = [];
             for (const port of swData) {
@@ -52,7 +52,7 @@ class MerakiMs extends EventEmitter {
                 ports.push(obj);
             };
             const portsCount = ports.length;
-            if (this.enableDebugMode) this.emit('debug', `Found: ${portsCount} exposed ports.`);
+            if (this.logDebug) this.emit('debug', `Found: ${portsCount} exposed ports.`);
 
             if (portsCount === 0) {
                 this.emit('warn', `Found: ${portsCount} ports.`);
@@ -73,12 +73,12 @@ class MerakiMs extends EventEmitter {
     };
 
     async connect() {
-        if (this.enableDebugMode) this.emit('debug', `Requesting data.`);
+        if (this.logDebug) this.emit('debug', `Requesting data.`);
         try {
             //get data of switch
             const portsUrl = ApiUrls.MsPorts.replace('serialNumber', this.device.serialNumber);
             const swData = await this.client.get(portsUrl);
-            if (this.enableDebugMode) this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `Data: ${JSON.stringify(swData.data, null, 2)}`);
 
             //check device state
             const state = await this.checkDeviceState(swData.data);

@@ -65,12 +65,14 @@
                         }
                     ],
                     "refreshInterval": 10,
-                    "disableLogDeviceInfo": false,
-                    "disableLogInfo": false,
-                    "disableLogSuccess": false,
-                    "disableLogWarn": false,
-                    "disableLogError": false,
-                    "enableDebugMode": false
+                    "log": {
+                        "deviceInfo": true,
+                        "success": true,
+                        "info": false,
+                        "warn": true,
+                        "error": true,
+                        "debug": false
+                    }
                 }
             ]
         }

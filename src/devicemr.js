@@ -23,9 +23,9 @@ class MerakiDevice extends EventEmitter {
         this.deviceName = deviceName;
         this.deviceUuid = deviceUuid;
         this.refreshInterval = (config.refreshInterval ?? 5) * 1000;
-        this.enableDebugMode = config.enableDebugMode || false;
-        this.disableLogInfo = config.disableLogInfo || false;
-        this.disableLogDeviceInfo = config.disableLogDeviceInfo || false;
+        this.logDeviceInfo = config.log?.deviceInfo || true;
+        this.logInfo = config.log?.info || false;
+        this.logDebug = config.log?.debug || false;
 
         //variables
         this.prefixForSsidName = config.enablePrefixForSsidsName || false;
@@ -48,14 +48,14 @@ class MerakiDevice extends EventEmitter {
     async prepareAccessory() {
         try {
             //prepare accessory
-            if (this.enableDebugMode) this.emit('debug', `prepare accessory`);
+            if (this.logDebug) this.emit('debug', `prepare accessory`);
             const accessoryName = this.deviceName;
             const accessoryUUID = AccessoryUUID.generate(this.deviceUuid);
             const accessoryCategory = Categories.AIRPORT;
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //prepare information service
-            if (this.enableDebugMode) this.emit('debug', `prepare information service`);
+            if (this.logDebug) this.emit('debug', `prepare information service`);
             accessory.getService(Service.AccessoryInformation)
                 .setCharacteristic(Characteristic.Manufacturer, 'Cisco Meraki')
                 .setCharacteristic(Characteristic.Model, accessoryName)
@@ -63,7 +63,7 @@ class MerakiDevice extends EventEmitter {
                 .setCharacteristic(Characteristic.FirmwareRevision, this.organizationId)
                 .setCharacteristic(Characteristic.ConfiguredName, accessoryName);
 
-            if (this.enableDebugMode) this.emit('debug', `prepare meraki service`);
+            if (this.logDebug) this.emit('debug', `prepare meraki service`);
             const exposedSsids = this.exposedSsids;
 
             //device
@@ -78,7 +78,7 @@ class MerakiDevice extends EventEmitter {
                 service.getCharacteristic(Characteristic.On)
                     .onGet(async () => {
                         const state = ssid.state ?? false;
-                        if (!this.disableLogInfo) this.emit('message', `SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
+                        if (this.logInfo) this.emit('message', `SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
                         return state;
                     })
                     .onSet(async (state) => {
@@ -89,7 +89,7 @@ class MerakiDevice extends EventEmitter {
                                 'enabled': state
                             };
                             await this.merakiMr.send(url, data);
-                            if (!this.disableLogInfo) this.emit('message', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                            if (this.logInfo) this.emit('message', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
                         } catch (error) {
                             this.emit('warn', `SSID: ${ssidName}, set state error: ${error}`);
                         }
@@ -97,7 +97,7 @@ class MerakiDevice extends EventEmitter {
                 this.services.push(service);
 
                 if (this.ssidsSensor) {
-                    if (this.enableDebugMode) this.emit('debug', `prepare meraki sensor service`);
+                    if (this.logDebug) this.emit('debug', `prepare meraki sensor service`);
 
                     this.sensorServices = [];
                     const sensorServiceName = this.prefixForSsidName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
@@ -125,11 +125,11 @@ class MerakiDevice extends EventEmitter {
             this.merakiMr = new MerakiMr({
                 client: this.client,
                 networkId: this.networkId,
-                enableDebugMode: this.enableDebugMode
+                logDebug: this.logDebug
             })
                 .on('deviceInfo', (ssidsCount) => {
                     this.emit('success', `Connect Success.`)
-                    if (!this.disableLogDeviceInfo) {
+                    if (this.logDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceName} ----`);
                         this.emit('devInfo', `Manufacturer: Cisco/Meraki`);
                         this.emit('devInfo', `Network: ${this.networkName}`);

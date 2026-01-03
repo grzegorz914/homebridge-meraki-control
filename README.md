@@ -22,8 +22,13 @@
 | Package | Installation | Role | Required |
 | --- | --- | --- | --- |
 | [Homebridge](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required |
-| [Homebridge UI <= v5.5.0](https://github.com/homebridge/homebridge-config-ui-x) | [Homebridge UI Wiki](https://github.com/homebridge/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Recommended |
+| [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x) | [Homebridge UI Wiki](https://github.com/homebridge/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Recommended |
 | [Meraki Control](https://www.npmjs.com/package/homebridge-meraki-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-meraki-control/wiki) | Homebridge Plug-In | Required |
+
+## Warning
+
+* For plugin < v1.6.0 use Homebridge UI <= v5.5.0.
+* For plugin >= v1.6.0 use Homebridge UI >= v5.13.0.
 
 ## About The Plugin
 
@@ -51,7 +56,7 @@
 ## Configuration
 
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
-* Install and use [Homebridge UI <= v5.5.0](https://github.com/homebridge/homebridge-config-ui-x/wiki) to configure this plugin.
+* Install and use [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x/wiki) to configure this plugin.
 * The `sample-config.json` can be edited and used as an alternative.
 
 <p align="center">
@@ -91,9 +96,9 @@
 | `switches.hidePorts.name` | Here set *Port Name* which You want hide and not expose to the *Homebridge/HomeKit*. |
 | `switches.hidePorts.mode` | Here *Activate/Deactivate* this Port control. |
 | `refreshInterval` | Here set the data refresh time in seconds. |
-| `disableLogDeviceInfo` | If enabled, add ability to disable log device info by every connections device to the network. |
-| `disableLogInfo` | If enabled, disable log info, all values and state will not be displayed in Homebridge log console. |
-| `disableLogSuccess` | If enabled, disable logging device success. |
-| `disableLogWarn` | If enabled, disable logging device warnings. |
-| `disableLogError` | If enabled, disable logging device error. |
-| `enableDebugMode` | If enabled, deep log will be present in homebridge console. |
+| `log.deviceInfo` | If enabled, log device info will be displayed by every connections device to the network. |
+| `log.success` | If enabled, success log will be displayed in console. |
+| `log.info` | If enabled, info log will be displayed in console. |
+| `log.warn` | If enabled, warn log will be displayed in console. |
+| `log.error` | If enabled, error log will be displayed in console. |
+| `log.debug` | If enabled, debug log will be displayed in console. |
