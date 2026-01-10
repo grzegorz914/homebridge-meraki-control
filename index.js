@@ -179,8 +179,8 @@ class MerakiPlatform {
                   }
 
                   configuredDevice
-                    .on('devInfo', (info) => log.info(info))
-                    .on('success', (msg) => log.success(`${accountName} ${deviceName}, ${msg}`))
+                    .on('devInfo', (info) => logLevel.devInfo && log.info(info))
+                    .on('success', (msg) => logLevel.success && log.success(`${accountName} ${deviceName}, ${msg}`))
                     .on('info', (msg) => log.info(`${accountName} ${deviceName}, ${msg}`))
                     .on('debug', (msg) => log.info(`${accountName} ${deviceName}, debug: ${msg}`))
                     .on('warn', (msg) => log.warn(`${accountName} ${deviceName}, ${msg}`))

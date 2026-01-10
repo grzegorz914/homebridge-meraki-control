@@ -319,7 +319,26 @@
                       ]
                     }
                   }
-                }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "required": [
+                        "mode"
+                      ],
+                      "properties": {
+                        "mode": {
+                          "const": true
+                        }
+                      }
+                    },
+                    "then": {
+                      "required": [
+                        "serialNumber"
+                      ]
+                    }
+                  }
+                ]
               }
             },
             "refreshInterval": {
