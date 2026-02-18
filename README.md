@@ -14,6 +14,8 @@
 [![GitHub issues](https://img.shields.io/github/issues/grzegorz914/homebridge-meraki-control.svg)](https://github.com/grzegorz914/homebridge-meraki-control/issues)
 
  Homebridge plugin for Meraki Dashboard and Devices control using RESTFull API.
+
+ <a href="https://buycoffee.to/grzegorz914" target="_blank"><img src="https://buycoffee.to/static/img/share/share-button-primary.png" style="width: 234px; height: 61px" alt="Postaw mi kawę na buycoffee.to"></a>
   
 </span>
 
