@@ -35,8 +35,8 @@ class MerakiDevice extends EventEmitter {
 
     async startImpulseGenerator() {
         try {
-            //start impulse generator 
-            await this.merakiDb.impulseGenerator.start([{ name: 'connect', sampling: this.refreshInterval }]);
+            //start impulse generator
+            await this.merakiDb.impulseGenerator.state(true, [{ name: 'connect', sampling: this.refreshInterval }]);
             return true;
         } catch (error) {
             throw new Error(`Impulse generator start error: ${error}`);
@@ -63,10 +63,11 @@ class MerakiDevice extends EventEmitter {
                 .setCharacteristic(Characteristic.ConfiguredName, accessoryName);
 
             //device
-            if (this.logDebug) this.emit('debug', `repare meraki service`);
+            if (this.logDebug) this.emit('debug', `prepare meraki service`);
             const exposedClients = this.exposedClients;
 
             this.services = [];
+            this.sensorServices = [];
             for (const client of exposedClients) {
                 const clientName = client.name;
                 const serviceName = this.prefixForClientName ? `C.${clientName}` : clientName;
@@ -96,9 +97,8 @@ class MerakiDevice extends EventEmitter {
                 this.services.push(clientPolicyService);
 
                 if (this.clientsSensor) {
-                    if (this.logDebug && i > 0) this.emit('debug', `prepare meraki sensor service`);
+                    if (this.logDebug) this.emit('debug', `prepare meraki sensor service`);
 
-                    this.sensorServices = [];
                     const sensorServiceName = this.prefixForClientName ? `Sensor C.${clientName}` : `Sensor ${clientName}`;
                     const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `Client Service Sensor ${clientName}`);
                     sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);

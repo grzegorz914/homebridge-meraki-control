@@ -9,7 +9,7 @@ class MerakiMs extends EventEmitter {
         this.logDebug = config.logDebug;
         this.firstRun = true;
 
-       this.client = config.client;
+        this.client = config.client;
 
         //lock flags
         this.locks = false;
@@ -20,7 +20,6 @@ class MerakiMs extends EventEmitter {
             .on('state', (state) => {
                 this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
             });
-
     };
 
     async handleWithLock(fn) {
@@ -30,7 +29,7 @@ class MerakiMs extends EventEmitter {
         try {
             await fn();
         } catch (error) {
-            this.emit('error', `Inpulse generator error: ${error}`);
+            this.emit('error', `Impulse generator error: ${error}`);
         } finally {
             this.locks = false;
         }

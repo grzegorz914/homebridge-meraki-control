@@ -29,7 +29,7 @@ class MerakiPlatform {
       // block the others. Promise.allSettled runs all in parallel.
       Promise.allSettled(
         config.devices.map(account =>
-          this.setupAccount(account, prefDir, log, api)
+          this.setupAccount(account, log, api)
         )
       ).then(results => {
         results.forEach((result, i) => {
@@ -43,7 +43,7 @@ class MerakiPlatform {
 
   // ── Per-account setup ───────────────────────────────────────────────────────
 
-  async setupAccount(account, prefDir, log, api) {
+  async setupAccount(account, log, api) {
     if (account.disableAccessory) return;
 
     const { name: accountName, apiKey, organizationId, networkId } = account;

@@ -31,7 +31,7 @@ class MerakiDb extends EventEmitter {
         try {
             await fn();
         } catch (error) {
-            this.emit('error', `Inpulse generator error: ${error}`);
+            this.emit('error', `Impulse generator error: ${error}`);
         } finally {
             this.locks = false;
         }
@@ -47,7 +47,7 @@ class MerakiDb extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Existed client policy data: ${JSON.stringify(clientPolicyData.data, null, 2)}`);
                 const clientPolicyMac = clientPolicyData.data.mac;
                 const clientPolicyPolicy = clientPolicyData.data.devicePolicy ?? 'undefined';
-                const clientPolicyState = clientPolicyPolicy !== 'Blocked' ?? false;
+                const clientPolicyState = clientPolicyPolicy !== 'Blocked';
 
                 //push exposed clients to array
                 const obj = {
@@ -85,41 +85,41 @@ class MerakiDb extends EventEmitter {
     };
 
     async updateConfiguredAndExistingClients(dbClients) {
-        if (this.logDebug) this.emit('debug', `Check configured and activ clients.`);
+        if (this.logDebug) this.emit('debug', `Check configured and active clients.`);
         try {
             //create exposed clientsPolicy
             const configuredAndExistedClients = [];
             for (const clientPolicy of this.clientsPolicy) {
-                const mac = (clientPolicy.mac).split(':').join('');
+                const mac = clientPolicy.mac.split(':').join('');
 
                 //check if configured client exist in dashboard
-                const index = dbClients.findIndex(item => item.id === mac);
+                const index = dbClients.findIndex(item => item.mac === mac);
                 const id = index !== -1 ? dbClients[index].id : -1;
 
                 //push existed clients
                 if (index !== -1) {
                     const obj = {
-                        "name": clientPolicy.name,
-                        "mac": clientPolicy.mac,
-                        "type": clientPolicy.type,
-                        "id": id
+                        'name': clientPolicy.name,
+                        'mac': clientPolicy.mac,
+                        'type': clientPolicy.type,
+                        'id': id
                     }
                     configuredAndExistedClients.push(obj);
                 };
             };
 
             const configuredAndExistedClientsCount = configuredAndExistedClients.length;
-            if (this.logDebug) this.emit('debug', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
+            if (this.logDebug) this.emit('debug', `Found: ${configuredAndExistedClientsCount} configured and active clients.`);
 
             if (configuredAndExistedClientsCount === 0) {
-                this.emit('warn', `Found: ${configuredAndExistedClientsCount} configured and activ clients.`);
+                this.emit('warn', `Found: ${configuredAndExistedClientsCount} configured and active clients.`);
                 return false;
             };
             const state = await this.updateExistedClientsPolicy(configuredAndExistedClients);
 
             return state;
         } catch (error) {
-            throw new Error(`Requestinjg configured clients error: ${error}`);
+            throw new Error(`Requesting configured clients error: ${error}`);
         };
     };
 
@@ -132,13 +132,13 @@ class MerakiDb extends EventEmitter {
             const dbClients = [];
             for (const dbClient of dbClientsData.data) {
                 const id = dbClient.id;
-                const mac = (dbClient.mac).split(':').join('');
+                const mac = dbClient.mac.split(':').join('');
                 const description = dbClient.description;
 
                 const obj = {
-                    "id": id,
-                    "mac": mac,
-                    "description": description
+                    'id': id,
+                    'mac': mac,
+                    'description': description
                 }
                 dbClients.push(obj);
             }

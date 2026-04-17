@@ -37,7 +37,7 @@ class MerakiDevice extends EventEmitter {
     async startImpulseGenerator() {
         try {
             //start impulse generator 
-            await this.merakiMr.impulseGenerator.start([{ name: 'connect', sampling: this.refreshInterval }]);
+            await this.merakiMr.impulseGenerator.state(true, [{ name: 'connect', sampling: this.refreshInterval }]);
             return true;
         } catch (error) {
             throw new Error(`Impulse generator start error: ${error}`);
@@ -68,6 +68,7 @@ class MerakiDevice extends EventEmitter {
 
             //device
             this.services = [];
+            this.sensorServices = [];
             for (const ssid of exposedSsids) {
                 const ssidNumber = ssid.number;
                 const ssidName = ssid.name;
@@ -99,7 +100,6 @@ class MerakiDevice extends EventEmitter {
                 if (this.ssidsSensor) {
                     if (this.logDebug) this.emit('debug', `prepare meraki sensor service`);
 
-                    this.sensorServices = [];
                     const sensorServiceName = this.prefixForSsidName ? `Sensor W.${ssidName}` : `Sensor ${ssidName}`;
                     const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `sensorService${ssidNumber}`);
                     sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -143,7 +143,7 @@ class MerakiDevice extends EventEmitter {
                     const arr = [];
                     for (const ssid of sids) {
 
-                        //hidde unconfigured and ssids by name
+                        //hide unconfigured and ssids by name
                         const ssidName = ssid.name;
                         const unconfiguredSsid = ssidName.startsWith('Unconfigured');
                         const hideUnconfiguredSsid = this.hideUnconfiguredSsids && unconfiguredSsid;

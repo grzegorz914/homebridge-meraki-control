@@ -32,7 +32,7 @@ class MerakiDevice extends EventEmitter {
         this.portsSensor = deviceData.enableSensorPorts || false;
         this.poePortsControl = deviceData.enablePoePortsControl || false;
 
-        //hidde port by name
+        //hide port by name
         this.swHidenPortsByName = [];
         const hidePorts = deviceData.hidePorts || [];
         for (const port of hidePorts) {
@@ -44,8 +44,8 @@ class MerakiDevice extends EventEmitter {
 
     async startImpulseGenerator() {
         try {
-            //start impulse generator 
-            await this.merakiMs.impulseGenerator.start([{ name: 'connect', sampling: this.refreshInterval }]);
+            //start impulse generator
+            await this.merakiMs.impulseGenerator.state(true, [{ name: 'connect', sampling: this.refreshInterval }]);
             return true;
         } catch (error) {
             throw new Error(`Impulse generator start error: ${error}`);
@@ -76,6 +76,7 @@ class MerakiDevice extends EventEmitter {
 
             //device
             this.services = [];
+            this.sensorServices = [];
             for (const port of exposedPorts) {
                 const portName = port.name;
                 const portId = port.id;
@@ -93,7 +94,7 @@ class MerakiDevice extends EventEmitter {
                         try {
                             state = state ? true : false;
                             const switchPortUrl = `/devices/${this.deviceUuid}/switch/ports/${portId}`;
-                            const switchPortData = this.poePortControl ? {
+                            const switchPortData = this.poePortsControl ? {
                                 'enabled': state,
                                 'poeEnabled': state
                             } : {
@@ -102,22 +103,21 @@ class MerakiDevice extends EventEmitter {
                             await this.merakiMs.send(switchPortUrl, switchPortData);
                             if (this.logInfo) this.emit('message', `Port: ${portId}, Name: ${portName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
                         } catch (error) {
-                            this.emit('warn', `Port: ${portId}, Name: ${portName}, set state error: %${error}`);
+                            this.emit('warn', `Port: ${portId}, Name: ${portName}, set state error: ${error}`);
                         }
                     });
                 this.services.push(service);
 
                 if (this.portsSensor) {
-                    if (this.logDebug && k > 0) this.emit('debug', `prepare meraki sensor service`);
+                    if (this.logDebug) this.emit('debug', `prepare meraki sensor service`);
 
-                    this.sensorServices = [];
-                    const serviceName = this.prefixForPortName ? `Sensor ${portId}.${portName}` : `Sensor ${portName}`;
-                    const sensorService = accessory.addService(Service.ContactSensor, serviceName, `sensorService${portId}`);
+                    const sensorServiceName = this.prefixForPortName ? `Sensor ${portId}.${portName}` : `Sensor ${portName}`;
+                    const sensorService = accessory.addService(Service.ContactSensor, sensorServiceName, `sensorService${portId}`);
                     sensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    sensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    sensorService.setCharacteristic(Characteristic.ConfiguredName, sensorServiceName);
                     sensorService.getCharacteristic(Characteristic.ContactSensorState)
                         .onGet(async () => {
-                            const state = port.state;
+                            const state = port.state ?? false;
                             return state;
                         });
                     this.sensorServices.push(sensorService);
@@ -154,7 +154,7 @@ class MerakiDevice extends EventEmitter {
                     const arr = [];
                     for (const port of ports) {
 
-                        //hidde uplink and port by name
+                        //hide uplink and port by name
                         const portName = port.name ?? `Port ${port.portId}`;
                         const uplinkPort = portName.startsWith('Uplink');
                         const hideUplinkPort = this.deviceData.hideUplinkPorts && uplinkPort;
