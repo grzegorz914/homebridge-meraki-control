@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin >= v1.6.0 use Homebridge UI >= v5.13.0
 - After update to v1.0.0 and above all automations and scenes will not work and the accessory must be added to the HomeKit again
 
+## [1.7.0] - (11.05.2026)
+
+## Changes
+
+- fix: `ContactSensor.onGet` returning raw boolean instead of correct HAP values (0/1) — state was inverted vs `updateCharacteristic`
+- fix: `onGet`/`onSet` log messages silently dropped — emitted `message` event that had no listener, now correctly emits `info`
+- fix: `logDeviceInfo` flag always `true` regardless of config due to `|| true` — changed to `?? false`
+- fix: switch port URL was hardcoded, now uses `ApiUrls.MsPorts` constant
+- fix: duplicate MAC normalization in dashboard clients — MACs are now stripped only once (in index.js)
+- fix: `throw new Error(error)` in `send()` methods was losing original stack trace — now rethrows directly
+- fix: double closing brace typo `}}` in `Start error` message
+- refactor: extracted duplicated `handleWithLock` from all three Meraki API classes into shared `src/utils.js`
+- refactor: renamed all three device classes from generic `MerakiDevice` to `DeviceDb`, `DeviceMr`, `DeviceMs`
+- refactor: removed redundant `state = state ? true : false` — replaced with `!!state`
+
 ## [1.6.0] - (03.01.2026)
 
 ## Changes

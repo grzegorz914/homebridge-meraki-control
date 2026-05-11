@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import { ApiUrls } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
-class MerakiDevice extends EventEmitter {
+class DeviceMr extends EventEmitter {
     constructor(api, config, deviceName, deviceUuid, deviceData, client) {
         super();
 
@@ -23,9 +23,9 @@ class MerakiDevice extends EventEmitter {
         this.deviceName = deviceName;
         this.deviceUuid = deviceUuid;
         this.refreshInterval = (config.refreshInterval ?? 5) * 1000;
-        this.logDeviceInfo = config.log?.deviceInfo || true;
-        this.logInfo = config.log?.info || false;
-        this.logDebug = config.log?.debug || false;
+        this.logDeviceInfo = config.log?.deviceInfo ?? false;
+        this.logInfo = config.log?.info ?? false;
+        this.logDebug = config.log?.debug ?? false;
 
         //variables
         this.prefixForSsidName = config.enablePrefixForSsidsName || false;
@@ -36,7 +36,7 @@ class MerakiDevice extends EventEmitter {
 
     async startImpulseGenerator() {
         try {
-            //start impulse generator 
+            //start impulse generator
             await this.merakiMr.impulseGenerator.state(true, [{ name: 'connect', sampling: this.refreshInterval }]);
             return true;
         } catch (error) {
@@ -79,18 +79,17 @@ class MerakiDevice extends EventEmitter {
                 service.getCharacteristic(Characteristic.On)
                     .onGet(async () => {
                         const state = ssid.state ?? false;
-                        if (this.logInfo) this.emit('message', `SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
+                        if (this.logInfo) this.emit('info', `SSID: ${ssidName}, state: ${state ? 'Enabled' : 'Disabled'}`);
                         return state;
                     })
                     .onSet(async (state) => {
                         try {
-                            state = state ? true : false;
                             const url = `${ApiUrls.MrSsids.replace('networkId', this.networkId)}/${ssid.number}`;
                             const data = {
-                                'enabled': state
+                                'enabled': !!state
                             };
                             await this.merakiMr.send(url, data);
-                            if (this.logInfo) this.emit('message', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                            if (this.logInfo) this.emit('info', `SSID: ${ssidName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
                         } catch (error) {
                             this.emit('warn', `SSID: ${ssidName}, set state error: ${error}`);
                         }
@@ -107,7 +106,7 @@ class MerakiDevice extends EventEmitter {
                     sensorService.getCharacteristic(Characteristic.ContactSensorState)
                         .onGet(async () => {
                             const state = ssid.state ?? false;
-                            return state;
+                            return state ? 0 : 1;
                         });
                     this.sensorServices.push(sensorService);
                 };
@@ -115,7 +114,7 @@ class MerakiDevice extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            throw new Error(error);
+            throw error;
         };
     };
 
@@ -186,8 +185,8 @@ class MerakiDevice extends EventEmitter {
             const accessory = await this.prepareAccessory();
             return accessory;
         } catch (error) {
-            throw new Error(`Start error: ${error.message || error}}.`);
+            throw new Error(`Start error: ${error.message ?? error}.`);
         };
     };
 };
-export default MerakiDevice;
+export default DeviceMr;

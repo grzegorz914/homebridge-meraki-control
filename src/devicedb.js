@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import { ApiUrls } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
-class MerakiDevice extends EventEmitter {
+class DeviceDb extends EventEmitter {
     constructor(api, config, deviceName, deviceUuid, deviceData, client) {
         super();
 
@@ -24,9 +24,9 @@ class MerakiDevice extends EventEmitter {
         this.deviceUuid = deviceUuid;
         this.deviceData = deviceData;
         this.refreshInterval = (config.refreshInterval ?? 5) * 1000;
-        this.logDeviceInfo = config.log?.deviceInfo || true;
-        this.logInfo = config.log?.info || false;
-        this.logDebug = config.log?.debug || false;
+        this.logDeviceInfo = config.log?.deviceInfo ?? false;
+        this.logInfo = config.log?.info ?? false;
+        this.logDebug = config.log?.debug ?? false;
 
         //variables
         this.prefixForClientName = config.enablePrefixForClientName || false;
@@ -78,7 +78,7 @@ class MerakiDevice extends EventEmitter {
                     .onGet(async () => {
                         const state = client.policyState ?? false;
                         const policy = state ? client.policyType : 'Blocked';
-                        if (this.logInfo) this.emit('message', `Client: ${clientName}, Policy: ${policy}`);
+                        if (this.logInfo) this.emit('info', `Client: ${clientName}, Policy: ${policy}`);
                         return state;
                     })
                     .onSet(async (state) => {
@@ -89,7 +89,7 @@ class MerakiDevice extends EventEmitter {
                                 'devicePolicy': policy
                             }
                             await this.merakiDb.send(policyUrl, policyData);
-                            if (this.logInfo) this.emit('message', `Client: ${clientName}, Policy: ${policy}`);
+                            if (this.logInfo) this.emit('info', `Client: ${clientName}, Policy: ${policy}`);
                         } catch (error) {
                             this.emit('warn', `Client: ${clientName}, set Policy error: ${error}`);
                         }
@@ -106,7 +106,7 @@ class MerakiDevice extends EventEmitter {
                     sensorService.getCharacteristic(Characteristic.ContactSensorState)
                         .onGet(async () => {
                             const state = client.policyState ?? false;
-                            return state;
+                            return state ? 0 : 1;
                         });
                     this.sensorServices.push(sensorService);
                 };
@@ -114,7 +114,7 @@ class MerakiDevice extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            throw new Error(error);
+            throw error;
         };
     };
 
@@ -172,8 +172,8 @@ class MerakiDevice extends EventEmitter {
             const accessory = await this.prepareAccessory();
             return accessory;
         } catch (error) {
-            throw new Error(`Start error: ${error.message || error}}.`);
+            throw new Error(`Start error: ${error.message ?? error}.`);
         };
     };
 };
-export default MerakiDevice;
+export default DeviceDb;

@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
 import { ApiUrls } from './constants.js';
+import { withLock } from './utils.js';
 
 class MerakiDb extends EventEmitter {
     constructor(config) {
@@ -16,26 +17,13 @@ class MerakiDb extends EventEmitter {
         //lock flags
         this.locks = false;
         this.impulseGenerator = new ImpulseGenerator()
-            .on('connect', () => this.handleWithLock(async () => {
+            .on('connect', () => withLock(this, async () => {
                 await this.connect();
             }))
             .on('state', (state) => {
                 this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
             });
     };
-
-    async handleWithLock(fn) {
-        if (this.locks) return;
-
-        this.locks = true;
-        try {
-            await fn();
-        } catch (error) {
-            this.emit('error', `Impulse generator error: ${error}`);
-        } finally {
-            this.locks = false;
-        }
-    }
 
     async updateExistedClientsPolicy(configuredAndExistedClients) {
         if (this.logDebug) this.emit('debug', `Requesting existed client policy data.`);
@@ -90,7 +78,7 @@ class MerakiDb extends EventEmitter {
             //create exposed clientsPolicy
             const configuredAndExistedClients = [];
             for (const clientPolicy of this.clientsPolicy) {
-                const mac = clientPolicy.mac.split(':').join('');
+                const mac = clientPolicy.mac;
 
                 //check if configured client exist in dashboard
                 const index = dbClients.findIndex(item => item.mac === mac);
@@ -157,12 +145,8 @@ class MerakiDb extends EventEmitter {
     };
 
     async send(url, payload) {
-        try {
-            await this.client.put(url, payload);
-            return true;
-        } catch (error) {
-            throw new Error(error);
-        };
+        await this.client.put(url, payload);
+        return true;
     };
 };
 export default MerakiDb;

@@ -1,8 +1,9 @@
 import MerakiMs from './merakims.js';
 import EventEmitter from 'events';
+import { ApiUrls } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
-class MerakiDevice extends EventEmitter {
+class DeviceMs extends EventEmitter {
     constructor(api, config, deviceName, deviceUuid, deviceData, client) {
         super();
 
@@ -23,9 +24,9 @@ class MerakiDevice extends EventEmitter {
         this.deviceUuid = deviceUuid;
         this.deviceData = deviceData;
         this.refreshInterval = (config.refreshInterval ?? 5) * 1000;
-        this.logDeviceInfo = config.log?.deviceInfo || true;
-        this.logInfo = config.log?.info || false;
-        this.logDebug = config.log?.debug || false;
+        this.logDeviceInfo = config.log?.deviceInfo ?? false;
+        this.logInfo = config.log?.info ?? false;
+        this.logDebug = config.log?.debug ?? false;
 
         //variables
         this.prefixForPortName = deviceData.enablePrefixForPortName || false;
@@ -87,21 +88,20 @@ class MerakiDevice extends EventEmitter {
                 service.getCharacteristic(Characteristic.On)
                     .onGet(async () => {
                         const state = port.state ?? false;
-                        if (this.logInfo) this.emit('message', `Port: ${portId}, Name: ${portName}, State: ${state ? 'Enabled' : 'Disabled'}`);
+                        if (this.logInfo) this.emit('info', `Port: ${portId}, Name: ${portName}, State: ${state ? 'Enabled' : 'Disabled'}`);
                         return state;
                     })
                     .onSet(async (state) => {
                         try {
-                            state = state ? true : false;
-                            const switchPortUrl = `/devices/${this.deviceUuid}/switch/ports/${portId}`;
+                            const switchPortUrl = `${ApiUrls.MsPorts.replace('serialNumber', this.deviceUuid)}/${portId}`;
                             const switchPortData = this.poePortsControl ? {
-                                'enabled': state,
-                                'poeEnabled': state
+                                'enabled': !!state,
+                                'poeEnabled': !!state
                             } : {
-                                'enabled': state
+                                'enabled': !!state
                             };
                             await this.merakiMs.send(switchPortUrl, switchPortData);
-                            if (this.logInfo) this.emit('message', `Port: ${portId}, Name: ${portName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
+                            if (this.logInfo) this.emit('info', `Port: ${portId}, Name: ${portName}, set State: ${state ? 'Enabled' : 'Disabled'}`);
                         } catch (error) {
                             this.emit('warn', `Port: ${portId}, Name: ${portName}, set state error: ${error}`);
                         }
@@ -118,7 +118,7 @@ class MerakiDevice extends EventEmitter {
                     sensorService.getCharacteristic(Characteristic.ContactSensorState)
                         .onGet(async () => {
                             const state = port.state ?? false;
-                            return state;
+                            return state ? 0 : 1;
                         });
                     this.sensorServices.push(sensorService);
                 };
@@ -126,7 +126,7 @@ class MerakiDevice extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            throw new Error(error);
+            throw error;
         };
     };
 
@@ -198,8 +198,8 @@ class MerakiDevice extends EventEmitter {
             const accessory = await this.prepareAccessory();
             return accessory;
         } catch (error) {
-            throw new Error(`Start error: ${error.message || error}}.`);
+            throw new Error(`Start error: ${error.message ?? error}.`);
         };
     };
 };
-export default MerakiDevice;
+export default DeviceMs;

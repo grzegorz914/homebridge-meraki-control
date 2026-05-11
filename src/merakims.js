@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
 import { ApiUrls } from './constants.js';
+import { withLock } from './utils.js';
 
 class MerakiMs extends EventEmitter {
     constructor(config) {
@@ -14,26 +15,13 @@ class MerakiMs extends EventEmitter {
         //lock flags
         this.locks = false;
         this.impulseGenerator = new ImpulseGenerator()
-            .on('connect', () => this.handleWithLock(async () => {
+            .on('connect', () => withLock(this, async () => {
                 await this.connect();
             }))
             .on('state', (state) => {
                 this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
             });
     };
-
-    async handleWithLock(fn) {
-        if (this.locks) return;
-
-        this.locks = true;
-        try {
-            await fn();
-        } catch (error) {
-            this.emit('error', `Impulse generator error: ${error}`);
-        } finally {
-            this.locks = false;
-        }
-    }
 
     async checkDeviceState(swData) {
         if (this.logDebug) this.emit('debug', `Requesting ports status.`);
@@ -89,12 +77,8 @@ class MerakiMs extends EventEmitter {
     };
 
     async send(url, payload) {
-        try {
-            await this.client.put(url, payload);
-            return true;
-        } catch (error) {
-            throw new Error(error);
-        };
+        await this.client.put(url, payload);
+        return true;
     };
 };
 export default MerakiMs;
